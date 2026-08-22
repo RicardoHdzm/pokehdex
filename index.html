@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Equipos Pokemon</title>
+  <meta name="description" content="Coleccion personal de equipos Pokemon, una lamina por generacion.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle cx='8' cy='8' r='7' fill='%23fff' stroke='%23000' stroke-width='1.5'/><path d='M1 8h14' stroke='%23000' stroke-width='2'/><path d='M1 8a7 7 0 0 1 14 0z' fill='%23ff5a4d'/><circle cx='8' cy='8' r='2.5' fill='%23fff' stroke='%23000' stroke-width='1.5'/></svg>">
+  <link rel="preconnect" href="https://raw.githubusercontent.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <header class="masthead">
+    <div class="wrap">
+      <p class="eyebrow">Pokedex @RicardoHdzm · 9 generaciones</p>
+      <h1 class="masthead-title">POKE<em>HDEX</em></h1>
+      <p class="masthead-note">
+      Registro de equipos y capturas por region
+      </p>
+    </div>
+  </header>
+
+  <nav class="index-nav" aria-label="Indice de generaciones">
+    <div class="wrap">
+      <div class="index-row" id="gamePills" role="tablist"></div>
+    </div>
+  </nav>
+
+  <main class="wrap" id="main">
+    <section class="gen-section" id="gamePanel" aria-live="polite">
+      <!-- Se rellena desde js/app.js -->
+    </section>
+  </main>
+
+  <footer class="colophon">
+    <div class="wrap">
+      <p class="eyebrow">@RicardoHdzm</p>
+      <p>Ilustraciones tomadas del archivo de <a href="https://pokeapi.co/" target="_blank" rel="noopener">PokeAPI</a><br>
+         Pokemon © Nintendo · Game Freak · The Pokemon Company<br>
+         Proyecto personal sin animo de lucro</p>
+    </div>
+  </footer>
+
+  <script src="data/teams.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
