@@ -209,5 +209,14 @@ const TEAMS = [
       { dex: 959, species: "Tinkaton",        nickname: "Hammeria", gender: "f", types: ["fairy", "steel"],              ball: "heal-ball" },
       { dex: 901, species: "Ursaluna", form: "bloodmoon", nickname: "Moonster", gender: "m", types: ["ground", "normal"], ball: "timer-ball" }
     ]
+  },
+  {
+    id: "gen-10",
+    generation: 10,
+    region: "Por confirmar",
+    game: "Pokemon Waves",
+    missing: "",
+    color: "#22d3ee",
+    team: []
   }
 ];

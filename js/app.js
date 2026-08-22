@@ -13,6 +13,23 @@ const CACHE_KEY = "pkmnteam:types";
 const FORM_CACHE_KEY = "pkmnteam:forms";
 const SPECIES_KEY = "pkmnteam:species";
 
+/* Las listas de PokeAPI caducan a la semana: asi entran solos los Pokemon
+   nuevos cuando se publica una generacion, sin tener que limpiar el navegador. */
+const CADUCIDAD = 7 * 24 * 60 * 60 * 1000;
+
+function leerLista(clave) {
+  try {
+    const c = JSON.parse(localStorage.getItem(clave));
+    if (!c || !Array.isArray(c.v) || Date.now() - c.t > CADUCIDAD) return null;
+    return c.v;
+  } catch { return null; }
+}
+
+function guardarLista(clave, lista) {
+  try { localStorage.setItem(clave, JSON.stringify({ t: Date.now(), v: lista })); }
+  catch { /* lleno */ }
+}
+
 /* Estilo de imagen: "pixel" (sprites de 8 bits) o "artwork" (ilustracion oficial) */
 const SPRITE_STYLE = "pixel";
 
@@ -201,10 +218,8 @@ function nombreEspecie(slug) {
 
 /* La lista completa de especies se pide una sola vez y se guarda en el navegador */
 async function fetchSpecies() {
-  try {
-    const guardado = JSON.parse(localStorage.getItem(SPECIES_KEY));
-    if (Array.isArray(guardado) && guardado.length > 900) return guardado;
-  } catch { /* cache invalida */ }
+  const guardado = leerLista(SPECIES_KEY);
+  if (guardado && guardado.length > 900) return guardado;
 
   try {
     const res = await fetch(SPECIES_URL);
@@ -214,7 +229,7 @@ async function fetchSpecies() {
       .map((r) => [Number(r.url.split("/").filter(Boolean).pop()), r.name])
       .filter(([id]) => id > 0)
       .sort((a, b) => a[0] - b[0]);
-    try { localStorage.setItem(SPECIES_KEY, JSON.stringify(lista)); } catch { /* lleno */ }
+    guardarLista(SPECIES_KEY, lista);
     return lista;
   } catch {
     return [];
@@ -234,10 +249,8 @@ const ES_REGIONAL = /-(alola|galar|hisui|paldea)$|-paldea-(combat|blaze|aqua)-br
    y no solo las regionales, para poder añadir formas sueltas (Luna Carmesi,
    Gigamax...) sin tener que volver a pedirlo. Una peticion, cacheada. */
 async function fetchVariantes() {
-  try {
-    const guardado = JSON.parse(localStorage.getItem(FORMAS_KEY));
-    if (Array.isArray(guardado) && guardado.length > 1000) return guardado;
-  } catch { /* cache invalida */ }
+  const guardado = leerLista(FORMAS_KEY);
+  if (guardado && guardado.length > 1000) return guardado;
 
   try {
     const res = await fetch(FORMAS_URL);
@@ -246,7 +259,7 @@ async function fetchVariantes() {
     const lista = data.results
       .map((r) => [Number(r.url.split("/").filter(Boolean).pop()), r.name])
       .sort((a, b) => a[0] - b[0]);
-    try { localStorage.setItem(FORMAS_KEY, JSON.stringify(lista)); } catch { /* lleno */ }
+    guardarLista(FORMAS_KEY, lista);
     return lista;
   } catch {
     return [];
@@ -379,10 +392,13 @@ function capturadosDe(gen, entradas, variantes) {
   return set;
 }
 
-/* Numeros de Pokedex Nacional que introdujo cada generacion */
+/* Numeros de Pokedex Nacional que introdujo cada generacion.
+   Si todavia no se sabe donde termina (una generacion recien anunciada), se deja
+   abierta: apareceran los Pokemon nuevos en cuanto PokeAPI los publique. */
 function rangoDex(generacion) {
   const desde = generacion === 1 ? 1 : CORTES_DEX[generacion - 2] + 1;
-  return { desde, hasta: CORTES_DEX[generacion - 1] };
+  const hasta = CORTES_DEX[generacion - 1];
+  return { desde, hasta: hasta === undefined ? Infinity : hasta };
 }
 
 function dexTile(entrada, capturados) {
@@ -413,6 +429,15 @@ async function renderDex(gen, token) {
 
   const entradas = entradasDe(gen, especies, variantes);
   const capturados = capturadosDe(gen, entradas, variantes);
+
+  if (!entradas.length) {
+    const seccion = grid.closest(".dex-section");
+    seccion.innerHTML = `
+      <h3 class="section-label">Pokedex de ${gen.region}</h3>
+      <p class="dex-error">Todavia no hay datos de esta generacion en PokeAPI.
+        Apareceran solos en cuanto se publiquen.</p>`;
+    return;
+  }
 
   grid.innerHTML = entradas.map((e) => dexTile(e, capturados)).join("");
 
