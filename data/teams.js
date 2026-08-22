@@ -153,7 +153,7 @@ const TEAMS = [
     missing: "650-721",
     color: "#e8383d",
     team: [
-      { dex: 652, species: "Chesnaught", nickname: "Wrekingball", gender: "m", types: ["grass", "fighting"], ball: "poke-ball" },
+      { dex: 652, species: "Chesnaught", nickname: "Wreckingball", gender: "m", types: ["grass", "fighting"], ball: "poke-ball" },
       { dex: 663, species: "Talonflame", nickname: "", gender: "m", types: ["fire", "flying"], ball: "poke-ball" },
       { dex: 675, species: "Pangoro",    nickname: "", gender: "m", types: ["fighting", "dark"], ball: "premier-ball" },
       { dex: 693, species: "Clawitzer",  nickname: "", gender: "m", types: ["water"], ball: "dive-ball" },
