@@ -70,7 +70,7 @@ const TEAMS = [
     generation: 1,
     region: "Kanto",
     game: "Pokemon FireRed",
-    missing: "18, 20, 35-36, 39-40, 44-45, 49, 51, 53, 61-65, 67-68, 73, 75-78, 81-82, 85, 87-89, 93-94, 97, 99, 101, 103, 106, 108, 110, 113, 115, 119, 122-125, 128, 134-139, 141, 145-151",
+    missing: "18, 20, 35-36, 39-40, 44-45, 49, 51, 53, 61-65, 67-68, 73, 75-78, 85, 87-89, 93-94, 99, 103, 106, 108, 110, 113, 115, 119, 122-124, 128, 134-139, 141, 146-151",
     color: "#ff6b35",
     team: [
       { dex: 9,   species: "Blastoise",  nickname: "Shellshock", gender: "m", types: ["water"], ball: "poke-ball" },
@@ -206,7 +206,7 @@ const TEAMS = [
       { dex: 941, species: "Kilowattrel",   nickname: "Lighting", gender: "m", types: ["electric", "flying"], ball: "ultra-ball" },
       { dex: 920, species: "Lokix",          nickname: "Chainsaw", gender: "m", types: ["bug", "dark"],      ball: "level-ball" },
       { dex: 937, species: "Ceruledge",      nickname: "Souleater", gender: "m", types: ["fire", "ghost"],    ball: "dusk-ball" },
-      { dex: 959, species: "Tinkaton",        nickname: "Hammeria", gender: "f", types: ["fairy", "steel"],              ball: "heal-ball" },
+      { dex: 959, species: "Tinkaton",        nickname: "Babymetal", gender: "f", types: ["fairy", "steel"],              ball: "heal-ball" },
       { dex: 901, species: "Ursaluna", form: "bloodmoon", nickname: "Moonster", gender: "m", types: ["ground", "normal"], ball: "timer-ball" }
     ]
   },
