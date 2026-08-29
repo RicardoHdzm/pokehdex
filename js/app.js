@@ -544,10 +544,10 @@ function asaDeArrastre(index, section) {
   if (section.team.length < 2) return "";
 
   return `
-    <div class="plate-asa" data-desde="${index}" title="Arrastra para cambiarlo de sitio"
-         aria-label="Arrastrar para reordenar">
-      <i class="fa-solid fa-grip-lines"></i>
-    </div>`;
+    <button type="button" class="plate-asa" data-desde="${index}"
+            title="Arrastra para cambiarlo de sitio" aria-label="Arrastrar para reordenar">
+      <i class="fa-solid fa-hand"></i>
+    </button>`;
 }
 
 function plate(mon, index, section) {
@@ -563,6 +563,7 @@ function plate(mon, index, section) {
              src="${spriteSrc(mon)}" data-fallback="${spriteAlt(mon)}">
         ${ballMark(mon)}
         ${mon.form ? `<span class="form-mark" title="${formName(mon)}">${formLabel(mon.form)}</span>` : ""}
+        ${asaDeArrastre(index, section)}
       </div>
       <div class="plate-index">
         <span class="num">${plateLabel(mon, index, section)}</span>
@@ -576,7 +577,6 @@ function plate(mon, index, section) {
         ${mon.shiny ? '<span class="plate-note">Ejemplar variocolor</span>' : ""}
       </p>
       <ul class="plate-types">${typeChips(mon.types || [])}</ul>
-      ${asaDeArrastre(index, section)}
     </article>`;
 }
 

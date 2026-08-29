@@ -480,23 +480,35 @@ body.con-sesion .dex-tile { cursor: pointer; }
 
 /* ---------- Arrastrar para reordenar ---------- */
 
+/* Va dentro del marco, en la esquina libre: la ball ocupa arriba a la
+   derecha y la forma regional abajo a la izquierda */
 .plate-asa {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: .8rem;
-  padding: .45rem;
-  background: var(--panel-2);
+  position: absolute;
+  bottom: .55rem;
+  right: .55rem;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  background: rgba(0, 0, 0, .88);
   border: 2px solid var(--rule);
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, .5);
   color: var(--ink-2);
-  font-size: .9rem;
+  font-size: .85rem;
   cursor: grab;
   /* Sin esto, en movil el navegador se lleva el gesto para hacer scroll */
   touch-action: none;
-  transition: color .15s ease, border-color .15s ease;
+  transition: color .15s ease, border-color .15s ease, transform .15s ease;
 }
 
-.plate-asa:hover { color: var(--accent); border-color: var(--accent); }
+.plate-asa:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  transform: scale(1.08);
+}
+
+.plate-asa:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .plate.arrastrando {
   z-index: 50;
@@ -506,7 +518,7 @@ body.con-sesion .dex-tile { cursor: pointer; }
   animation: none;
 }
 
-.plate.arrastrando .plate-asa { cursor: grabbing; }
+.plate.arrastrando .plate-asa { cursor: grabbing; color: var(--accent); border-color: var(--accent); }
 
 .plate.arrastrando .plate-figure {
   border-color: var(--accent);
