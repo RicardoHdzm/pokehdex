@@ -467,10 +467,7 @@ async function actualizarEntradilla() {
   const rotulo = document.querySelector(".masthead .eyebrow");
   if (!rotulo) return;
 
-  if (!perfilVisto || typeof construirCatalogo !== "function") {
-    rotulo.textContent = "Pokedex · 10 generaciones";
-    return;
-  }
+  if (typeof construirCatalogo !== "function") return;
 
   const catalogo = await construirCatalogo();
 
@@ -481,14 +478,20 @@ async function actualizarEntradilla() {
   let total = 0;
   catalogo.forEach((info, id) => { if (info.base === id) total++; });
 
-  const especies = new Set();
-  CAPTURAS.normal.forEach((id) => {
-    const info = catalogo.get(id);
-    if (info) especies.add(info.base);
-  });
-  const tengo = especies.size;
+  /* Sin red la primera vez no hay catalogo: mejor dejar el texto de reserva
+     del HTML que enseñar "0 de 0" */
+  if (!total) return;
 
-  rotulo.textContent = "Pokedex · " + String(tengo).padStart(String(total).length, "0") +
+  /* Sin perfil, en la pantalla de acceso, se enseña el formato a cero */
+  const especies = new Set();
+  if (perfilVisto) {
+    CAPTURAS.normal.forEach((id) => {
+      const info = catalogo.get(id);
+      if (info) especies.add(info.base);
+    });
+  }
+
+  rotulo.textContent = "Pokedex · " + String(especies.size).padStart(String(total).length, "0") +
                        " de " + total + " capturados";
 }
 
