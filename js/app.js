@@ -648,8 +648,9 @@ function hallHead(sec) {
 /* El juego elegido en el perfil manda sobre lo que diga data/teams.js */
 function juegoDeGen(gen) {
   if (typeof JUEGOS_ELEGIDOS === "undefined" || typeof juegoDe !== "function") return null;
-  const elegido = JUEGOS_ELEGIDOS.get(gen.generation);
-  return elegido ? juegoDe(gen.generation, elegido) : null;
+  /* juegoDe devuelve la primera version de la generacion cuando no hay
+     eleccion guardada o cuando la guardada ya no esta en el catalogo */
+  return juegoDe(gen.generation, JUEGOS_ELEGIDOS.get(gen.generation));
 }
 
 function colorDe(gen) {
@@ -659,7 +660,7 @@ function colorDe(gen) {
 
 function nombreJuegoDe(gen) {
   const j = juegoDeGen(gen);
-  return j ? j.name : (gen.game || "");
+  return j ? j.name : "";
 }
 
 /* El juego se elige en el perfil; aqui solo se enseña cual es */

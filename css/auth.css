@@ -576,12 +576,16 @@ body.con-sesion .dex-tile { cursor: pointer; }
 /* ---------- Visitando el perfil de otro ---------- */
 
 .visita-barra {
+  /* Mas estrecho que el contenido y centrado: ocupando todo el ancho
+     parecia pegado al borde, aunque estuviera alineado con el resto */
+  max-width: 46rem;
+  margin: 1.75rem auto 0;
+
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: .75rem;
-  margin-top: 1.5rem;
   padding: .8rem 1rem;
   background: color-mix(in srgb, var(--accent) 12%, var(--panel));
   border: 2px solid var(--accent);
