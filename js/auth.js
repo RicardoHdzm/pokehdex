@@ -12,6 +12,10 @@ const sb = (typeof supabase !== "undefined" && HAY_SUPABASE)
 let sesion = null;
 let perfil = null;
 
+/* supabase-js borra el hash en cuanto lo procesa, asi que se lee ya */
+const HASH_INICIAL = location.hash || "";
+let esRecuperacion = HASH_INICIAL.includes("type=recovery");
+
 /* ---------- Pantalla de acceso ---------- */
 
 function pintarAcceso(mensaje, tipo) {
@@ -30,6 +34,12 @@ function mostrarPuerta(visible) {
 /* Traduce los errores de Supabase, que llegan en ingles y algo cripticos */
 function explicar(error) {
   const t = (error && error.message ? error.message : "").toLowerCase();
+  if (t.includes("invalid login credentials")) {
+    return "Correo o contraseña incorrectos.";
+  }
+  if (t.includes("email not confirmed")) {
+    return "Ese correo esta sin confirmar. Pideselo a Ricardo.";
+  }
   if (t.includes("signups not allowed") || t.includes("signup is disabled")) {
     return "Ese correo no esta dado de alta. Pideselo a Ricardo.";
   }
@@ -42,30 +52,92 @@ function explicar(error) {
   return "No se pudo enviar el enlace: " + (error && error.message ? error.message : "error desconocido");
 }
 
-async function pedirEnlace(e) {
+/* Entrada normal: correo y contraseña, sin pasar por el correo */
+async function entrar(e) {
   e.preventDefault();
   if (!sb) return pintarAcceso("Falta configurar Supabase en js/config.js", "error");
 
-  const campo = document.getElementById("authCorreo");
   const boton = document.getElementById("authEnviar");
-  const correo = campo.value.trim();
-  if (!correo) return;
+  const correo = document.getElementById("authCorreo").value.trim();
+  const clave = document.getElementById("authClave").value;
+  if (!correo || !clave) return;
+
+  boton.disabled = true;
+  pintarAcceso("Entrando...", "");
+
+  const { error } = await sb.auth.signInWithPassword({ email: correo, password: clave });
+
+  if (error) {
+    boton.disabled = false;
+    return pintarAcceso(explicar(error), "error");
+  }
+  /* onAuthStateChange recarga la pagina y ya entra con sesion */
+}
+
+/* Manda el enlace para poner o cambiar la contraseña.
+   Supabase responde igual exista el correo o no, a proposito: asi nadie
+   puede usar esta pantalla para averiguar quien tiene cuenta. Por eso el
+   mensaje que se enseña es deliberadamente ambiguo. */
+async function pedirEnlace() {
+  if (!sb) return pintarAcceso("Falta configurar Supabase en js/config.js", "error");
+
+  const correo = document.getElementById("authCorreo").value.trim();
+  const boton = document.getElementById("authOtp");
+  if (!correo) return pintarAcceso("Escribe primero tu correo.", "error");
 
   boton.disabled = true;
   pintarAcceso("Enviando...", "");
 
-  /* Vuelve exactamente a esta pagina; tiene que estar en la lista de
-     Redirect URLs del panel de Supabase */
-  const { error } = await sb.auth.signInWithOtp({
-    email: correo,
-    options: { emailRedirectTo: location.origin + location.pathname }
+  const { error } = await sb.auth.resetPasswordForEmail(correo, {
+    redirectTo: location.origin + location.pathname
   });
 
   boton.disabled = false;
 
   if (error) return pintarAcceso(explicar(error), "error");
-  pintarAcceso("Enlace enviado a " + correo + ". Revisa el correo, caduca en una hora.", "ok");
-  campo.value = "";
+  pintarAcceso("Si " + correo + " esta dado de alta, le llega un enlace para poner la contraseña.", "ok");
+}
+
+/* ---------- Poner la contraseña al volver del correo ---------- */
+
+function pintarClave(mensaje, tipo) {
+  const caja = document.getElementById("authClaveMensaje");
+  if (!caja) return;
+  caja.textContent = mensaje || "";
+  caja.className = "auth-mensaje" + (tipo ? " " + tipo : "");
+}
+
+function mostrarPanelClave() {
+  const login = document.querySelector(".auth-caja");
+  const panel = document.getElementById("authClavePanel");
+  if (login) login.hidden = true;
+  if (panel) panel.hidden = false;
+  mostrarPuerta(true);
+}
+
+async function guardarClave(e) {
+  e.preventDefault();
+
+  const nueva = document.getElementById("authClaveNueva").value;
+  const repetir = document.getElementById("authClaveRepetir").value;
+  const boton = document.getElementById("authClaveGuardar");
+
+  if (nueva !== repetir) return pintarClave("Las dos contraseñas no coinciden.", "error");
+  if (nueva.length < 8) return pintarClave("Minimo 8 caracteres.", "error");
+
+  boton.disabled = true;
+  pintarClave("Guardando...", "");
+
+  const { error } = await sb.auth.updateUser({ password: nueva });
+
+  if (error) {
+    boton.disabled = false;
+    return pintarClave(explicar(error), "error");
+  }
+
+  pintarClave("Listo. Entrando...", "ok");
+  esRecuperacion = false;
+  setTimeout(() => location.replace(location.pathname), 900);
 }
 
 /* ---------- Perfil ---------- */
@@ -112,25 +184,76 @@ async function initAuth() {
   }
 
   const form = document.getElementById("authForm");
-  if (form) form.addEventListener("submit", pedirEnlace);
+  if (form) form.addEventListener("submit", entrar);
+
+  const otp = document.getElementById("authOtp");
+  if (otp) otp.addEventListener("click", pedirEnlace);
+
+  const claveForm = document.getElementById("authClaveForm");
+  if (claveForm) claveForm.addEventListener("submit", guardarClave);
 
   const { data } = await sb.auth.getSession();
   sesion = data.session;
 
   if (sesion) {
     perfil = await cargarPerfil();
+    if (perfil) {
+      perfilVisto = perfil;
+      await cargarPerfilCompleto(perfil.id);
+      if (typeof refrescarTodo === "function") refrescarTodo();
+    }
     /* Limpia los tokens que el enlace deja colgando en la direccion */
     if (location.hash.includes("access_token")) {
       history.replaceState(null, "", location.pathname + location.search);
     }
   }
 
+  if (esRecuperacion && sesion) {
+    mostrarPanelClave();
+    return;
+  }
+
   mostrarPuerta(!sesion);
   pintarSesion();
+  prepararImportacion();
 
-  sb.auth.onAuthStateChange((evento, nueva) => {
+  sb.auth.onAuthStateChange((evento) => {
+    if (evento === "PASSWORD_RECOVERY") { esRecuperacion = true; mostrarPanelClave(); return; }
+    if (esRecuperacion) return;
     if (evento === "SIGNED_IN" && !sesion) location.reload();
     if (evento === "SIGNED_OUT") location.reload();
+  });
+}
+
+/* El aviso solo sale en tu propio perfil y solo si no hay nada subido */
+function prepararImportacion() {
+  const aviso = document.getElementById("importAviso");
+  if (!aviso) return;
+
+  const vacio = sesion && typeof CAPTURAS !== "undefined" &&
+                CAPTURAS.normal.size === 0 && CAPTURAS.shiny.size === 0;
+  aviso.hidden = !vacio;
+  if (!vacio) return;
+
+  const boton = document.getElementById("importBoton");
+  const estado = document.getElementById("importEstado");
+
+  boton.addEventListener("click", async () => {
+    boton.disabled = true;
+    const res = await importarDesdeArchivo((paso) => { estado.textContent = paso; });
+
+    if (!res.ok) {
+      estado.textContent = "No se pudo importar: " + res.error;
+      estado.className = "import-estado error";
+      boton.disabled = false;
+      return;
+    }
+
+    estado.textContent = res.capturas + " capturas, " + res.equipos +
+      " del equipo y " + res.favoritos + " favoritos subidos.";
+    estado.className = "import-estado ok";
+    if (typeof refrescarTodo === "function") refrescarTodo();
+    setTimeout(() => { aviso.hidden = true; }, 4000);
   });
 }
 

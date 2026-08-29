@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mis Equipos Pokemon</title>
+  <title>PPVDEX</title>
   <meta name="description" content="Coleccion personal de equipos Pokemon, una lamina por generacion.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle cx='8' cy='8' r='7' fill='%23fff' stroke='%23000' stroke-width='1.5'/><path d='M1 8h14' stroke='%23000' stroke-width='2'/><path d='M1 8a7 7 0 0 1 14 0z' fill='%23ff5a4d'/><circle cx='8' cy='8' r='2.5' fill='%23fff' stroke='%23000' stroke-width='1.5'/></svg>">
   <link rel="preconnect" href="https://raw.githubusercontent.com">
@@ -22,17 +22,40 @@
   <div class="auth-puerta" id="authPuerta" hidden>
     <div class="auth-caja">
       <p class="eyebrow">Acceso</p>
-      <h1 class="auth-titulo">POKE<em>HDEX</em></h1>
-      <p class="auth-texto">
-        Escribe tu correo y te llega un enlace para entrar. Sin contraseñas.
-      </p>
+      <h1 class="auth-titulo">PPV<em>DEX</em></h1>
+      <p class="auth-texto">Entra con tu correo y tu contraseña.</p>
       <form class="auth-form" id="authForm">
-        <input class="auth-campo" id="authCorreo" type="email" required
+        <input class="auth-campo ancho" id="authCorreo" type="email" required
                autocomplete="email" placeholder="tu@correo.com" aria-label="Correo">
-        <button class="auth-enviar" id="authEnviar" type="submit">Enviar enlace</button>
+        <input class="auth-campo ancho" id="authClave" type="password" required
+               autocomplete="current-password" placeholder="contraseña" aria-label="Contraseña">
+        <button class="auth-enviar ancho" id="authEnviar" type="submit">Entrar</button>
       </form>
       <p class="auth-mensaje" id="authMensaje"></p>
+      <p class="auth-alterno">
+        <button class="auth-enlace" id="authOtp" type="button">
+          No tengo contraseña, o la olvide
+        </button>
+      </p>
       <p class="auth-pie">Solo entran los correos dados de alta.</p>
+    </div>
+
+    <!-- Segundo paso: se llega aqui desde el enlace del correo -->
+    <div class="auth-caja" id="authClavePanel" hidden>
+      <p class="eyebrow">Nueva contraseña</p>
+      <h1 class="auth-titulo">PPV<em>DEX</em></h1>
+      <p class="auth-texto">Elige la contraseña con la que entraras a partir de ahora.</p>
+      <form class="auth-form" id="authClaveForm">
+        <input class="auth-campo ancho" id="authClaveNueva" type="password" required
+               minlength="8" autocomplete="new-password"
+               placeholder="contraseña nueva" aria-label="Contraseña nueva">
+        <input class="auth-campo ancho" id="authClaveRepetir" type="password" required
+               minlength="8" autocomplete="new-password"
+               placeholder="repitela" aria-label="Repetir contraseña">
+        <button class="auth-enviar ancho" id="authClaveGuardar" type="submit">Guardar y entrar</button>
+      </form>
+      <p class="auth-mensaje" id="authClaveMensaje"></p>
+      <p class="auth-pie">Minimo 8 caracteres.</p>
     </div>
   </div>
 
@@ -46,6 +69,17 @@
       </p>
     </div>
   </header>
+
+  <div class="wrap">
+    <div class="import-aviso" id="importAviso" hidden>
+      <p class="import-texto">
+        Tu perfil esta vacio. Puedes subir de una vez lo que ya hay en el archivo
+        <code>data/teams.js</code>: capturas, equipos y favoritos.
+      </p>
+      <button class="admin-btn primary" id="importBoton" type="button">Importar mis datos</button>
+      <p class="import-estado" id="importEstado"></p>
+    </div>
+  </div>
 
   <nav class="index-nav" aria-label="Indice de generaciones">
     <div class="wrap">
@@ -74,5 +108,6 @@
   <script src="data/games.js"></script>
   <script src="data/teams.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/datos.js"></script>
 </body>
 </html>

@@ -1,0 +1,175 @@
+/* ============================================================
+   DATOS DEL PERFIL CONTRA SUPABASE
+   ------------------------------------------------------------
+   En la base se guarda lo que SI se tiene, tanto normal como variocolor.
+   La sintaxis de "missing" de data/teams.js solo se usa ya para la
+   importacion inicial: a partir de ahi manda la base.
+   ============================================================ */
+
+/* Lo que tiene el perfil que se esta viendo */
+const CAPTURAS = { normal: new Set(), shiny: new Set() };
+
+/* Juego elegido por generacion: Map<generacion, game_id> */
+const JUEGOS_ELEGIDOS = new Map();
+
+/* De quien son los datos en pantalla. Si no es la sesion, es solo lectura. */
+let perfilVisto = null;
+
+const esMiPerfil = () => Boolean(sesion && perfilVisto && perfilVisto.id === sesion.user.id);
+
+/* ---------- Lectura ---------- */
+
+async function cargarCapturas(userId) {
+  CAPTURAS.normal.clear();
+  CAPTURAS.shiny.clear();
+  if (!sb) return;
+
+  /* PostgREST pagina de mil en mil, asi que se pide por tramos */
+  const paso = 1000;
+  for (let desde = 0; ; desde += paso) {
+    const { data, error } = await sb
+      .from("catches")
+      .select("dex_id, shiny")
+      .eq("user_id", userId)
+      .range(desde, desde + paso - 1);
+
+    if (error) { console.warn("capturas:", error.message); return; }
+    data.forEach((f) => (f.shiny ? CAPTURAS.shiny : CAPTURAS.normal).add(f.dex_id));
+    if (data.length < paso) return;
+  }
+}
+
+async function cargarJuegos(userId) {
+  JUEGOS_ELEGIDOS.clear();
+  if (!sb) return;
+
+  const { data, error } = await sb
+    .from("region_games")
+    .select("generation, game_id")
+    .eq("user_id", userId);
+
+  if (error) { console.warn("juegos:", error.message); return; }
+  data.forEach((f) => JUEGOS_ELEGIDOS.set(f.generation, f.game_id));
+}
+
+async function cargarPerfilCompleto(userId) {
+  await Promise.all([cargarCapturas(userId), cargarJuegos(userId)]);
+}
+
+/* ---------- Escritura ---------- */
+
+/* Marca o desmarca un Pokemon. Actualiza la pantalla al momento y si la
+   base falla lo deshace, para no dejar mintiendo al contador. */
+async function alternarCaptura(dexId, shiny, tener) {
+  const conjunto = shiny ? CAPTURAS.shiny : CAPTURAS.normal;
+  if (tener) conjunto.add(dexId); else conjunto.delete(dexId);
+
+  if (!sb || !sesion) return { ok: false, error: "sin sesion" };
+
+  const fila = { user_id: sesion.user.id, dex_id: dexId, shiny };
+  const { error } = tener
+    ? await sb.from("catches").upsert(fila, { onConflict: "user_id,dex_id,shiny" })
+    : await sb.from("catches").delete().match(fila);
+
+  if (error) {
+    if (tener) conjunto.delete(dexId); else conjunto.add(dexId);
+    console.warn("no se pudo guardar:", error.message);
+    return { ok: false, error: error.message };
+  }
+  return { ok: true };
+}
+
+async function guardarJuego(generacion, gameId) {
+  JUEGOS_ELEGIDOS.set(generacion, gameId);
+  if (!sb || !sesion) return { ok: false };
+
+  const { error } = await sb.from("region_games").upsert(
+    { user_id: sesion.user.id, generation: generacion, game_id: gameId },
+    { onConflict: "user_id,generation" }
+  );
+
+  if (error) { console.warn("no se pudo guardar el juego:", error.message); return { ok: false }; }
+  return { ok: true };
+}
+
+/* ---------- Importacion inicial desde data/teams.js ---------- */
+
+/* Trocea para no mandar mil filas de golpe */
+async function insertarPorTandas(tabla, filas, conflicto) {
+  const TANDA = 500;
+  for (let i = 0; i < filas.length; i += TANDA) {
+    const { error } = await sb
+      .from(tabla)
+      .upsert(filas.slice(i, i + TANDA), { onConflict: conflicto });
+    if (error) return error;
+  }
+  return null;
+}
+
+async function importarDesdeArchivo(alProgresar) {
+  if (!sb || !sesion) return { ok: false, error: "Hay que entrar primero" };
+
+  const yo = sesion.user.id;
+  const avisar = alProgresar || (() => {});
+
+  avisar("Pidiendo las especies a PokeAPI...");
+  const [especies, variantes] = await Promise.all([fetchSpecies(), fetchVariantes()]);
+  if (!especies.length) return { ok: false, error: "No se pudo cargar la lista de especies" };
+
+  const capturas = [];
+  const equipos = [];
+  const favoritos = [];
+
+  for (const seccion of TEAMS) {
+    if (seccion.hall) {
+      seccion.team.forEach((m, i) => {
+        favoritos.push({
+          user_id: yo, position: i + 1, dex_id: m.dex, species: m.species,
+          nickname: m.nickname || null, gender: m.gender || "n",
+          form: m.form || null, ball: m.ball || null, shiny: Boolean(m.shiny)
+        });
+      });
+      continue;
+    }
+
+    avisar("Generacion " + seccion.generation + "...");
+
+    const entradas = entradasDe(seccion, especies, variantes);
+    capturadosDe(seccion, entradas, variantes)
+      .forEach((id) => capturas.push({ user_id: yo, dex_id: id, shiny: false }));
+    shinyDe(seccion, entradas, variantes)
+      .forEach((id) => capturas.push({ user_id: yo, dex_id: id, shiny: true }));
+
+    seccion.team.forEach((m, i) => {
+      equipos.push({
+        user_id: yo, generation: seccion.generation, slot: i + 1,
+        dex_id: m.dex, species: m.species, nickname: m.nickname || null,
+        gender: m.gender || "n", form: m.form || null,
+        ball: m.ball || null, shiny: Boolean(m.shiny)
+      });
+    });
+
+    /* El juego de teams.js, si esta en el catalogo */
+    const lista = GAMES[seccion.generation] || [];
+    const juego = lista.find((j) => j.name.toLowerCase() === String(seccion.game || "")
+      .replace(/^pokemon\s+/i, "").toLowerCase());
+    if (juego) {
+      await guardarJuego(seccion.generation, juego.id);
+    }
+  }
+
+  avisar("Subiendo " + capturas.length + " capturas...");
+  let error = await insertarPorTandas("catches", capturas, "user_id,dex_id,shiny");
+  if (error) return { ok: false, error: error.message };
+
+  avisar("Subiendo los equipos...");
+  error = await insertarPorTandas("teams", equipos, "user_id,generation,slot");
+  if (error) return { ok: false, error: error.message };
+
+  avisar("Subiendo los favoritos...");
+  error = await insertarPorTandas("favourites", favoritos, "user_id,position");
+  if (error) return { ok: false, error: error.message };
+
+  await cargarPerfilCompleto(yo);
+  return { ok: true, capturas: capturas.length, equipos: equipos.length, favoritos: favoritos.length };
+}

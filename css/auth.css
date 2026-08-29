@@ -92,18 +92,20 @@
 }
 
 .auth-mensaje {
-  margin: 1.1rem 0 0;
-  min-height: 1.6rem;
+  /* Sin mensaje no ocupa nada, para que no quede un hueco raro */
+  margin: 0;
+  min-height: 0;
   font-size: 1.05rem;
   line-height: 1.5;
   color: var(--ink-2);
 }
 
+.auth-mensaje:not(:empty) { margin-top: 1.1rem; }
 .auth-mensaje.ok    { color: #7ee787; }
 .auth-mensaje.error { color: #ff8f8f; }
 
 .auth-pie {
-  margin: 1.5rem 0 0;
+  margin: 1.35rem 0 0;
   padding-top: 1.1rem;
   border-top: 2px solid var(--rule);
   color: var(--ink-2);
@@ -137,3 +139,67 @@
 }
 
 .auth-salir:hover { color: var(--ink); border-color: var(--accent); }
+
+/* ---------- Aviso de importacion ---------- */
+
+.import-aviso {
+  margin: 2rem 0 0;
+  padding: 1.25rem;
+  background: var(--panel);
+  border: 2px dashed var(--rule);
+}
+
+.import-aviso[hidden] { display: none; }
+
+.import-texto { margin: 0 0 1rem; color: var(--ink-2); font-size: 1.05rem; }
+
+.import-texto code {
+  padding: .05rem .3rem;
+  background: var(--panel-2);
+  border: 2px solid var(--rule);
+  font-family: var(--pixel);
+  font-size: .5rem;
+  color: var(--ink);
+}
+
+.import-estado { margin: .9rem 0 0; min-height: 1.4rem; color: var(--ink-2); font-size: 1rem; }
+.import-estado.ok    { color: #7ee787; }
+.import-estado.error { color: #ff8f8f; }
+
+/* ---------- Marcado en vivo ---------- */
+
+/* Solo se puede marcar en el perfil propio */
+body.con-sesion .dex-tile { cursor: pointer; }
+
+.dex-tile.guardando { opacity: .55; }
+
+.dex-tile.fallo {
+  border-color: #ff8f8f;
+  animation: sacudir .25s steps(3) 2;
+}
+
+@keyframes sacudir {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(3px); }
+}
+
+/* Formulario en columna: correo, contraseña y boton, cada uno en su linea */
+.auth-campo.ancho,
+.auth-enviar.ancho { flex: 1 1 100%; }
+
+.auth-alterno { margin: 1rem 0 0; }
+
+.auth-enlace {
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--ink-2);
+  font-family: var(--term);
+  font-size: 1rem;
+  text-decoration: underline;
+  text-underline-offset: .2em;
+  cursor: pointer;
+}
+
+.auth-enlace:hover { color: var(--accent); }
+.auth-enlace:disabled { opacity: .5; cursor: progress; }

@@ -381,6 +381,12 @@ function idDeEquipo(mon, variantes, idsDeEsteDex) {
 /* La Pokedex shiny va al reves: en "shinies" se apuntan los que SI tienes,
    porque de variocolores se tienen pocos y seria absurdo listar los que faltan. */
 function shinyDe(gen, entradas, variantes) {
+  if (typeof CAPTURAS !== "undefined" && perfilVisto) {
+    const set = new Set();
+    entradas.forEach((e) => { if (CAPTURAS.shiny.has(e.id)) set.add(e.id); });
+    return set;
+  }
+
   const tengo = parseNumeros(gen.shinies);
   const ids = new Set(entradas.map((e) => e.id));
 
@@ -397,6 +403,13 @@ function shinyDe(gen, entradas, variantes) {
 /* En teams.js se apuntan los que FALTAN. Todo lo demas se da por capturado,
    que para una Pokedex casi completa es mucho menos que escribir. */
 function capturadosDe(gen, entradas, variantes) {
+  /* Con sesion manda la base; el archivo solo sirve de arranque */
+  if (typeof CAPTURAS !== "undefined" && perfilVisto) {
+    const set = new Set();
+    entradas.forEach((e) => { if (CAPTURAS.normal.has(e.id)) set.add(e.id); });
+    return set;
+  }
+
   const faltan = parseNumeros(gen.missing);
   const ids = new Set(entradas.map((e) => e.id));
 
@@ -429,7 +442,7 @@ function dexTile(entrada, capturados) {
     : (modoShiny ? " - sin variocolor" : " - te falta");
   return `
     <li class="dex-tile${tengo ? " caught" : ""}${entrada.region ? " variante" : ""}"
-        title="${etiqueta} ${entrada.nombre}${estado}">
+        data-id="${entrada.id}" title="${etiqueta} ${entrada.nombre}${estado}">
       <img class="dex-sprite" loading="lazy" alt="" aria-hidden="true"
            src="${spriteDex(entrada.id)}">
       <span class="dex-num">${etiqueta}</span>
@@ -708,8 +721,8 @@ function selectGeneration(id, push = true) {
   renderGeneration(gen);
   if (push) history.replaceState(null, "", "#" + gen.id);
   document.title = gen.hall
-    ? `${gen.title || "Mis favoritos"} — Mis Equipos Pokemon`
-    : `${ORDINAL[gen.generation]} generacion · ${gen.region} — Mis Equipos Pokemon`;
+    ? `${gen.title || "Mis favoritos"} — PPVDEX`
+    : `${ORDINAL[gen.generation]} generacion · ${gen.region} — PPVDEX`;
 }
 
 function buildIndex() {
@@ -746,6 +759,51 @@ function conectarModos() {
   });
 }
 
+/* Marcar y desmarcar desde la propia Pokedex, solo en el perfil propio */
+function conectarMarcado() {
+  panelEl.addEventListener("click", async (e) => {
+    const tile = e.target.closest(".dex-tile");
+    if (!tile || !tile.dataset.id) return;
+    if (typeof esMiPerfil !== "function" || !esMiPerfil()) return;
+
+    const id = Number(tile.dataset.id);
+    const tenerlo = !tile.classList.contains("caught");
+
+    tile.classList.toggle("caught", tenerlo);
+    tile.classList.add("guardando");
+
+    const res = await alternarCaptura(id, modoShiny, tenerlo);
+
+    tile.classList.remove("guardando");
+    if (!res.ok) {
+      tile.classList.toggle("caught", !tenerlo);
+      tile.classList.add("fallo");
+      setTimeout(() => tile.classList.remove("fallo"), 1200);
+      return;
+    }
+    if (genEnPantalla) actualizarMarcadorDex(genEnPantalla);
+  });
+}
+
+/* Recalcula contador, porcentaje y barra sin repintar toda la rejilla */
+function actualizarMarcadorDex(gen) {
+  const total = panelEl.querySelectorAll(".dex-tile").length;
+  const tengo = panelEl.querySelectorAll(".dex-tile.caught").length;
+  const pct = total ? Math.round((tengo / total) * 100) : 0;
+
+  const c = panelEl.querySelector(".dex-count");
+  const p = panelEl.querySelector(".dex-pct");
+  const b = panelEl.querySelector(".dex-bar-fill");
+  if (c) c.textContent = tengo + " / " + total;
+  if (p) p.textContent = pct + "%";
+  if (b) b.style.width = pct + "%";
+}
+
+/* Repinta la generacion en pantalla, para cuando llegan los datos del perfil */
+function refrescarTodo() {
+  if (genEnPantalla) selectGeneration(genEnPantalla.id, false);
+}
+
 function init() {
   /* admin.html reutiliza las funciones de este archivo pero no tiene estos
      elementos, asi que aqui no hay nada que montar */
@@ -757,6 +815,7 @@ function init() {
   }
   buildIndex();
   conectarModos();
+  conectarMarcado();
 
   const fromHash = location.hash.slice(1);
   if (TEAMS.some((g) => g.id === fromHash)) return selectGeneration(fromHash, false);
