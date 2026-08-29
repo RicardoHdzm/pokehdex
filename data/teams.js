@@ -75,7 +75,7 @@ const TEAMS = [
     team: [
       { dex: 9,   species: "Blastoise",  nickname: "Shellshock", gender: "m", types: ["water"], ball: "poke-ball" },
       { dex: 26,  species: "Raichu",     nickname: "Raider",       gender: "m", types: ["electric"], ball: "poke-ball" },
-      { dex: 34,  species: "Nidoking",   nickname: "Rampage",       gender: "m", types: ["poison", "ground"], ball: "poke-ball" },
+      { dex: 34,  species: "Nidoking",   nickname: "",       gender: "m", types: ["poison", "ground"], ball: "poke-ball" },
       { dex: 59,  species: "Arcanine",   nickname: "Hotrod",      gender: "m", types: ["fire"], ball: "poke-ball" },
       { dex: 112, species: "Rhydon",     nickname: "Rocksteady",   gender: "m", types: ["ground", "rock"], ball: "safari-ball" },
       { dex: 142, species: "Aerodactyl", nickname: "Skydread",     gender: "m", types: ["rock", "flying"], ball: "poke-ball" }
@@ -189,7 +189,7 @@ const TEAMS = [
       { dex: 823, species: "Corviknight", nickname: "Knightwing", gender: "m", types: ["flying", "steel"], ball: "poke-ball" },
       { dex: 834, species: "Drednaw",   nickname: "Juggernawt", gender: "m", types: ["water", "rock"],    ball: "poke-ball" },
       { dex: 862, species: "Obstagoon",   nickname: "Crossroad", gender: "m", types: ["dark", "normal"], ball: "poke-ball" },
-      { dex: 849, species: "Toxtricity", form: "low-key",  nickname: "Punkshock", gender: "m", types: ["electric", "poison"], ball: "luxury-ball" },
+      { dex: 849, species: "Toxtricity", form: "low-key",  nickname: "Shockbass", gender: "m", types: ["electric", "poison"], ball: "luxury-ball" },
       { dex: 873, species: "Frosmoth",    nickname: "Snowflake", gender: "f", types: ["ice", "bug"],      ball: "premier-ball" }
     ]
   },
