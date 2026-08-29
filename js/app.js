@@ -537,6 +537,23 @@ function plateLabel(mon, index, section) {
   return gen ? "Gen " + roman(gen) : plateNum(index + 1);
 }
 
+/* Mover el Pokemon a izquierda o derecha dentro del equipo */
+function flechasDeOrden(index, section) {
+  if (typeof esMiPerfil !== "function" || !esMiPerfil()) return "";
+  const total = section.team.length;
+  if (total < 2) return "";
+
+  return `
+    <div class="plate-orden">
+      <button type="button" class="orden-btn" data-mover="-1" data-desde="${index}"
+              ${index === 0 ? "disabled" : ""} title="Mover antes"
+              aria-label="Mover antes"><i class="fa-solid fa-chevron-left"></i></button>
+      <button type="button" class="orden-btn" data-mover="1" data-desde="${index}"
+              ${index === total - 1 ? "disabled" : ""} title="Mover despues"
+              aria-label="Mover despues"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>`;
+}
+
 function plate(mon, index, section) {
   const g = GENDER[mon.gender] || GENDER.n;
   const nickname = mon.nickname && mon.nickname.trim() ? mon.nickname.trim() : "";
@@ -563,6 +580,7 @@ function plate(mon, index, section) {
         ${mon.shiny ? '<span class="plate-note">Ejemplar variocolor</span>' : ""}
       </p>
       <ul class="plate-types">${typeChips(mon.types || [])}</ul>
+      ${flechasDeOrden(index, section)}
     </article>`;
 }
 
@@ -656,8 +674,16 @@ function renderGeneration(gen) {
     : `<div class="plates">${filled}${empty}</div>`;
 
   /* Solo las generaciones llevan Pokedex; el Salon de la Fama no */
+  const puedeEditar = typeof esMiPerfil === "function" && esMiPerfil();
+  const vaciar = puedeEditar && gen.team.length
+    ? '<button type="button" class="boton peligro" id="vaciarEquipo">Vaciar equipo</button>'
+    : "";
+
   const equipo = gen.hall ? cuerpo : `
-    <h3 class="section-label">Equipo campeon</h3>
+    <div class="section-head">
+      <h3 class="section-label">Equipo campeon</h3>
+      ${vaciar}
+    </div>
     ${cuerpo}`;
 
   const dex = gen.hall ? "" : `
@@ -878,7 +904,36 @@ async function borrarDelEditor() {
 }
 
 function conectarEditor() {
-  panelEl.addEventListener("click", (e) => {
+  panelEl.addEventListener("click", async (e) => {
+    /* Las flechas van dentro de la lamina, asi que se atienden primero */
+    const flecha = e.target.closest(".orden-btn");
+    if (flecha && genEnPantalla) {
+      e.stopPropagation();
+      const desde = Number(flecha.dataset.desde);
+      const res = await moverMon(genEnPantalla, desde, desde + Number(flecha.dataset.mover));
+      if (res.ok) selectGeneration(genEnPantalla.id, false);
+      return;
+    }
+
+    /* Vaciar pide confirmacion en el propio boton */
+    const vaciar = e.target.closest("#vaciarEquipo");
+    if (vaciar && genEnPantalla) {
+      e.stopPropagation();
+      if (vaciar.dataset.confirmando !== "si") {
+        vaciar.dataset.confirmando = "si";
+        vaciar.textContent = "¿Seguro? Pulsa otra vez";
+        setTimeout(() => {
+          if (!vaciar.isConnected) return;
+          vaciar.dataset.confirmando = "";
+          vaciar.textContent = "Vaciar equipo";
+        }, 4000);
+        return;
+      }
+      const res = await vaciarEquipo(genEnPantalla);
+      if (res.ok) selectGeneration(genEnPantalla.id, false);
+      return;
+    }
+
     const plate = e.target.closest(".plate.editable");
     if (!plate || !genEnPantalla) return;
     abrirEditor(genEnPantalla, Number(plate.dataset.slot));

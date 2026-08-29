@@ -117,19 +117,81 @@ async function guardarMon(seccion, indice, mon) {
   return { ok: true };
 }
 
+/* Reescribe los huecos de una seccion tal y como esta el array en memoria.
+   Primero mete los que hay y luego quita los que sobran, en ese orden: si
+   fallara algo por el camino nunca se queda sin datos. */
+async function guardarOrden(seccion) {
+  if (!sb || !sesion) return { ok: false, error: "sin sesion" };
+
+  const yo = sesion.user.id;
+  const filas = seccion.team.map((m, i) => {
+    const comun = {
+      user_id: yo, dex_id: m.dex, species: m.species,
+      nickname: m.nickname || null, gender: m.gender || "n",
+      form: m.form || null, ball: m.ball || null, shiny: Boolean(m.shiny)
+    };
+    return seccion.hall
+      ? { ...comun, position: i + 1 }
+      : { ...comun, generation: seccion.generation, slot: i + 1 };
+  });
+
+  if (filas.length) {
+    const { error } = seccion.hall
+      ? await sb.from("favourites").upsert(filas, { onConflict: "user_id,position" })
+      : await sb.from("teams").upsert(filas, { onConflict: "user_id,generation,slot" });
+    if (error) return { ok: false, error: error.message };
+  }
+
+  /* Fuera los huecos que quedaron por encima del ultimo */
+  const sobrantes = seccion.hall
+    ? sb.from("favourites").delete().eq("user_id", yo).gt("position", filas.length)
+    : sb.from("teams").delete().eq("user_id", yo)
+        .eq("generation", seccion.generation).gt("slot", filas.length);
+
+  const { error } = await sobrantes;
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
+/* Intercambia dos huecos y guarda el resultado */
+async function moverMon(seccion, desde, hacia) {
+  if (hacia < 0 || hacia >= seccion.team.length) return { ok: false, error: "fuera de rango" };
+
+  const copia = seccion.team.slice();
+  [copia[desde], copia[hacia]] = [copia[hacia], copia[desde]];
+  const antes = seccion.team;
+  seccion.team = copia;
+
+  const res = await guardarOrden(seccion);
+  if (!res.ok) seccion.team = antes;
+  return res;
+}
+
+/* Vacia el equipo entero de esa seccion */
+async function vaciarEquipo(seccion) {
+  if (!sb || !sesion) return { ok: false, error: "sin sesion" };
+
+  const yo = sesion.user.id;
+  const { error } = seccion.hall
+    ? await sb.from("favourites").delete().eq("user_id", yo)
+    : await sb.from("teams").delete().eq("user_id", yo).eq("generation", seccion.generation);
+
+  if (error) return { ok: false, error: error.message };
+  seccion.team = [];
+  return { ok: true };
+}
+
 async function borrarMon(seccion, indice) {
   if (!sb || !sesion) return { ok: false, error: "sin sesion" };
 
-  const { error } = seccion.hall
-    ? await sb.from("favourites").delete()
-        .match({ user_id: sesion.user.id, position: indice + 1 })
-    : await sb.from("teams").delete()
-        .match({ user_id: sesion.user.id, generation: seccion.generation, slot: indice + 1 });
-
-  if (error) return { ok: false, error: error.message };
-
+  /* Se quita del array y se reescriben los huecos: asi no quedan numerados
+     con saltos (1, 3, 4) cuando se borra uno del medio */
+  const antes = seccion.team.slice();
   seccion.team.splice(indice, 1);
-  return { ok: true };
+
+  const res = await guardarOrden(seccion);
+  if (!res.ok) seccion.team = antes;
+  return res;
 }
 
 /* ---------- Escritura ---------- */
