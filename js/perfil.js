@@ -9,6 +9,8 @@ function abrirPerfil() {
   if (!sesion || !perfil) return;
 
   document.getElementById("perfilNombre").value = perfil.display_name || perfil.handle || "";
+  document.getElementById("perfilFriendCode").value = perfil.friend_code || "";
+  document.getElementById("perfilChampionsId").value = perfil.champions_id || "";
   document.getElementById("perfilHandle").textContent = "@" + (perfil.handle || "");
   document.getElementById("perfilCorreo").textContent = sesion.user.email || "";
   document.getElementById("perfilMensaje").textContent = "";
@@ -46,20 +48,39 @@ function pintarJuegosDelPerfil() {
   }).join("");
 }
 
+/* Los codigos de Switch son doce digitos. Se acepta como los escriba cada
+   uno y se guarda siempre igual: SW-0000-0000-0000 */
+function normalizarFriendCode(texto) {
+  const digitos = texto.replace(/D/g, "");
+  if (digitos.length !== 12) return texto.trim();
+  return "SW-" + digitos.slice(0, 4) + "-" + digitos.slice(4, 8) + "-" + digitos.slice(8);
+}
+
 async function guardarNombre(e) {
   e.preventDefault();
 
   const aviso = document.getElementById("perfilMensaje");
   const nombre = document.getElementById("perfilNombre").value.trim();
+  const campoFc = document.getElementById("perfilFriendCode");
+  const campoCh = document.getElementById("perfilChampionsId");
 
   if (!nombre) { aviso.textContent = "El nombre no puede quedar vacio."; aviso.className = "mon-mensaje"; return; }
+
+  const fc = campoFc.value.trim() ? normalizarFriendCode(campoFc.value) : null;
+  const ch = campoCh.value.trim() || null;
+
+  if (fc && !/^SW-d{4}-d{4}-d{4}$/.test(fc)) {
+    aviso.textContent = "El codigo de amigo son doce digitos: SW-0000-0000-0000.";
+    aviso.className = "mon-mensaje";
+    return;
+  }
 
   aviso.textContent = "Guardando...";
   aviso.className = "mon-mensaje neutro";
 
   const { error } = await sb
     .from("profiles")
-    .update({ display_name: nombre })
+    .update({ display_name: nombre, friend_code: fc, champions_id: ch })
     .eq("id", sesion.user.id);
 
   if (error) {
@@ -69,6 +90,9 @@ async function guardarNombre(e) {
   }
 
   perfil.display_name = nombre;
+  perfil.friend_code = fc;
+  perfil.champions_id = ch;
+  campoFc.value = fc || "";
   pintarSesion();
   aviso.textContent = "Guardado.";
   aviso.className = "mon-mensaje ok";

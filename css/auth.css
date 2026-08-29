@@ -611,3 +611,25 @@ body.con-sesion .dex-tile { cursor: pointer; }
 body.visitando .dex-tile,
 body.visitando .plate { cursor: default; }
 
+
+/* Codigos de intercambio dentro del aviso de visita */
+.visita-codigos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem .9rem;
+  width: 100%;
+  padding-top: .7rem;
+  border-top: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  font-size: 1rem;
+  color: var(--ink-2);
+}
+
+.visita-codigo b {
+  margin-right: .35rem;
+  font-family: var(--pixel);
+  font-size: .45rem;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.visita-codigo { user-select: all; }

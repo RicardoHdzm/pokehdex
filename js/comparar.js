@@ -38,7 +38,7 @@ async function cargarPerfiles() {
 
   const { data, error } = await sb
     .from("profiles")
-    .select("id, handle, display_name")
+    .select("id, handle, display_name, friend_code, champions_id")
     .order("handle");
 
   if (error) { console.warn("perfiles:", error.message); return []; }
@@ -116,11 +116,12 @@ async function verPokedexDe(id, nombre) {
   const aviso = document.getElementById("compMensaje");
   aviso.textContent = "Cargando su Pokedex...";
 
-  perfilVisto = { id, display_name: nombre };
+  const ficha = (perfilesCache || []).find((p) => p.id === id) || { id, display_name: nombre };
+  perfilVisto = ficha;
   await cargarPerfilCompleto(id);
 
   cerrarComparar();
-  pintarVisita(nombre);
+  pintarVisita(ficha);
   buildIndex();
   selectGeneration(genEnPantalla ? genEnPantalla.id : TEAMS[0].id, false);
 }
@@ -133,17 +134,30 @@ async function volverAMiPerfil() {
   selectGeneration(genEnPantalla ? genEnPantalla.id : TEAMS[0].id, false);
 }
 
-function pintarVisita(nombre) {
+function pintarVisita(quien) {
   const barra = document.getElementById("visitaBarra");
   if (!barra) return;
 
   /* Marca el body para que el cursor no prometa un clic que no hace nada */
-  document.body.classList.toggle("visitando", Boolean(nombre));
+  document.body.classList.toggle("visitando", Boolean(quien));
 
-  if (!nombre) { barra.hidden = true; barra.innerHTML = ""; return; }
+  if (!quien) { barra.hidden = true; barra.innerHTML = ""; return; }
+
+  const nombre = quien.display_name || quien.handle || "";
+
+  /* Los codigos son el motivo de mirar el perfil de otro: si los tiene
+     puestos, se enseñan aqui para poder copiarlos sin mas pasos */
+  const codigos = [];
+  if (quien.friend_code) {
+    codigos.push('<span class="visita-codigo"><b>Switch</b> ' + quien.friend_code + "</span>");
+  }
+  if (quien.champions_id) {
+    codigos.push('<span class="visita-codigo"><b>Champions</b> ' + quien.champions_id + "</span>");
+  }
 
   barra.innerHTML = `
     <span><i class="fa-solid fa-eye"></i> Estas viendo la Pokedex de <b>${nombre}</b>. Solo lectura.</span>
+    ${codigos.length ? '<span class="visita-codigos">' + codigos.join("") + "</span>" : ""}
     <button type="button" class="boton" id="visitaVolver">Volver a la mia</button>`;
   barra.hidden = false;
 

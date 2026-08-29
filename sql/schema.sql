@@ -16,6 +16,11 @@ create table if not exists public.profiles (
 
 comment on table public.profiles is 'Perfil publico de cada entrenador';
 
+-- Codigos para intercambiar. Se añaden asi para poder relanzar el archivo
+-- entero sobre una base que ya existe sin que falle.
+alter table public.profiles add column if not exists friend_code  text;
+alter table public.profiles add column if not exists champions_id text;
+
 -- Al registrarse alguien, se le crea el perfil solo.
 -- El handle sale del correo y se limpia; si choca, se le pega un sufijo.
 create or replace function public.crear_perfil()
