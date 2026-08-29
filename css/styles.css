@@ -110,7 +110,9 @@ a { color: var(--accent); text-underline-offset: .2em; }
   margin: 1.5rem 0 0;
   font-family: var(--pixel);
   font-weight: 400;
-  font-size: clamp(1.3rem, 4.6vw, 2.9rem);
+  /* En movil se quedaba en el minimo del clamp y salia diminuto: se sube
+     el suelo y se deja crecer mas rapido con el ancho */
+  font-size: clamp(2rem, 9.2vw, 2.9rem);
   line-height: 1.55;
   letter-spacing: -.01em;
   text-shadow: 4px 4px 0 rgba(0, 0, 0, .55);

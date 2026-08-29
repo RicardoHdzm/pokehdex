@@ -30,7 +30,7 @@
   margin: 1.25rem 0 0;
   font-family: var(--pixel);
   font-weight: 400;
-  font-size: clamp(1.1rem, 4vw, 1.7rem);
+  font-size: clamp(1.5rem, 7vw, 2rem);
   line-height: 1.5;
   text-shadow: 3px 3px 0 rgba(0, 0, 0, .55);
 }
