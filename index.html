@@ -82,6 +82,39 @@
     </section>
   </main>
 
+  <!-- Comparar con otro perfil para cuadrar intercambios -->
+  <div class="mon-editor" id="compPanel" hidden>
+    <div class="mon-caja ancha comp-caja" role="dialog" aria-modal="true" aria-labelledby="compTitulo">
+      <p class="eyebrow" id="compTitulo">Cuadrar intercambios</p>
+
+      <div class="comp-controles">
+        <select id="compQuien" aria-label="Con quien comparar"></select>
+        <select id="compGen" class="juego-select" aria-label="Generacion"></select>
+        <div class="dex-modos" id="compModos" role="tablist" aria-label="Tipo">
+          <button class="dex-modo" type="button" role="tab" data-modo="normal" aria-selected="true">Normal</button>
+          <button class="dex-modo" type="button" role="tab" data-modo="shiny" aria-selected="false">Shiny</button>
+        </div>
+      </div>
+
+      <p class="mon-mensaje neutro" id="compMensaje"></p>
+
+      <div class="comp-resultado" id="compResultado" hidden>
+        <section class="comp-lado">
+          <h3 class="section-label">Te puede dar <span class="comp-total" id="compMeDaTotal">0</span></h3>
+          <ul class="comp-lista" id="compMeDa"></ul>
+        </section>
+        <section class="comp-lado">
+          <h3 class="section-label">Le puedes dar <span class="comp-total" id="compLeDoyTotal">0</span></h3>
+          <ul class="comp-lista" id="compLeDoy"></ul>
+        </section>
+      </div>
+
+      <div class="mon-botones">
+        <button type="button" class="boton" id="compCerrar">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Perfil: nombre a mostrar y juego de cada region -->
   <div class="mon-editor" id="perfilPanel" hidden>
     <div class="mon-caja ancha" role="dialog" aria-modal="true" aria-labelledby="perfilTitulo">
@@ -176,5 +209,6 @@
   <script src="js/app.js"></script>
   <script src="js/datos.js"></script>
   <script src="js/perfil.js"></script>
+  <script src="js/comparar.js"></script>
 </body>
 </html>

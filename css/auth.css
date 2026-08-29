@@ -387,3 +387,93 @@ body.con-sesion .dex-tile { cursor: pointer; }
   .perfil-fila { flex-wrap: wrap; }
   .perfil-fila .juego-select { flex: 1 1 100%; max-width: none; }
 }
+
+/* ---------- Comparar perfiles ---------- */
+
+.comp-caja { width: min(56rem, 100%); }
+
+.comp-controles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  align-items: center;
+  margin: 1.25rem 0 1rem;
+}
+
+#compQuien {
+  flex: 1 1 12rem;
+  min-width: 0;
+  padding: .55rem .6rem;
+  background: var(--bg);
+  border: 2px solid var(--rule);
+  color: var(--ink);
+  font-family: var(--term);
+  font-size: 1.1rem;
+}
+
+#compQuien:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.comp-resultado {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1.5rem;
+  margin-top: .5rem;
+}
+
+.comp-resultado[hidden] { display: none; }
+
+.comp-lado .section-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  padding-bottom: .6rem;
+  margin-bottom: .8rem;
+  border-bottom: 2px solid var(--rule);
+  font-size: .58rem;
+}
+
+.comp-total { color: var(--accent); }
+
+.comp-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
+  gap: .5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 22rem;
+  overflow-y: auto;
+}
+
+.comp-ficha {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .1rem;
+  padding: .4rem .2rem;
+  background: var(--panel-2);
+  border: 2px solid var(--rule);
+}
+
+.comp-ficha img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.comp-nombre {
+  font-size: .8rem;
+  line-height: 1.15;
+  text-align: center;
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
+}
+
+.comp-vacio {
+  grid-column: 1 / -1;
+  padding: 1.5rem 0;
+  color: var(--ink-2);
+  font-size: 1.05rem;
+}

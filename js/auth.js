@@ -166,8 +166,13 @@ function pintarSesion() {
   const quien = (perfil && (perfil.display_name || perfil.handle)) || sesion.user.email;
   barra.innerHTML = `
     <span class="auth-quien"><i class="fa-solid fa-user"></i> ${quien}</span>
+    <button class="auth-salir" type="button" id="authComparar">Comparar</button>
     <button class="auth-salir" type="button" id="authPerfil">Perfil</button>
     <button class="auth-salir" type="button" id="authSalir">Salir</button>`;
+
+  document.getElementById("authComparar").addEventListener("click", () => {
+    if (typeof abrirComparar === "function") abrirComparar();
+  });
 
   document.getElementById("authPerfil").addEventListener("click", () => {
     if (typeof abrirPerfil === "function") abrirPerfil();
