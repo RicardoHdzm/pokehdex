@@ -1,0 +1,139 @@
+/* ============================================================
+   Puerta de acceso y barra de sesion
+   ============================================================ */
+
+.auth-puerta {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: var(--bg);
+  background-image:
+    repeating-linear-gradient(to right,  rgba(255, 255, 255, .05) 0 1px, transparent 1px 128px),
+    repeating-linear-gradient(to bottom, rgba(255, 255, 255, .05) 0 1px, transparent 1px 128px);
+}
+
+.auth-puerta[hidden] { display: none; }
+
+.auth-caja {
+  width: min(30rem, 100%);
+  padding: clamp(1.75rem, 5vw, 2.75rem);
+  background: var(--panel);
+  border: 2px solid var(--rule);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, .6);
+  text-align: center;
+}
+
+.auth-titulo {
+  margin: 1.25rem 0 0;
+  font-family: var(--pixel);
+  font-weight: 400;
+  font-size: clamp(1.1rem, 4vw, 1.7rem);
+  line-height: 1.5;
+  text-shadow: 3px 3px 0 rgba(0, 0, 0, .55);
+}
+
+.auth-titulo em {
+  font-style: normal;
+  color: var(--accent);
+  text-shadow: 3px 3px 0 rgba(0, 0, 0, .55),
+               0 0 20px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+.auth-texto {
+  margin: 1.25rem 0 0;
+  color: var(--ink-2);
+  font-size: 1.1rem;
+}
+
+.auth-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  margin-top: 1.5rem;
+}
+
+.auth-campo {
+  flex: 1 1 12rem;
+  min-width: 0;
+  padding: .7rem .8rem;
+  background: var(--bg);
+  border: 2px solid var(--rule);
+  color: var(--ink);
+  font-family: var(--term);
+  font-size: 1.15rem;
+}
+
+.auth-campo::placeholder { color: var(--ink-2); }
+
+.auth-enviar {
+  padding: .75rem .9rem .65rem;
+  background: color-mix(in srgb, var(--accent) 20%, var(--panel));
+  border: 2px solid var(--accent);
+  color: var(--ink);
+  font-family: var(--pixel);
+  font-size: .52rem;
+  line-height: 1.5;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background .15s ease;
+}
+
+.auth-enviar:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 35%, var(--panel)); }
+.auth-enviar:disabled { opacity: .5; cursor: progress; }
+
+.auth-campo:focus-visible,
+.auth-enviar:focus-visible,
+.auth-salir:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.auth-mensaje {
+  margin: 1.1rem 0 0;
+  min-height: 1.6rem;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+.auth-mensaje.ok    { color: #7ee787; }
+.auth-mensaje.error { color: #ff8f8f; }
+
+.auth-pie {
+  margin: 1.5rem 0 0;
+  padding-top: 1.1rem;
+  border-top: 2px solid var(--rule);
+  color: var(--ink-2);
+  font-size: .95rem;
+}
+
+/* ---------- Barra de sesion ---------- */
+
+.auth-barra {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: .7rem;
+  min-height: 1.5rem;
+  font-size: 1rem;
+  color: var(--ink-2);
+}
+
+.auth-quien i { margin-right: .35rem; color: var(--accent); }
+
+.auth-salir {
+  padding: .4rem .6rem .32rem;
+  background: none;
+  border: 2px solid var(--rule);
+  color: var(--ink-2);
+  font-family: var(--pixel);
+  font-size: .45rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color .15s ease, border-color .15s ease;
+}
+
+.auth-salir:hover { color: var(--ink); border-color: var(--accent); }

@@ -14,11 +14,31 @@
         integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
         crossorigin="anonymous" referrerpolicy="no-referrer">
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/auth.css">
 </head>
 <body>
 
+  <!-- Puerta de acceso: tapa la pagina mientras no haya sesion -->
+  <div class="auth-puerta" id="authPuerta" hidden>
+    <div class="auth-caja">
+      <p class="eyebrow">Acceso</p>
+      <h1 class="auth-titulo">POKE<em>HDEX</em></h1>
+      <p class="auth-texto">
+        Escribe tu correo y te llega un enlace para entrar. Sin contraseñas.
+      </p>
+      <form class="auth-form" id="authForm">
+        <input class="auth-campo" id="authCorreo" type="email" required
+               autocomplete="email" placeholder="tu@correo.com" aria-label="Correo">
+        <button class="auth-enviar" id="authEnviar" type="submit">Enviar enlace</button>
+      </form>
+      <p class="auth-mensaje" id="authMensaje"></p>
+      <p class="auth-pie">Solo entran los correos dados de alta.</p>
+    </div>
+  </div>
+
   <header class="masthead">
     <div class="wrap">
+      <div class="auth-barra" id="authBarra"></div>
       <p class="eyebrow">Pokedex PPV · 10 generaciones</p>
       <h1 class="masthead-title">PPV<em>DEX</em></h1>
       <p class="masthead-note">
@@ -48,6 +68,10 @@
     </div>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="data/games.js"></script>
   <script src="data/teams.js"></script>
   <script src="js/app.js"></script>
 </body>
