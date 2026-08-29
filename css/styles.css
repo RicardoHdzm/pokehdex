@@ -599,9 +599,34 @@ a { color: var(--accent); text-underline-offset: .2em; }
   transition: width .5s steps(12);
 }
 
+/* Cajas del PC: seis columnas fijas y treinta por caja, como en el juego */
+.dex-cajas {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.75rem, 3vw, 2.75rem);
+}
+
+.dex-caja-titulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  margin: 0 0 .7rem;
+  padding-bottom: .5rem;
+  border-bottom: 2px solid var(--rule);
+  font-family: var(--pixel);
+  font-weight: 400;
+  font-size: .55rem;
+  line-height: 1.6;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.dex-caja-cuenta { color: var(--accent); }
+
 .dex-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: .6rem;
   margin: 0;
   padding: 0;
@@ -620,8 +645,8 @@ a { color: var(--accent); text-underline-offset: .2em; }
 }
 
 .dex-sprite {
-  width: 64px;
-  height: 64px;
+  width: clamp(40px, 7vw, 96px);
+  height: clamp(40px, 7vw, 96px);
   object-fit: contain;
   image-rendering: pixelated;
   /* Sin capturar se ve apagado, como una entrada sin registrar */
@@ -715,6 +740,14 @@ a { color: var(--accent); text-underline-offset: .2em; }
   .type-chip { font-size: .42rem; padding: .32rem .4rem .26rem; }
   .ball-mark { width: 24px; height: 24px; padding: 3px; }
   .index-row { justify-content: flex-start; }
+
+  /* Con seis columnas en un telefono no cabe el nombre: se deja solo el
+     sprite, como en las cajas del juego. El nombre sigue en el tooltip. */
+  .dex-grid { gap: .3rem; }
+  .dex-tile { padding: .35rem .15rem; }
+  .dex-name { display: none; }
+  .dex-num { font-size: .34rem; }
+  .dex-caja-titulo { font-size: .48rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -459,8 +459,11 @@ function dexTile(entrada, capturados) {
     </li>`;
 }
 
+/* Las cajas del PC de los juegos son de 30, en seis columnas por cinco filas */
+const POR_CAJA = 30;
+
 async function renderDex(gen, token) {
-  const grid = panelEl.querySelector(".dex-grid");
+  const grid = panelEl.querySelector("#dexCajas");
   if (!grid) return;
 
   const [especies, variantes] = await Promise.all([fetchSpecies(), fetchVariantes()]);
@@ -486,7 +489,22 @@ async function renderDex(gen, token) {
     return;
   }
 
-  grid.innerHTML = entradas.map((e) => dexTile(e, capturados)).join("");
+  /* Se parte en cajas de 30, como en el juego. La ultima queda incompleta
+     igual que alli cuando la generacion no es multiplo de treinta. */
+  let html = "";
+  for (let i = 0; i < entradas.length; i += POR_CAJA) {
+    const tanda = entradas.slice(i, i + POR_CAJA);
+    const tengoEnCaja = tanda.filter((e) => capturados.has(e.id)).length;
+    html += `
+      <section class="dex-caja">
+        <h4 class="dex-caja-titulo">
+          <span>Caja ${Math.floor(i / POR_CAJA) + 1}</span>
+          <span class="dex-caja-cuenta">${tengoEnCaja}/${tanda.length}</span>
+        </h4>
+        <ul class="dex-grid">${tanda.map((e) => dexTile(e, capturados)).join("")}</ul>
+      </section>`;
+  }
+  grid.innerHTML = html;
 
   const tengo = entradas.filter((e) => capturados.has(e.id)).length;
   const total = entradas.length;
@@ -730,7 +748,7 @@ function renderGeneration(gen) {
         </p>
       </div>
       <div class="dex-bar"><span class="dex-bar-fill"></span></div>
-      <ul class="dex-grid"></ul>
+      <div class="dex-cajas" id="dexCajas"></div>
     </section>`;
 
   panelEl.innerHTML = (gen.hall ? hallHead(gen) : genHead(gen)) + equipo + dex;
@@ -845,7 +863,7 @@ function conectarModos() {
       b.setAttribute("aria-selected", String((b.dataset.modo === "shiny") === modoShiny));
     });
 
-    const grid = panelEl.querySelector(".dex-grid");
+    const grid = panelEl.querySelector("#dexCajas");
     if (grid) grid.innerHTML = "";
     if (genEnPantalla) renderDex(genEnPantalla, renderToken);
   });
