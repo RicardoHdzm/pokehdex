@@ -114,15 +114,19 @@
 
 /* ---------- Barra de sesion ---------- */
 
+/* Va debajo de la entradilla, centrada como el resto de la cabecera */
 .auth-barra {
   display: flex;
-  justify-content: flex-end;
+  flex-wrap: wrap;
+  justify-content: center;
   align-items: center;
   gap: .7rem;
   min-height: 1.5rem;
   font-size: 1rem;
   color: var(--ink-2);
 }
+
+.auth-barra:not(:empty) { margin-top: 1.75rem; }
 
 .auth-quien i { margin-right: .35rem; color: var(--accent); }
 
