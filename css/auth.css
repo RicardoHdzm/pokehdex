@@ -478,30 +478,47 @@ body.con-sesion .dex-tile { cursor: pointer; }
   font-size: 1.05rem;
 }
 
-/* ---------- Reordenar el equipo ---------- */
+/* ---------- Arrastrar para reordenar ---------- */
 
-.plate-orden {
+.plate-asa {
   display: flex;
-  gap: .4rem;
+  align-items: center;
+  justify-content: center;
   margin-top: .8rem;
-  padding-top: .7rem;
-  border-top: 2px solid var(--rule);
-}
-
-.orden-btn {
-  flex: 1;
-  padding: .4rem;
+  padding: .45rem;
   background: var(--panel-2);
   border: 2px solid var(--rule);
   color: var(--ink-2);
-  font-size: .85rem;
-  cursor: pointer;
+  font-size: .9rem;
+  cursor: grab;
+  /* Sin esto, en movil el navegador se lleva el gesto para hacer scroll */
+  touch-action: none;
   transition: color .15s ease, border-color .15s ease;
 }
 
-.orden-btn:hover:not(:disabled) { color: var(--accent); border-color: var(--accent); }
-.orden-btn:disabled { opacity: .3; cursor: default; }
-.orden-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.plate-asa:hover { color: var(--accent); border-color: var(--accent); }
+
+.plate.arrastrando {
+  z-index: 50;
+  opacity: .9;
+  cursor: grabbing;
+  transition: none;
+  animation: none;
+}
+
+.plate.arrastrando .plate-asa { cursor: grabbing; }
+
+.plate.arrastrando .plate-figure {
+  border-color: var(--accent);
+  box-shadow: 0 0 24px -4px var(--accent);
+}
+
+/* Donde va a caer */
+.plate.destino .plate-figure {
+  border-style: dashed;
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--panel));
+}
 
 /* El rotulo del equipo comparte fila con el boton de vaciar */
 .section-head #vaciarEquipo { flex: 0 0 auto; margin-left: auto; }

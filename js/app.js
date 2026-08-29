@@ -537,20 +537,16 @@ function plateLabel(mon, index, section) {
   return gen ? "Gen " + roman(gen) : plateNum(index + 1);
 }
 
-/* Mover el Pokemon a izquierda o derecha dentro del equipo */
-function flechasDeOrden(index, section) {
+/* Asa para arrastrar. Va aparte del resto de la lamina para que en movil
+   se pueda seguir haciendo scroll tocando cualquier otro sitio. */
+function asaDeArrastre(index, section) {
   if (typeof esMiPerfil !== "function" || !esMiPerfil()) return "";
-  const total = section.team.length;
-  if (total < 2) return "";
+  if (section.team.length < 2) return "";
 
   return `
-    <div class="plate-orden">
-      <button type="button" class="orden-btn" data-mover="-1" data-desde="${index}"
-              ${index === 0 ? "disabled" : ""} title="Mover antes"
-              aria-label="Mover antes"><i class="fa-solid fa-chevron-left"></i></button>
-      <button type="button" class="orden-btn" data-mover="1" data-desde="${index}"
-              ${index === total - 1 ? "disabled" : ""} title="Mover despues"
-              aria-label="Mover despues"><i class="fa-solid fa-chevron-right"></i></button>
+    <div class="plate-asa" data-desde="${index}" title="Arrastra para cambiarlo de sitio"
+         aria-label="Arrastrar para reordenar">
+      <i class="fa-solid fa-grip-lines"></i>
     </div>`;
 }
 
@@ -580,7 +576,7 @@ function plate(mon, index, section) {
         ${mon.shiny ? '<span class="plate-note">Ejemplar variocolor</span>' : ""}
       </p>
       <ul class="plate-types">${typeChips(mon.types || [])}</ul>
-      ${flechasDeOrden(index, section)}
+      ${asaDeArrastre(index, section)}
     </article>`;
 }
 
@@ -903,17 +899,93 @@ async function borrarDelEditor() {
   selectGeneration(seccion.id, false);
 }
 
+/* ---------- Arrastrar para reordenar ---------- */
+
+let arrastre = null;      // { origen, desde, offsetX, offsetY }
+let huboArrastre = false;
+
+const laminasVisibles = () =>
+  [...panelEl.querySelectorAll(".plate:not(.plate-empty)")];
+
+/* Sobre que lamina esta el puntero */
+function laminaBajo(x, y) {
+  return laminasVisibles().find((el) => {
+    const r = el.getBoundingClientRect();
+    return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+  }) || null;
+}
+
+function marcarDestino(el) {
+  laminasVisibles().forEach((p) => p.classList.toggle("destino", p === el));
+}
+
+function empezarArrastre(e) {
+  const asa = e.target.closest(".plate-asa");
+  if (!asa || !genEnPantalla) return;
+
+  const origen = asa.closest(".plate");
+  if (!origen) return;
+
+  e.preventDefault();
+  asa.setPointerCapture(e.pointerId);
+
+  const r = origen.getBoundingClientRect();
+  arrastre = {
+    origen, asa,
+    desde: Number(asa.dataset.desde),
+    offsetX: e.clientX - r.left - r.width / 2,
+    offsetY: e.clientY - r.top - r.height / 2
+  };
+  origen.classList.add("arrastrando");
+}
+
+function moverArrastre(e) {
+  if (!arrastre) return;
+  huboArrastre = true;
+
+  const r = arrastre.origen.getBoundingClientRect();
+  const dx = e.clientX - (r.left + r.width / 2) - arrastre.offsetX;
+  const dy = e.clientY - (r.top + r.height / 2) - arrastre.offsetY;
+  arrastre.origen.style.transform = "translate(" + dx + "px, " + dy + "px)";
+
+  /* La lamina que se arrastra no puede taparse a si misma */
+  arrastre.origen.style.pointerEvents = "none";
+  const destino = laminaBajo(e.clientX, e.clientY);
+  arrastre.origen.style.pointerEvents = "";
+  marcarDestino(destino && destino !== arrastre.origen ? destino : null);
+}
+
+async function soltarArrastre(e) {
+  if (!arrastre) return;
+
+  const { origen, desde } = arrastre;
+  origen.style.pointerEvents = "none";
+  const destino = laminaBajo(e.clientX, e.clientY);
+  origen.style.pointerEvents = "";
+
+  origen.classList.remove("arrastrando");
+  origen.style.transform = "";
+  marcarDestino(null);
+  arrastre = null;
+
+  if (!destino || destino === origen || !genEnPantalla) return;
+
+  const hacia = Number(destino.dataset.slot);
+  const res = await moverMon(genEnPantalla, desde, hacia);
+  if (res.ok) selectGeneration(genEnPantalla.id, false);
+}
+
+function conectarArrastre() {
+  panelEl.addEventListener("pointerdown", empezarArrastre);
+  panelEl.addEventListener("pointermove", moverArrastre);
+  panelEl.addEventListener("pointerup", soltarArrastre);
+  panelEl.addEventListener("pointercancel", soltarArrastre);
+}
+
 function conectarEditor() {
   panelEl.addEventListener("click", async (e) => {
-    /* Las flechas van dentro de la lamina, asi que se atienden primero */
-    const flecha = e.target.closest(".orden-btn");
-    if (flecha && genEnPantalla) {
-      e.stopPropagation();
-      const desde = Number(flecha.dataset.desde);
-      const res = await moverMon(genEnPantalla, desde, desde + Number(flecha.dataset.mover));
-      if (res.ok) selectGeneration(genEnPantalla.id, false);
-      return;
-    }
+    /* Tras arrastrar llega un clic que abriria el editor sin querer */
+    if (huboArrastre) { huboArrastre = false; e.stopPropagation(); return; }
 
     /* Vaciar pide confirmacion en el propio boton */
     const vaciar = e.target.closest("#vaciarEquipo");
@@ -1016,6 +1088,7 @@ function init() {
   conectarModos();
   conectarMarcado();
   conectarEditor();
+  conectarArrastre();
 
   const fromHash = location.hash.slice(1);
   if (TEAMS.some((g) => g.id === fromHash)) return selectGeneration(fromHash, false);

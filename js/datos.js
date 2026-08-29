@@ -153,13 +153,16 @@ async function guardarOrden(seccion) {
   return { ok: true };
 }
 
-/* Intercambia dos huecos y guarda el resultado */
+/* Saca el Pokemon de su hueco y lo mete en otro, corriendo los demas.
+   Es lo que se espera al arrastrar, a diferencia de un intercambio seco. */
 async function moverMon(seccion, desde, hacia) {
+  if (desde === hacia) return { ok: true };
   if (hacia < 0 || hacia >= seccion.team.length) return { ok: false, error: "fuera de rango" };
 
+  const antes = seccion.team.slice();
   const copia = seccion.team.slice();
-  [copia[desde], copia[hacia]] = [copia[hacia], copia[desde]];
-  const antes = seccion.team;
+  const [movido] = copia.splice(desde, 1);
+  copia.splice(hacia, 0, movido);
   seccion.team = copia;
 
   const res = await guardarOrden(seccion);
