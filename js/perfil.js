@@ -51,7 +51,7 @@ function pintarJuegosDelPerfil() {
 /* Los codigos de Switch son doce digitos. Se acepta como los escriba cada
    uno y se guarda siempre igual: SW-0000-0000-0000 */
 function normalizarFriendCode(texto) {
-  const digitos = texto.replace(/D/g, "");
+  const digitos = texto.replace(/[^0-9]/g, "");
   if (digitos.length !== 12) return texto.trim();
   return "SW-" + digitos.slice(0, 4) + "-" + digitos.slice(4, 8) + "-" + digitos.slice(8);
 }
@@ -69,7 +69,7 @@ async function guardarNombre(e) {
   const fc = campoFc.value.trim() ? normalizarFriendCode(campoFc.value) : null;
   const ch = campoCh.value.trim() || null;
 
-  if (fc && !/^SW-d{4}-d{4}-d{4}$/.test(fc)) {
+  if (fc && !/^SW-[0-9]{4}-[0-9]{4}-[0-9]{4}$/.test(fc)) {
     aviso.textContent = "El codigo de amigo son doce digitos: SW-0000-0000-0000.";
     aviso.className = "mon-mensaje";
     return;
