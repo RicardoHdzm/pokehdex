@@ -821,6 +821,7 @@ async function abrirEditor(seccion, indice) {
     .map(([id, slug]) => '<option value="' + nombreEspecie(slug) + '" data-dex="' + id + '">')
     .join("");
 
+  document.getElementById("monBall").innerHTML = opcionesDeBall();
   document.getElementById("monEspecie").value = mon ? mon.species : "";
   document.getElementById("monApodo").value = mon ? mon.nickname || "" : "";
   document.getElementById("monBall").value = mon && mon.ball ? mon.ball : "poke-ball";

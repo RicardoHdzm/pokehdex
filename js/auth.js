@@ -215,45 +215,12 @@ async function initAuth() {
 
   mostrarPuerta(!sesion);
   pintarSesion();
-  prepararImportacion();
 
   sb.auth.onAuthStateChange((evento) => {
     if (evento === "PASSWORD_RECOVERY") { esRecuperacion = true; mostrarPanelClave(); return; }
     if (esRecuperacion) return;
     if (evento === "SIGNED_IN" && !sesion) location.reload();
     if (evento === "SIGNED_OUT") location.reload();
-  });
-}
-
-/* El aviso solo sale en tu propio perfil y solo si no hay nada subido */
-function prepararImportacion() {
-  const aviso = document.getElementById("importAviso");
-  if (!aviso) return;
-
-  const vacio = sesion && typeof CAPTURAS !== "undefined" &&
-                CAPTURAS.normal.size === 0 && CAPTURAS.shiny.size === 0;
-  aviso.hidden = !vacio;
-  if (!vacio) return;
-
-  const boton = document.getElementById("importBoton");
-  const estado = document.getElementById("importEstado");
-
-  boton.addEventListener("click", async () => {
-    boton.disabled = true;
-    const res = await importarDesdeArchivo((paso) => { estado.textContent = paso; });
-
-    if (!res.ok) {
-      estado.textContent = "No se pudo importar: " + res.error;
-      estado.className = "import-estado error";
-      boton.disabled = false;
-      return;
-    }
-
-    estado.textContent = res.capturas + " capturas, " + res.equipos +
-      " del equipo y " + res.favoritos + " favoritos subidos.";
-    estado.className = "import-estado ok";
-    if (typeof refrescarTodo === "function") refrescarTodo();
-    setTimeout(() => { aviso.hidden = true; }, 4000);
   });
 }
 

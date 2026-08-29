@@ -70,17 +70,6 @@
     </div>
   </header>
 
-  <div class="wrap">
-    <div class="import-aviso" id="importAviso" hidden>
-      <p class="import-texto">
-        Tu perfil esta vacio. Puedes subir de una vez lo que ya hay en el archivo
-        <code>data/teams.js</code>: capturas, equipos y favoritos.
-      </p>
-      <button class="boton primary" id="importBoton" type="button">Importar mis datos</button>
-      <p class="import-estado" id="importEstado"></p>
-    </div>
-  </div>
-
   <nav class="index-nav" aria-label="Indice de generaciones">
     <div class="wrap">
       <div class="index-row" id="gamePills" role="tablist"></div>
@@ -92,6 +81,57 @@
       <!-- Se rellena desde js/app.js -->
     </section>
   </main>
+
+  <!-- Editor de un hueco del equipo o de favoritos -->
+  <div class="mon-editor" id="monEditor" hidden>
+    <div class="mon-caja" role="dialog" aria-modal="true" aria-labelledby="monTitulo">
+      <p class="eyebrow" id="monTitulo">Añadir</p>
+
+      <form class="mon-form" id="monForm">
+        <label class="mon-campo">
+          <span>Especie</span>
+          <input id="monEspecie" list="monLista" required autocomplete="off"
+                 placeholder="Empieza a escribir...">
+          <datalist id="monLista"></datalist>
+        </label>
+
+        <label class="mon-campo">
+          <span>Apodo</span>
+          <input id="monApodo" maxlength="24" autocomplete="off" placeholder="opcional">
+        </label>
+
+        <div class="mon-campo">
+          <span>Genero</span>
+          <div class="mon-generos">
+            <button type="button" class="mon-genero" data-genero="m" aria-pressed="true"
+                    title="Macho"><i class="fa-solid fa-mars"></i></button>
+            <button type="button" class="mon-genero" data-genero="f" aria-pressed="false"
+                    title="Hembra"><i class="fa-solid fa-venus"></i></button>
+            <button type="button" class="mon-genero" data-genero="n" aria-pressed="false"
+                    title="Sin genero"><i class="fa-solid fa-genderless"></i></button>
+          </div>
+        </div>
+
+        <label class="mon-campo">
+          <span>Ball</span>
+          <select id="monBall"></select>
+        </label>
+
+        <label class="mon-check">
+          <input type="checkbox" id="monShiny">
+          <span>Es variocolor</span>
+        </label>
+
+        <p class="mon-mensaje" id="monMensaje"></p>
+
+        <div class="mon-botones">
+          <button type="submit" class="boton primary">Guardar</button>
+          <button type="button" class="boton" id="monCancelar">Cancelar</button>
+          <button type="button" class="boton peligro" id="monBorrar" hidden>Quitar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <footer class="colophon">
     <div class="wrap">

@@ -259,3 +259,90 @@ body.con-sesion .dex-tile { cursor: pointer; }
   color: var(--ink);
   text-transform: none;
 }
+
+/* ---------- Editor de un hueco del equipo ---------- */
+
+.mon-editor {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, .82);
+}
+
+.mon-editor[hidden] { display: none; }
+
+.mon-caja {
+  width: min(26rem, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 1.75rem;
+  background: var(--panel);
+  border: 2px solid var(--rule);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, .6);
+}
+
+.mon-form { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.25rem; }
+
+.mon-campo { display: flex; flex-direction: column; gap: .35rem; }
+
+.mon-campo > span {
+  font-family: var(--pixel);
+  font-size: .5rem;
+  line-height: 1.5;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.mon-campo input,
+.mon-campo select {
+  padding: .55rem .6rem;
+  background: var(--bg);
+  border: 2px solid var(--rule);
+  color: var(--ink);
+  font-family: var(--term);
+  font-size: 1.1rem;
+}
+
+.mon-campo input:focus-visible,
+.mon-campo select:focus-visible,
+.mon-genero:focus-visible,
+.mon-check input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.mon-generos { display: flex; gap: .4rem; }
+
+.mon-genero {
+  flex: 1;
+  padding: .5rem;
+  background: var(--bg);
+  border: 2px solid var(--rule);
+  color: var(--ink-2);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: color .15s ease, border-color .15s ease;
+}
+
+.mon-genero[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.mon-genero[data-genero="m"][aria-pressed="true"] { color: var(--male); border-color: var(--male); }
+.mon-genero[data-genero="f"][aria-pressed="true"] { color: var(--female); border-color: var(--female); }
+
+.mon-check { display: flex; align-items: center; gap: .5rem; color: var(--ink-2); font-size: 1.05rem; }
+.mon-check input { width: 1.1rem; height: 1.1rem; accent-color: var(--accent); }
+
+.mon-mensaje { margin: 0; min-height: 1.3rem; color: #ff8f8f; font-size: 1rem; }
+
+.mon-botones { display: flex; flex-wrap: wrap; gap: .5rem; }
+
+.boton.peligro { border-color: #ff8f8f; color: #ff8f8f; margin-left: auto; }
+.boton.peligro:hover:not(:disabled) { background: rgba(255, 143, 143, .12); color: #ff8f8f; }
+
+/* Huecos y laminas editables */
+.plate.editable { cursor: pointer; }
+.plate-empty.editable .plate-figure { border-color: color-mix(in srgb, var(--accent) 45%, var(--rule)); }
+.plate-empty.editable:hover .plate-figure { border-color: var(--accent); }
+.plate-empty.editable .empty-mark { color: var(--accent); }
