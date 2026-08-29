@@ -602,3 +602,11 @@ body.con-sesion .dex-tile { cursor: pointer; }
 /* Visitando: nada de aqui se puede tocar */
 body.visitando .dex-tile,
 body.visitando .plate { cursor: default; }
+
+@media (max-width: 640px) {
+  /* El nombre baja para quedar justo encima de los botones: arriba a la
+     derecha, en un telefono, queda descolgado en una esquina. */
+  .masthead .wrap { display: flex; flex-direction: column; }
+  .auth-nombre { order: 1; justify-content: center; margin-top: 1.5rem; }
+  .auth-barra  { order: 2; margin-top: .8rem; }
+}
