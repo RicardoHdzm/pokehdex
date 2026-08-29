@@ -639,6 +639,16 @@ function selectorDeJuego(gen) {
   return n ? '<span class="dot">·</span> <b>' + n + "</b>" : "";
 }
 
+function champHead(gen) {
+  return `
+    <header class="gen-head">
+      <span class="gen-watermark" aria-hidden="true"><i class="fa-solid fa-medal"></i></span>
+      <p class="eyebrow">Combate</p>
+      <h2 class="gen-title">${gen.title || gen.region}</h2>
+      <p class="gen-meta">Equipo de ${gen.team.length} de 6</p>
+    </header>`;
+}
+
 function genHead(gen) {
   return `
     <header class="gen-head">
@@ -674,6 +684,14 @@ function renderGeneration(gen) {
   const vaciar = puedeEditar && gen.team.length
     ? '<button type="button" class="boton peligro" id="vaciarEquipo">Vaciar equipo</button>'
     : "";
+
+  if (gen.soloEquipo) {
+    panelEl.innerHTML = champHead(gen) + cuerpo;
+    genEnPantalla = gen;
+    wireSprites();
+    fillMissingTypes(gen, token);
+    return;
+  }
 
   const equipo = gen.hall ? cuerpo : `
     <div class="section-head">
@@ -768,16 +786,17 @@ function selectGeneration(id, push = true) {
 
   renderGeneration(gen);
   if (push) history.replaceState(null, "", "#" + gen.id);
-  document.title = gen.hall
-    ? `${gen.title || "Mis favoritos"} — PPVDEX`
+  document.title = gen.hall || gen.soloEquipo
+    ? `${gen.title || gen.region} — PPVDEX`
     : `${ORDINAL[gen.generation]} generacion · ${gen.region} — PPVDEX`;
 }
 
 function buildIndex() {
   navEl.innerHTML = TEAMS.map((g) => `
-    <button class="index-item${g.hall ? " index-hall" : ""}" role="tab" type="button"
+    <button class="index-item${g.hall || g.soloEquipo ? " index-hall" : ""}" role="tab" type="button"
             data-id="${g.id}" aria-selected="false">
-      <span class="roman">${g.hall ? '<i class="fa-solid fa-star"></i>' : roman(g.generation)}</span>
+      <span class="roman">${g.hall ? '<i class="fa-solid fa-star"></i>'
+        : g.soloEquipo ? '<i class="fa-solid fa-medal"></i>' : roman(g.generation)}</span>
       <span class="region">${g.hall ? "Favoritos" : g.region}</span>
     </button>`).join("");
 

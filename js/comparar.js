@@ -21,7 +21,7 @@ async function construirCatalogo() {
   const mapa = new Map();
 
   for (const seccion of TEAMS) {
-    if (seccion.hall) continue;
+    if (seccion.hall || seccion.soloEquipo) continue;
     for (const e of entradasDe(seccion, especies, variantes)) {
       mapa.set(e.id, { nombre: e.nombre, base: e.base || e.id, generacion: seccion.generation });
     }
@@ -103,7 +103,7 @@ function pintarCruce() {
 function pintarFiltroGeneraciones() {
   const sel = document.getElementById("compGen");
   sel.innerHTML = '<option value="todas">Todas las generaciones</option>' +
-    TEAMS.filter((s) => !s.hall).map((g) =>
+    TEAMS.filter((s) => !s.hall && !s.soloEquipo).map((g) =>
       '<option value="' + g.generation + '">' + roman(g.generation) + " · " + g.region + "</option>"
     ).join("");
 }

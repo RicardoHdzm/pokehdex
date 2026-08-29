@@ -232,5 +232,16 @@ const TEAMS = [
     missing: "",
     color: "#22d3ee",
     team: []
+  },
+  /* --- Pokemon Champions: solo equipo de combate. No tiene Pokedex propia
+         porque los Pokemon se traen de HOME, ni region asociada. --- */
+  {
+    id: "champions",
+    generation: 11,
+    soloEquipo: true,
+    title: "Pokemon Champions",
+    region: "Champions",
+    color: "#3ddc97",
+    team: []
   }
 ];
