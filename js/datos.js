@@ -100,6 +100,12 @@ async function cargarPerfilCompleto(userId) {
 async function guardarMon(seccion, indice, mon) {
   if (!sb || !sesion) return { ok: false, error: "sin sesion" };
 
+  /* El equipo es una lista sin huecos en medio. Si se pulsa un cuadro por
+     encima del ultimo ocupado, el Pokemon entra al final: escribir en
+     team[5] con la lista vacia crearia un array disperso de longitud 6,
+     y entonces no quedarian huecos libres que pintar. */
+  const i = Math.min(indice, seccion.team.length);
+
   const comun = {
     user_id: sesion.user.id, dex_id: mon.dex, species: mon.species,
     nickname: mon.nickname || null, gender: mon.gender || "n",
@@ -107,14 +113,14 @@ async function guardarMon(seccion, indice, mon) {
   };
 
   const { error } = seccion.hall
-    ? await sb.from("favourites").upsert({ ...comun, position: indice + 1 }, { onConflict: "user_id,position" })
-    : await sb.from("teams").upsert({ ...comun, generation: seccion.generation, slot: indice + 1 },
+    ? await sb.from("favourites").upsert({ ...comun, position: i + 1 }, { onConflict: "user_id,position" })
+    : await sb.from("teams").upsert({ ...comun, generation: seccion.generation, slot: i + 1 },
         { onConflict: "user_id,generation,slot" });
 
   if (error) return { ok: false, error: error.message };
 
-  seccion.team[indice] = mon;
-  return { ok: true };
+  seccion.team[i] = mon;
+  return { ok: true, indice: i };
 }
 
 /* Reescribe los huecos de una seccion tal y como esta el array en memoria.
@@ -124,6 +130,9 @@ async function guardarOrden(seccion) {
   if (!sb || !sesion) return { ok: false, error: "sin sesion" };
 
   const yo = sesion.user.id;
+  /* filter(Boolean) por si quedara algun hueco suelto: un null aqui
+     reventaria la insercion entera */
+  seccion.team = seccion.team.filter(Boolean);
   const filas = seccion.team.map((m, i) => {
     const comun = {
       user_id: yo, dex_id: m.dex, species: m.species,
