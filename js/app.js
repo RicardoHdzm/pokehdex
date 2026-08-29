@@ -591,7 +591,7 @@ let renderToken = 0;
 function hallHead(sec) {
   return `
     <header class="gen-head">
-      <span class="gen-watermark" aria-hidden="true">RH</span>
+      <span class="gen-watermark" aria-hidden="true">HOF</span>
       <p class="eyebrow">Salon de la Fama</p>
       <h2 class="gen-title">${sec.title || "Mis favoritos"}</h2>
       <p class="gen-meta">
