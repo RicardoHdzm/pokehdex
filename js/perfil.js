@@ -37,7 +37,9 @@ function pintarJuegosDelPerfil() {
     return `
       <div class="perfil-fila">
         <span class="perfil-muestra" style="background:${actual ? actual.color : gen.color}"></span>
-        <span class="perfil-region">${roman(gen.generation)} · ${gen.region}</span>
+        <span class="perfil-region">${gen.soloEquipo
+          ? gen.title || gen.region
+          : roman(gen.generation) + " · " + gen.region}</span>
         <select class="juego-select" data-gen="${gen.generation}"
                 aria-label="Juego de ${gen.region}">${opciones}</select>
       </div>`;
