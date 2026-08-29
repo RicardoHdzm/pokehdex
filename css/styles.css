@@ -113,7 +113,9 @@ a { color: var(--accent); text-underline-offset: .2em; }
   /* En movil se quedaba en el minimo del clamp y salia diminuto: se sube
      el suelo y se deja crecer mas rapido con el ancho */
   font-size: clamp(2rem, 9.2vw, 2.9rem);
-  line-height: 1.55;
+  /* Es siempre una sola linea: con 1.55 sobraban 24px de interlineado y
+     la mitad caian debajo, separando el titulo del nombre */
+  line-height: 1.12;
   letter-spacing: -.01em;
   text-shadow: 4px 4px 0 rgba(0, 0, 0, .55);
 }
