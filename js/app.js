@@ -646,14 +646,20 @@ function plate(mon, index, section) {
     </article>`;
 }
 
-function emptyPlate(index) {
+function emptyPlate(index, section) {
   const mio = typeof esMiPerfil === "function" && esMiPerfil();
+  /* Los equipos son de seis; favoritos no tiene tope, asi que ahi el hueco
+     solo lleva su numero */
+  const etiqueta = section && section.hall
+    ? plateNum(index + 1)
+    : plateNum(index + 1) + " / 06";
+
   return `
     <article class="plate plate-empty${mio ? " editable" : ""}" data-slot="${index}"
              style="animation-delay:${index * 70}ms"${mio ? ' role="button" tabindex="0"' : ""}>
       <div class="plate-figure"><span class="empty-mark">${mio ? "+" : "—"}</span></div>
       <div class="plate-index">
-        <span class="num">${plateNum(index + 1)} / 06</span>
+        <span class="num">${etiqueta}</span>
         <span>#————</span>
       </div>
       <h3 class="plate-name">${mio ? "Añadir" : "Sin registrar"}</h3>
@@ -736,13 +742,22 @@ function renderGeneration(gen) {
   /* Una generacion siempre enseña seis huecos; el Salon de la Fama, los que haya. */
   const mostrados = gen.hall ? gen.team : gen.team.slice(0, 6);
   const filled = mostrados.map((m, i) => plate(m, i, gen)).join("");
-  const empty = gen.hall ? "" : Array.from({ length: Math.max(0, 6 - gen.team.length) },
-    (_, i) => emptyPlate(gen.team.length + i)).join("");
+  const puedoEditar = typeof esMiPerfil === "function" && esMiPerfil();
 
-  const cuerpo = gen.hall && !gen.team.length
-    ? `<p class="hall-empty">Todavia no has elegido a tus favoritos.<br>
-         Añadelos en <code>data/teams.js</code>, dentro de <code>id: "favoritos"</code>.</p>`
-    : `<div class="plates">${filled}${empty}</div>`;
+  /* En una generacion siempre hay seis sitios. En favoritos no hay tope:
+     se enseñan seis como minimo y uno mas por encima de lo que ya haya,
+     para que siempre quede uno libre donde añadir. */
+  let huecos;
+  if (gen.hall) {
+    huecos = puedoEditar ? Math.max(6, gen.team.length + 1) - gen.team.length : 0;
+  } else {
+    huecos = Math.max(0, 6 - gen.team.length);
+  }
+
+  const empty = Array.from({ length: huecos },
+    (_, i) => emptyPlate(gen.team.length + i, gen)).join("");
+
+  const cuerpo = `<div class="plates">${filled}${empty}</div>`;
 
   /* Solo las generaciones llevan Pokedex; el Salon de la Fama no */
   const puedeEditar = typeof esMiPerfil === "function" && esMiPerfil();

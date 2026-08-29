@@ -158,7 +158,7 @@ function pintarVisita(quien) {
   barra.innerHTML = `
     <span><i class="fa-solid fa-eye"></i> Estas viendo la Pokedex de <b>${nombre}</b>. Solo lectura.</span>
     ${codigos.length ? '<span class="visita-codigos">' + codigos.join("") + "</span>" : ""}
-    <button type="button" class="boton" id="visitaVolver">Volver a la mia</button>`;
+    <button type="button" class="boton" id="visitaVolver">Volver a mi Perfil</button>`;
   barra.hidden = false;
 
   document.getElementById("visitaVolver").addEventListener("click", volverAMiPerfil);
