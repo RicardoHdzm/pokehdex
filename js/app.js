@@ -378,6 +378,22 @@ function idDeEquipo(mon, variantes, idsDeEsteDex) {
   return encontrada[0];
 }
 
+/* La Pokedex shiny va al reves: en "shinies" se apuntan los que SI tienes,
+   porque de variocolores se tienen pocos y seria absurdo listar los que faltan. */
+function shinyDe(gen, entradas, variantes) {
+  const tengo = parseNumeros(gen.shinies);
+  const ids = new Set(entradas.map((e) => e.id));
+
+  /* Un Pokemon del equipo marcado como variocolor cuenta solo en esta lista */
+  gen.team.forEach((m) => {
+    if (m.shiny) tengo.add(idDeEquipo(m, variantes, ids));
+  });
+
+  const set = new Set();
+  entradas.forEach((e) => { if (tengo.has(e.id)) set.add(e.id); });
+  return set;
+}
+
 /* En teams.js se apuntan los que FALTAN. Todo lo demas se da por capturado,
    que para una Pokedex casi completa es mucho menos que escribir. */
 function capturadosDe(gen, entradas, variantes) {
@@ -401,14 +417,21 @@ function rangoDex(generacion) {
   return { desde, hasta: hasta === undefined ? Infinity : hasta };
 }
 
+function spriteDex(id) {
+  return SPRITES + (modoShiny ? "/shiny/" : "/") + id + ".png";
+}
+
 function dexTile(entrada, capturados) {
   const tengo = capturados.has(entrada.id);
   const etiqueta = dexNum(entrada.base || entrada.id);
+  const estado = tengo
+    ? (modoShiny ? " - lo tienes variocolor" : " - capturado")
+    : (modoShiny ? " - sin variocolor" : " - te falta");
   return `
     <li class="dex-tile${tengo ? " caught" : ""}${entrada.region ? " variante" : ""}"
-        title="${etiqueta} ${entrada.nombre}${tengo ? " - capturado" : " - te falta"}">
+        title="${etiqueta} ${entrada.nombre}${estado}">
       <img class="dex-sprite" loading="lazy" alt="" aria-hidden="true"
-           src="${SPRITES}/${entrada.id}.png">
+           src="${spriteDex(entrada.id)}">
       <span class="dex-num">${etiqueta}</span>
       <span class="dex-name">${entrada.nombre}</span>
     </li>`;
@@ -428,7 +451,9 @@ async function renderDex(gen, token) {
   }
 
   const entradas = entradasDe(gen, especies, variantes);
-  const capturados = capturadosDe(gen, entradas, variantes);
+  const capturados = modoShiny
+    ? shinyDe(gen, entradas, variantes)
+    : capturadosDe(gen, entradas, variantes);
 
   if (!entradas.length) {
     const seccion = grid.closest(".dex-section");
@@ -539,6 +564,10 @@ function emptyPlate(index) {
     </article>`;
 }
 
+/* Modo de la Pokedex: normal o variocolor. Se conserva al cambiar de pestaña. */
+let modoShiny = false;
+let genEnPantalla = null;
+
 /* Cada render lleva numero. Si llega tarde una respuesta de PokeAPI de la
    generacion anterior, se descarta en vez de pintar sobre la nueva. */
 let renderToken = 0;
@@ -596,6 +625,12 @@ function renderGeneration(gen) {
     <section class="dex-section">
       <div class="section-head">
         <h3 class="section-label">Pokedex de ${gen.region}</h3>
+        <div class="dex-modos" role="tablist" aria-label="Tipo de Pokedex">
+          <button class="dex-modo" type="button" role="tab" data-modo="normal"
+                  aria-selected="${!modoShiny}">Normal</button>
+          <button class="dex-modo" type="button" role="tab" data-modo="shiny"
+                  aria-selected="${modoShiny}">Shiny</button>
+        </div>
         <p class="dex-progress">
           <span class="dex-count">...</span>
           <span class="dex-pct">0%</span>
@@ -607,6 +642,7 @@ function renderGeneration(gen) {
 
   panelEl.innerHTML = (gen.hall ? hallHead(gen) : genHead(gen)) + equipo + dex;
 
+  genEnPantalla = gen;
   wireSprites();
   fillMissingTypes(gen, token);
   if (!gen.hall) renderDex(gen, token);
@@ -690,6 +726,26 @@ function buildIndex() {
   });
 }
 
+/* Cambio entre Pokedex normal y variocolor */
+function conectarModos() {
+  panelEl.addEventListener("click", (e) => {
+    const boton = e.target.closest(".dex-modo");
+    if (!boton) return;
+
+    const quiereShiny = boton.dataset.modo === "shiny";
+    if (quiereShiny === modoShiny) return;
+
+    modoShiny = quiereShiny;
+    panelEl.querySelectorAll(".dex-modo").forEach((b) => {
+      b.setAttribute("aria-selected", String((b.dataset.modo === "shiny") === modoShiny));
+    });
+
+    const grid = panelEl.querySelector(".dex-grid");
+    if (grid) grid.innerHTML = "";
+    if (genEnPantalla) renderDex(genEnPantalla, renderToken);
+  });
+}
+
 function init() {
   /* admin.html reutiliza las funciones de este archivo pero no tiene estos
      elementos, asi que aqui no hay nada que montar */
@@ -700,6 +756,7 @@ function init() {
     return;
   }
   buildIndex();
+  conectarModos();
 
   const fromHash = location.hash.slice(1);
   if (TEAMS.some((g) => g.id === fromHash)) return selectGeneration(fromHash, false);

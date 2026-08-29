@@ -13,6 +13,10 @@
                    Las formas regionales (Alola, Galar, Hisui, Paldea) ya salen
                    solas en la generacion que las estreno, no hace falta ponerlas.
      color      -> color de acento (hex)
+     shinies    -> Variocolores que SI tienes de esa generacion, en la misma
+                   sintaxis: "25, 133, 149". Aqui la logica va al reves que en
+                   "missing" porque de shinies se tienen pocos. Vacio = ninguno.
+                   Los del equipo con shiny: true cuentan solos.
      missing    -> Pokemon que te FALTAN de esa generacion. Todo lo que no este
                    en esta lista cuenta como capturado. Admite numeros sueltos y
                    rangos separados por comas: "10-15, 25, 63-65, 150".
@@ -70,6 +74,7 @@ const TEAMS = [
     generation: 1,
     region: "Kanto",
     game: "Pokemon FireRed",
+    shinies: "",
     missing: "20, 35-36, 39-40, 44-45, 49, 51, 61-65, 67-68, 73, 75-76, 85, 87-89, 93-94, 99, 103, 108, 110, 113, 115, 119, 122-124, 128, 134-137, 141, 146-150",
     color: "#ff6b35",
     team: [
@@ -86,6 +91,7 @@ const TEAMS = [
     generation: 2,
     region: "Johto",
     game: "Pokemon HeartGold",
+    shinies: "",
     missing: "152-251",
     color: "#ffc233",
     team: [
@@ -102,6 +108,7 @@ const TEAMS = [
     generation: 3,
     region: "Hoenn",
     game: "Pokemon Omega Ruby",
+    shinies: "",
     missing: "252-386",
     color: "#d81b60",
     team: [
@@ -118,6 +125,7 @@ const TEAMS = [
     generation: 4,
     region: "Sinnoh",
     game: "Pokemon Brilliant Diamond",
+    shinies: "",
     missing: "387-493",
     color: "#56ccf2",
     team: [
@@ -134,6 +142,7 @@ const TEAMS = [
     generation: 5,
     region: "Teselia",
     game: "Pokemon White 2",
+    shinies: "",
     missing: "494-649",
     color: "#f0f0f0",
     team: [
@@ -150,6 +159,7 @@ const TEAMS = [
     generation: 6,
     region: "Kalos",
     game: "Pokemon Y",
+    shinies: "",
     missing: "650-721",
     color: "#e8383d",
     team: [
@@ -166,6 +176,7 @@ const TEAMS = [
     generation: 7,
     region: "Alola",
     game: "Pokemon Ultra Moon",
+    shinies: "",
     missing: "722-809, 10091-10092, 10100-10115",
     color: "#4a6cf7",
     team: [
@@ -182,6 +193,7 @@ const TEAMS = [
     generation: 8,
     region: "Galar",
     game: "Pokemon Sword",
+    shinies: "",
     missing: "810-905, 10161-10176, 10179-10180, 10229-10244",
     color: "#00c2d1",
     team: [
@@ -199,6 +211,7 @@ const TEAMS = [
     region: "Paldea",
     game: "Pokemon Violet",
     forms: ["ursaluna-bloodmoon"],
+    shinies: "",
     missing: "906-1025, 10250-10253",
     color: "#b46cff",
     team: [
@@ -215,6 +228,7 @@ const TEAMS = [
     generation: 10,
     region: "Por confirmar",
     game: "Pokemon Waves",
+    shinies: "",
     missing: "",
     color: "#22d3ee",
     team: []

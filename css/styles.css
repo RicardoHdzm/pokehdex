@@ -505,6 +505,40 @@ a { color: var(--accent); text-underline-offset: .2em; }
   margin-bottom: .8rem;
 }
 
+/* Pestañas Normal / Shiny de la Pokedex */
+.dex-modos {
+  display: flex;
+  gap: 0;
+  border: 2px solid var(--rule);
+}
+
+.dex-modo {
+  padding: .5rem .8rem .42rem;
+  border: 0;
+  background: none;
+  color: var(--ink-2);
+  font-family: var(--pixel);
+  font-size: .5rem;
+  line-height: 1.5;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color .15s ease, background .15s ease;
+}
+
+.dex-modo + .dex-modo { border-left: 2px solid var(--rule); }
+
+.dex-modo:hover { color: var(--ink); }
+
+.dex-modo[aria-selected="true"] {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--ink);
+}
+
+.dex-modo[data-modo="shiny"][aria-selected="true"] {
+  color: #ffd45c;
+  text-shadow: 0 0 12px rgba(255, 212, 92, .55);
+}
+
 .dex-progress {
   display: flex;
   align-items: baseline;

@@ -93,6 +93,27 @@ Detalles:
   No hace falta que los busques: los genera la pagina de marcar.
 - Los numeros fuera del rango de la generacion se ignoran.
 
+## Pokedex shiny
+
+Dentro de cada generacion hay dos pestañas, **Normal** y **Shiny**, que cambian la
+rejilla entre los sprites normales y los variocolor. El modo se conserva al saltar de
+una region a otra.
+
+La logica va al reves que en `missing`, a proposito: de la Pokedex normal tienes casi
+todo, asi que apuntas lo que falta; de shinies tienes muy pocos, asi que en `shinies`
+se apunta lo que **si** tienes.
+
+```js
+shinies: "25, 133, 149",   // solo esos tres
+shinies: "",               // ninguno todavia
+```
+
+Un Pokemon del equipo con `shiny: true` cuenta solo en la Pokedex shiny, y ademas
+sigue contando como capturado en la normal.
+
+La pagina de marcar tiene el mismo interruptor: en modo Shiny genera la linea
+`shinies` en vez de `missing`, y cada modo guarda su propio borrador.
+
 ## Pagina para marcar capturados
 
 Escribir a mano cientos de numeros es inviable, asi que hay un editor aparte:

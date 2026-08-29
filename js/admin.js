@@ -19,7 +19,7 @@ let genActual = GENS[0];
 let especies = [];
 let variantes = [];
 let entradas = [];
-let faltan = new Set();      // numeros que faltan en la generacion actual
+let faltan = new Set();      // normal: los que faltan | shiny: los que tienes
 let bloqueados = new Set();  // los del equipo: siempre capturados
 let verTodas = false;
 
@@ -30,16 +30,20 @@ function leerBorrador() {
   catch { return {}; }
 }
 
+const claveBorrador = () => genActual.id + (modoShiny ? ":shiny" : "");
+
 function guardarBorrador() {
   const todo = leerBorrador();
-  todo[genActual.id] = comprimirRangos(faltan);
+  todo[claveBorrador()] = comprimirRangos(faltan);
   try { localStorage.setItem(ADMIN_KEY, JSON.stringify(todo)); } catch { /* lleno */ }
 }
 
 /* Lo que hay en teams.js, salvo que haya un borrador mas reciente */
 function faltantesIniciales(gen) {
-  const borrador = leerBorrador()[gen.id];
-  return parseNumeros(borrador !== undefined ? borrador : gen.missing);
+  const clave = gen.id + (modoShiny ? ":shiny" : "");
+  const borrador = leerBorrador()[clave];
+  const enArchivo = modoShiny ? gen.shinies : gen.missing;
+  return parseNumeros(borrador !== undefined ? borrador : enArchivo);
 }
 
 /* ---------- Numeros a texto ---------- */
@@ -60,13 +64,14 @@ function comprimirRangos(conjunto) {
 }
 
 function lineaDe(gen, conjunto) {
-  return '    missing: "' + comprimirRangos(conjunto) + '",';
+  const campo = modoShiny ? "shinies" : "missing";
+  return "    " + campo + ': "' + comprimirRangos(conjunto) + '",';
 }
 
 /* ---------- Pintado ---------- */
 
 function tileAdmin(entrada) {
-  const tengo = !faltan.has(entrada.id);
+  const tengo = modoShiny ? faltan.has(entrada.id) : !faltan.has(entrada.id);
   const fijo = bloqueados.has(entrada.id);
   const etiqueta = dexNum(entrada.base || entrada.id);
   const titulo = fijo
@@ -77,7 +82,7 @@ function tileAdmin(entrada) {
     <li class="dex-tile admin-tile${tengo ? " caught" : ""}${fijo ? " locked" : ""}${entrada.region ? " variante" : ""}"
         data-id="${entrada.id}" data-nombre="${entrada.nombre.toLowerCase()}"
         role="button" tabindex="0" aria-pressed="${tengo}" title="${titulo}">
-      <img class="dex-sprite" loading="lazy" alt="" aria-hidden="true" src="${SPRITES}/${entrada.id}.png">
+      <img class="dex-sprite" loading="lazy" alt="" aria-hidden="true" src="${spriteDex(entrada.id)}">
       <span class="dex-num">${etiqueta}</span>
       <span class="dex-name">${entrada.nombre}</span>
       ${fijo ? '<span class="tile-lock"><i class="fa-solid fa-lock"></i></span>' : ""}
@@ -86,7 +91,7 @@ function tileAdmin(entrada) {
 
 function actualizarMarcador() {
   const total = entradas.length;
-  const tengo = entradas.filter((e) => !faltan.has(e.id)).length;
+  const tengo = entradas.filter((e) => (modoShiny ? faltan.has(e.id) : !faltan.has(e.id))).length;
   const pct = total ? Math.round((tengo / total) * 100) : 0;
 
   document.getElementById("adminCount").textContent = tengo + " / " + total;
@@ -115,9 +120,10 @@ function pintarGeneracion() {
   const propios = new Set(entradas.map((e) => e.id));
 
   bloqueados = new Set(genActual.team
+    .filter((m) => !modoShiny || m.shiny)
     .map((m) => idDeEquipo(m, variantes, propios))
     .filter((id) => propios.has(id)));
-  bloqueados.forEach((id) => faltan.delete(id));
+  bloqueados.forEach((id) => (modoShiny ? faltan.add(id) : faltan.delete(id)));
 
   /* Numeros de otras generaciones no pintan aqui, se conservan tal cual */
   const formas = entradas.filter((e) => e.region).length;
@@ -150,12 +156,12 @@ function alternar(li) {
 
   if (faltan.has(id)) {
     faltan.delete(id);
-    li.classList.add("caught");
+    li.classList.toggle("caught", modoShiny ? false : true);
   } else {
     faltan.add(id);
-    li.classList.remove("caught");
+    li.classList.toggle("caught", modoShiny ? true : false);
   }
-  li.setAttribute("aria-pressed", String(!faltan.has(id)));
+  li.setAttribute("aria-pressed", String(li.classList.contains("caught")));
 
   guardarBorrador();
   actualizarMarcador();
@@ -202,22 +208,36 @@ function conectarBotones() {
   searchEl.addEventListener("input", aplicarFiltro);
 
   document.getElementById("btnTodos").addEventListener("click", () => {
-    faltan = new Set();
+    faltan = modoShiny ? new Set(entradas.map((e) => e.id)) : new Set();
     guardarBorrador();
     pintarGeneracion();
   });
 
   document.getElementById("btnNinguno").addEventListener("click", () => {
-    faltan = new Set(entradas.map((e) => e.id));
+    faltan = modoShiny ? new Set() : new Set(entradas.map((e) => e.id));
     guardarBorrador();
     pintarGeneracion();
   });
 
   document.getElementById("btnReset").addEventListener("click", () => {
     const todo = leerBorrador();
-    delete todo[genActual.id];
+    delete todo[claveBorrador()];
     try { localStorage.setItem(ADMIN_KEY, JSON.stringify(todo)); } catch { /* lleno */ }
-    faltan = parseNumeros(genActual.missing);
+    faltan = parseNumeros(modoShiny ? genActual.shinies : genActual.missing);
+    pintarGeneracion();
+  });
+
+  document.getElementById("adminModos").addEventListener("click", (e) => {
+    const boton = e.target.closest(".dex-modo");
+    if (!boton) return;
+    const quiereShiny = boton.dataset.modo === "shiny";
+    if (quiereShiny === modoShiny) return;
+
+    modoShiny = quiereShiny;
+    document.querySelectorAll("#adminModos .dex-modo").forEach((b) => {
+      b.setAttribute("aria-selected", String((b.dataset.modo === "shiny") === modoShiny));
+    });
+    faltan = faltantesIniciales(genActual);
     pintarGeneracion();
   });
 
