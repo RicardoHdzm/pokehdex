@@ -188,7 +188,7 @@ function pintarSesion() {
 
   barra.innerHTML = `
     <button class="auth-salir" type="button" id="authPerfil">Perfil</button>
-    <button class="auth-salir" type="button" id="authComparar">Comparar</button>
+    <button class="auth-salir" type="button" id="authComparar">Amigos</button>
     <button class="auth-salir" type="button" id="authSalir">Salir</button>`;
 
   document.getElementById("authComparar").addEventListener("click", () => {
