@@ -447,8 +447,8 @@ function dexTile(entrada, capturados) {
   const tengo = capturados.has(entrada.id);
   const etiqueta = dexNum(entrada.base || entrada.id);
   const estado = tengo
-    ? (modoShiny ? " - lo tienes variocolor" : " - capturado")
-    : (modoShiny ? " - sin variocolor" : " - te falta");
+    ? (modoShiny ? " - lo tienes shiny" : " - capturado")
+    : (modoShiny ? " - sin shiny" : " - te falta");
   return `
     <li class="dex-tile${tengo ? " caught" : ""}${entrada.region ? " variante" : ""}"
         data-id="${entrada.id}" title="${etiqueta} ${entrada.nombre}${estado}">
@@ -585,7 +585,7 @@ function plate(mon, index, section) {
         ${nickname ? (mon.form ? formName(mon) : mon.species) + '<span class="sep">·</span>' : ""}
         <span class="gender ${mon.gender || "n"}" role="img"
               title="${g.label}" aria-label="${g.label}">${g.icon}</span>
-        ${mon.shiny ? '<i class="fa-solid fa-star plate-shiny" title="Variocolor" aria-label="Variocolor"></i>' : ""}
+        ${mon.shiny ? '<i class="fa-solid fa-star plate-shiny" title="Shiny" aria-label="Shiny"></i>' : ""}
       </p>
       <ul class="plate-types">${typeChips(mon.types || [])}</ul>
     </article>`;
