@@ -131,6 +131,12 @@
 .auth-quien i { margin-right: .35rem; color: var(--accent); }
 
 .auth-salir {
+  /* Los tres del mismo ancho: "Comparar" son 8 caracteres y la fuente de
+     pixeles es monoespaciada, asi que 8ch da la medida exacta. En
+     content-box para que el relleno y el borde se sumen aparte. */
+  box-sizing: content-box;
+  min-width: 8ch;
+  text-align: center;
   padding: .4rem .6rem .32rem;
   background: none;
   border: 2px solid var(--rule);
