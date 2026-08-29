@@ -496,7 +496,7 @@ async function actualizarEntradilla() {
 }
 
 /* Cuantos favoritos caben en el Salon de la Fama */
-const TOPE_FAVORITOS = 9;
+const TOPE_FAVORITOS = 12;
 
 /* Las cajas del PC de los juegos son de 30, en seis columnas por cinco filas */
 const POR_CAJA = 30;
