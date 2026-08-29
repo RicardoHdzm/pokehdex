@@ -3,6 +3,10 @@
    ============================================================ */
 
 .auth-puerta {
+  /* La puerta tiene su propio acento fijo: si heredara el global, cambiaria
+     de color segun la ultima region que se hubiera pintado al arrancar */
+  --accent: #e3350d;
+
   position: fixed;
   inset: 0;
   z-index: 500;

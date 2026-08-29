@@ -492,6 +492,8 @@ async function renderDex(gen, token) {
   const total = entradas.length;
   const pct = total ? Math.round((tengo / total) * 100) : 0;
 
+  document.title = tituloDe(gen, tengo, total);
+
   const marcador = panelEl.querySelector(".dex-count");
   if (marcador) marcador.textContent = tengo + " / " + total;
   const barra = panelEl.querySelector(".dex-bar-fill");
@@ -791,6 +793,17 @@ async function fillMissingTypes(gen, token) {
 
 /* ---------- Navegacion ---------- */
 
+/* El titulo lleva el progreso de la region: "Kanto 105/151 — POKEHDEX".
+   Los numeros no se saben hasta que la Pokedex termina de cargar, asi que
+   primero se pone el nombre y luego se completa. */
+function tituloDe(gen, tengo, total) {
+  const cola = " — POKEHDEX";
+  if (!gen) return "POKEHDEX";
+  if (gen.hall || gen.soloEquipo) return (gen.title || gen.region) + cola;
+  if (total == null) return gen.region + cola;
+  return gen.region + " " + (modoShiny ? "★ " : "") + tengo + "/" + total + cola;
+}
+
 function selectGeneration(id, push = true) {
   const gen = TEAMS.find((g) => g.id === id) || TEAMS[0];
 
@@ -800,9 +813,7 @@ function selectGeneration(id, push = true) {
 
   renderGeneration(gen);
   if (push) history.replaceState(null, "", "#" + gen.id);
-  document.title = gen.hall || gen.soloEquipo
-    ? `${gen.title || gen.region} — POKEHDEX`
-    : `${ORDINAL[gen.generation]} generacion · ${gen.region} — POKEHDEX`;
+  document.title = tituloDe(gen);
 }
 
 function buildIndex() {
@@ -1176,6 +1187,8 @@ function actualizarMarcadorDex(gen) {
   const total = panelEl.querySelectorAll(".dex-tile").length;
   const tengo = panelEl.querySelectorAll(".dex-tile.caught").length;
   const pct = total ? Math.round((tengo / total) * 100) : 0;
+
+  document.title = tituloDe(gen, tengo, total);
 
   const c = panelEl.querySelector(".dex-count");
   const p = panelEl.querySelector(".dex-pct");
