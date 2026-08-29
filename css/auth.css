@@ -203,3 +203,28 @@ body.con-sesion .dex-tile { cursor: pointer; }
 
 .auth-enlace:hover { color: var(--accent); }
 .auth-enlace:disabled { opacity: .5; cursor: progress; }
+
+/* Boton generico del aviso de importacion */
+.boton {
+  padding: .6rem .7rem .5rem;
+  background: var(--panel-2);
+  border: 2px solid var(--rule);
+  color: var(--ink-2);
+  font-family: var(--pixel);
+  font-size: .52rem;
+  line-height: 1.5;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color .15s ease, border-color .15s ease, background .15s ease;
+}
+
+.boton:hover:not(:disabled) { color: var(--ink); border-color: var(--accent); }
+.boton:disabled { opacity: .5; cursor: progress; }
+
+.boton.primary {
+  background: color-mix(in srgb, var(--accent) 18%, var(--panel));
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+.boton:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

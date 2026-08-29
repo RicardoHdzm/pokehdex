@@ -111,24 +111,6 @@ shinies: "",               // ninguno todavia
 Un Pokemon del equipo con `shiny: true` cuenta solo en la Pokedex shiny, y ademas
 sigue contando como capturado en la normal.
 
-La pagina de marcar tiene el mismo interruptor: en modo Shiny genera la linea
-`shinies` en vez de `missing`, y cada modo guarda su propio borrador.
-
-## Pagina para marcar capturados
-
-Escribir a mano cientos de numeros es inviable, asi que hay un editor aparte:
-**`admin.html`** (enlazado tambien al pie de la coleccion).
-
-- Haces clic en cada Pokemon para marcarlo o desmarcarlo.
-- Abajo se genera la linea `missing` ya comprimida en rangos, con boton de copiar.
-- El boton **Ver las 9 generaciones** saca las nueve lineas de golpe.
-- Los seis del equipo salen con un candado: cuentan como capturados y no se tocan.
-- Hay filtro por nombre o numero, y botones de marcar y desmarcar todo.
-
-Lo que marcas se guarda en el navegador mientras trabajas, pero **no es definitivo
-hasta que pegas el codigo en `data/teams.js`**. El boton *Volver a teams.js* descarta
-el borrador de esa generacion y recupera lo que hay en el archivo.
-
 ## Salon de la Fama (favoritos)
 
 La primera entrada de `TEAMS` no es una generacion, sino tu seleccion de favoritos.
@@ -165,10 +147,7 @@ Diferencias con una generacion normal:
 
 ```
 index.html        Estructura de la pagina
-admin.html        Editor para marcar capturados y generar el codigo
 css/styles.css    Estilos (tema arcade oscuro, tipografia de 8 bits, colores de tipo)
-css/admin.css     Estilos propios del editor
-js/admin.js       Logica del editor
 js/app.js         Selector de generacion y render de las tarjetas
 data/teams.js     TUS EQUIPOS — es lo unico que necesitas editar
 ```
