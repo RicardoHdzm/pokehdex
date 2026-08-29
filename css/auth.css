@@ -570,13 +570,23 @@ body.con-sesion .dex-tile { cursor: pointer; }
   .dex-masivo .boton { flex: 1 1 auto; }
 }
 
-/* El nombre va donde estaba la descripcion, bajo el titulo */
+/* El nombre va donde estaba la descripcion, bajo el titulo, con los
+   codigos de intercambio debajo si estan puestos */
 .auth-nombre {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
+  gap: .5rem;
   font-size: 1.15rem;
   color: var(--ink-2);
+}
+
+.auth-codigos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .4rem .9rem;
+  font-size: 1rem;
 }
 
 .auth-nombre:not(:empty) { margin-top: 1.1rem; }
