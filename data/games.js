@@ -27,8 +27,8 @@ const GAMES = {
     { id: "crystal", name: "Cristal", color: "#4dd0e1" }
   ],
   3: [
-    { id: "ruby",     name: "Rubi",      color: "#d62828" },
-    { id: "sapphire", name: "Zafiro",    color: "#2f6fd0" },
+    { id: "ruby",     name: "Rubi",      color: "#f04141" },
+    { id: "sapphire", name: "Zafiro",    color: "#4a90e8" },
     { id: "emerald",  name: "Esmeralda", color: "#2fbf71" }
   ],
   4: [
@@ -41,16 +41,16 @@ const GAMES = {
     { id: "white", name: "Blanco", color: "#f0f0f0" }
   ],
   6: [
-    { id: "x", name: "X", color: "#3f51b5" },
+    { id: "x", name: "X", color: "#7b8ef0" },
     { id: "y", name: "Y", color: "#e8383d" }
   ],
   7: [
     { id: "sun",  name: "Sol",  color: "#f57c00" },
-    { id: "moon", name: "Luna", color: "#5c6bc0" }
+    { id: "moon", name: "Luna", color: "#8b9aeb" }
   ],
   8: [
     { id: "sword",  name: "Espada", color: "#00c2d1" },
-    { id: "shield", name: "Escudo", color: "#d81b60" }
+    { id: "shield", name: "Escudo", color: "#f4508c" }
   ],
   9: [
     { id: "scarlet", name: "Escarlata", color: "#e04a3f" },
