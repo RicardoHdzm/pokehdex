@@ -108,6 +108,48 @@ function pintarFiltroGeneraciones() {
     ).join("");
 }
 
+/* ---------- Ver la Pokedex de otro ---------- */
+
+/* Todo el sitio pinta lo que haya en perfilVisto, y esMiPerfil() apaga la
+   edicion sola. Asi que "visitar" es cambiar de quien son los datos. */
+async function verPokedexDe(id, nombre) {
+  const aviso = document.getElementById("compMensaje");
+  aviso.textContent = "Cargando su Pokedex...";
+
+  perfilVisto = { id, display_name: nombre };
+  await cargarPerfilCompleto(id);
+
+  cerrarComparar();
+  pintarVisita(nombre);
+  buildIndex();
+  selectGeneration(genEnPantalla ? genEnPantalla.id : TEAMS[0].id, false);
+}
+
+async function volverAMiPerfil() {
+  perfilVisto = perfil;
+  await cargarPerfilCompleto(perfil.id);
+  pintarVisita(null);
+  buildIndex();
+  selectGeneration(genEnPantalla ? genEnPantalla.id : TEAMS[0].id, false);
+}
+
+function pintarVisita(nombre) {
+  const barra = document.getElementById("visitaBarra");
+  if (!barra) return;
+
+  /* Marca el body para que el cursor no prometa un clic que no hace nada */
+  document.body.classList.toggle("visitando", Boolean(nombre));
+
+  if (!nombre) { barra.hidden = true; barra.innerHTML = ""; return; }
+
+  barra.innerHTML = `
+    <span><i class="fa-solid fa-eye"></i> Estas viendo la Pokedex de <b>${nombre}</b>. Solo lectura.</span>
+    <button type="button" class="boton" id="visitaVolver">Volver a la mia</button>`;
+  barra.hidden = false;
+
+  document.getElementById("visitaVolver").addEventListener("click", volverAMiPerfil);
+}
+
 /* ---------- Panel ---------- */
 
 async function abrirComparar() {
@@ -148,7 +190,9 @@ async function elegirPerfil(e) {
   const id = e.target.value;
   const aviso = document.getElementById("compMensaje");
   const res = document.getElementById("compResultado");
+  const verBtn = document.getElementById("compVer");
 
+  verBtn.hidden = !id;
   if (!id) { res.hidden = true; return; }
 
   aviso.textContent = "Cruzando las dos Pokedex...";
@@ -176,6 +220,12 @@ function conectarComparar() {
     pintarCruce();
   });
   document.getElementById("compCerrar").addEventListener("click", cerrarComparar);
+
+  document.getElementById("compVer").addEventListener("click", () => {
+    const sel = document.getElementById("compQuien");
+    if (!sel.value) return;
+    verPokedexDe(sel.value, sel.options[sel.selectedIndex].textContent);
+  });
 
   document.getElementById("compModos").addEventListener("click", (e) => {
     const b = e.target.closest(".dex-modo");

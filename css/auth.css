@@ -562,3 +562,27 @@ body.con-sesion .dex-tile { cursor: pointer; }
   font-size: 1rem;
   color: var(--ink-2);
 }
+
+/* ---------- Visitando el perfil de otro ---------- */
+
+.visita-barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  margin-top: 1.5rem;
+  padding: .8rem 1rem;
+  background: color-mix(in srgb, var(--accent) 12%, var(--panel));
+  border: 2px solid var(--accent);
+  color: var(--ink);
+  font-size: 1.05rem;
+}
+
+.visita-barra[hidden] { display: none; }
+
+.visita-barra i { margin-right: .4rem; color: var(--accent); }
+
+/* Visitando: nada de aqui se puede tocar */
+body.visitando .dex-tile,
+body.visitando .plate { cursor: default; }

@@ -71,6 +71,10 @@
     </div>
   </header>
 
+  <div class="wrap">
+    <div class="visita-barra" id="visitaBarra" hidden></div>
+  </div>
+
   <nav class="index-nav" aria-label="Indice de generaciones">
     <div class="wrap">
       <div class="index-row" id="gamePills" role="tablist"></div>
@@ -90,6 +94,7 @@
 
       <div class="comp-controles">
         <select id="compQuien" aria-label="Con quien comparar"></select>
+        <button type="button" class="boton primary" id="compVer" hidden>Ver su Pokedex</button>
         <select id="compGen" class="juego-select" aria-label="Generacion"></select>
         <div class="dex-modos" id="compModos" role="tablist" aria-label="Tipo">
           <button class="dex-modo" type="button" role="tab" data-modo="normal" aria-selected="true">Normal</button>
