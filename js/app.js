@@ -614,7 +614,7 @@ let renderToken = 0;
 function hallHead(sec) {
   return `
     <header class="gen-head">
-      <span class="gen-watermark" aria-hidden="true">HOF</span>
+      <span class="gen-watermark" aria-hidden="true"><i class="fa-solid fa-star"></i></span>
       <p class="eyebrow">Salon de la Fama</p>
       <h2 class="gen-title">${sec.title || "Mis favoritos"}</h2>
       <p class="gen-meta">
@@ -719,6 +719,11 @@ function renderGeneration(gen) {
           <button class="dex-modo" type="button" role="tab" data-modo="shiny"
                   aria-selected="${modoShiny}">Shiny</button>
         </div>
+        ${puedeEditar ? `
+          <div class="dex-masivo">
+            <button type="button" class="boton" id="dexTodos">Marcar todos</button>
+            <button type="button" class="boton peligro" id="dexNinguno">Desmarcar todos</button>
+          </div>` : ""}
         <p class="dex-progress">
           <span class="dex-count">...</span>
           <span class="dex-pct">0%</span>
@@ -1100,6 +1105,47 @@ function conectarEditor() {
   });
 }
 
+/* Marcar o desmarcar la generacion entera, en el modo que este activo */
+function conectarMarcadoMasivo() {
+  panelEl.addEventListener("click", async (e) => {
+    const todos = e.target.closest("#dexTodos");
+    const ninguno = e.target.closest("#dexNinguno");
+    if (!todos && !ninguno) return;
+    if (typeof esMiPerfil !== "function" || !esMiPerfil()) return;
+
+    const boton = todos || ninguno;
+    const tener = Boolean(todos);
+
+    /* Desmarcar borra el avance de toda una region: se pide confirmacion */
+    if (!tener && boton.dataset.confirmando !== "si") {
+      boton.dataset.confirmando = "si";
+      boton.textContent = "¿Seguro? Pulsa otra vez";
+      setTimeout(() => {
+        if (!boton.isConnected) return;
+        boton.dataset.confirmando = "";
+        boton.textContent = "Desmarcar todos";
+      }, 4000);
+      return;
+    }
+
+    const ids = [...panelEl.querySelectorAll(".dex-tile[data-id]")]
+      .map((t) => Number(t.dataset.id));
+    if (!ids.length) return;
+
+    boton.disabled = true;
+    const previo = boton.textContent;
+    boton.textContent = "Guardando...";
+
+    const res = await marcarTodas(ids, modoShiny, tener);
+
+    boton.disabled = false;
+    boton.textContent = previo;
+
+    if (!res.ok) { boton.textContent = "No se pudo guardar"; return; }
+    if (genEnPantalla) renderDex(genEnPantalla, renderToken);
+  });
+}
+
 function conectarMarcado() {
   panelEl.addEventListener("click", async (e) => {
     const tile = e.target.closest(".dex-tile");
@@ -1156,6 +1202,7 @@ function init() {
   buildIndex();
   conectarModos();
   conectarMarcado();
+  conectarMarcadoMasivo();
   conectarEditor();
   conectarArrastre();
 

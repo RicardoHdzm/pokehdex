@@ -260,7 +260,8 @@ a { color: var(--accent); text-underline-offset: .2em; }
 /* El trofeo del Salon de la Fama, en el indice y como marca de agua */
 .index-hall .roman { font-size: .82rem; }
 
-.gen-watermark .fa-trophy { font-size: .75em; }
+/* Los iconos ocupan mas caja que un numeral, hay que encogerlos */
+.gen-watermark .fa-solid { font-size: .75em; }
 
 .hall-empty {
   margin: 0;

@@ -534,3 +534,17 @@ body.con-sesion .dex-tile { cursor: pointer; }
 
 /* El rotulo del equipo comparte fila con el boton de vaciar */
 .section-head #vaciarEquipo { flex: 0 0 auto; margin-left: auto; }
+
+/* Marcar / desmarcar una generacion entera */
+.dex-masivo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.dex-masivo .boton.peligro { margin-left: 0; }
+
+@media (max-width: 640px) {
+  .dex-masivo { width: 100%; }
+  .dex-masivo .boton { flex: 1 1 auto; }
+}

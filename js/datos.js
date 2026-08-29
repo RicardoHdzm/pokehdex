@@ -229,6 +229,39 @@ async function alternarCaptura(dexId, shiny, tener) {
   return { ok: true };
 }
 
+/* Marca o desmarca de golpe una lista entera de ids.
+   Va por tandas porque PostgREST manda los filtros en la direccion y con
+   ciento y pico numeros se pasaria de largo. */
+async function marcarTodas(ids, shiny, tener) {
+  const conjunto = shiny ? CAPTURAS.shiny : CAPTURAS.normal;
+  const antes = new Set(conjunto);
+
+  ids.forEach((id) => (tener ? conjunto.add(id) : conjunto.delete(id)));
+
+  if (!sb || !sesion) return { ok: false, error: "sin sesion" };
+
+  const yo = sesion.user.id;
+  const TANDA = 200;
+
+  for (let i = 0; i < ids.length; i += TANDA) {
+    const trozo = ids.slice(i, i + TANDA);
+    const { error } = tener
+      ? await sb.from("catches").upsert(
+          trozo.map((id) => ({ user_id: yo, dex_id: id, shiny })),
+          { onConflict: "user_id,dex_id,shiny" })
+      : await sb.from("catches").delete()
+          .eq("user_id", yo).eq("shiny", shiny).in("dex_id", trozo);
+
+    if (error) {
+      /* Se deshace en memoria para no dejar el contador mintiendo */
+      conjunto.clear();
+      antes.forEach((v) => conjunto.add(v));
+      return { ok: false, error: error.message };
+    }
+  }
+  return { ok: true, total: ids.length };
+}
+
 async function guardarJuego(generacion, gameId) {
   JUEGOS_ELEGIDOS.set(generacion, gameId);
   if (!sb || !sesion) return { ok: false };
