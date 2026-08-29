@@ -170,9 +170,20 @@ function pintarSesion() {
 
   const quien = (perfil && (perfil.display_name || perfil.handle)) || sesion.user.email;
 
-  /* El nombre se queda arriba del todo; los botones van bajo la entradilla */
+  /* Bajo el titulo van tu nombre y tus codigos de intercambio, para tenerlos
+     a mano al pasarselos a alguien sin abrir el perfil */
   if (nombre) {
-    nombre.innerHTML = '<span class="auth-quien"><i class="fa-solid fa-user"></i> ' + quien + "</span>";
+    const codigos = [];
+    if (perfil && perfil.friend_code) {
+      codigos.push('<span class="visita-codigo"><b>Switch</b> ' + perfil.friend_code + "</span>");
+    }
+    if (perfil && perfil.champions_id) {
+      codigos.push('<span class="visita-codigo"><b>Champions</b> ' + perfil.champions_id + "</span>");
+    }
+
+    nombre.innerHTML =
+      '<span class="auth-quien"><i class="fa-solid fa-user"></i> ' + quien + "</span>" +
+      (codigos.length ? '<span class="auth-codigos">' + codigos.join("") + "</span>" : "");
   }
 
   barra.innerHTML = `
