@@ -495,6 +495,9 @@ async function actualizarEntradilla() {
                        " de " + total + " capturados";
 }
 
+/* Cuantos favoritos caben en el Salon de la Fama */
+const TOPE_FAVORITOS = 9;
+
 /* Las cajas del PC de los juegos son de 30, en seis columnas por cinco filas */
 const POR_CAJA = 30;
 
@@ -534,7 +537,7 @@ async function renderDex(gen, token) {
     html += `
       <section class="dex-caja">
         <h4 class="dex-caja-titulo">
-          <span>Caja ${Math.floor(i / POR_CAJA) + 1}</span>
+          <span>Box ${Math.floor(i / POR_CAJA) + 1}</span>
           <span class="dex-caja-cuenta">${tengoEnCaja}/${tanda.length}</span>
         </h4>
         <ul class="dex-grid">${tanda.map((e) => dexTile(e, capturados)).join("")}</ul>
@@ -648,11 +651,8 @@ function plate(mon, index, section) {
 
 function emptyPlate(index, section) {
   const mio = typeof esMiPerfil === "function" && esMiPerfil();
-  /* Los equipos son de seis; favoritos no tiene tope, asi que ahi el hueco
-     solo lleva su numero */
-  const etiqueta = section && section.hall
-    ? plateNum(index + 1)
-    : plateNum(index + 1) + " / 06";
+  const tope = section && section.hall ? TOPE_FAVORITOS : 6;
+  const etiqueta = plateNum(index + 1) + " / " + plateNum(tope);
 
   return `
     <article class="plate plate-empty${mio ? " editable" : ""}" data-slot="${index}"
@@ -740,19 +740,11 @@ function renderGeneration(gen) {
   document.documentElement.style.setProperty("--accent", colorDe(gen));
 
   /* Una generacion siempre enseña seis huecos; el Salon de la Fama, los que haya. */
-  const mostrados = gen.hall ? gen.team : gen.team.slice(0, 6);
+  const mostrados = gen.team.slice(0, gen.hall ? TOPE_FAVORITOS : 6);
   const filled = mostrados.map((m, i) => plate(m, i, gen)).join("");
-  const puedoEditar = typeof esMiPerfil === "function" && esMiPerfil();
-
-  /* En una generacion siempre hay seis sitios. En favoritos no hay tope:
-     se enseñan seis como minimo y uno mas por encima de lo que ya haya,
-     para que siempre quede uno libre donde añadir. */
-  let huecos;
-  if (gen.hall) {
-    huecos = puedoEditar ? Math.max(6, gen.team.length + 1) - gen.team.length : 0;
-  } else {
-    huecos = Math.max(0, 6 - gen.team.length);
-  }
+  /* Seis sitios en una generacion, nueve en favoritos */
+  const tope = gen.hall ? TOPE_FAVORITOS : 6;
+  const huecos = Math.max(0, tope - gen.team.length);
 
   const empty = Array.from({ length: huecos },
     (_, i) => emptyPlate(gen.team.length + i, gen)).join("");
