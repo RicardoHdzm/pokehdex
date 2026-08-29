@@ -226,7 +226,7 @@ const TEAMS = [
   {
     id: "gen-10",
     generation: 10,
-    region: "Por confirmar",
+    region: "???",
     game: "Pokemon Waves",
     shinies: "",
     missing: "",
@@ -241,7 +241,7 @@ const TEAMS = [
     soloEquipo: true,
     title: "Pokemon Champions",
     region: "Champions",
-    color: "#3ddc97",
+    color: "#ffab00",
     team: []
   }
 ];

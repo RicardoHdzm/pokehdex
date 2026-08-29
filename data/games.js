@@ -60,7 +60,7 @@ const GAMES = {
     { id: "waves", name: "Waves", color: "#22d3ee" }
   ],
   11: [
-    { id: "champions", name: "Champions", color: "#3ddc97" }
+    { id: "champions", name: "Champions", color: "#ffab00" }
   ]
 };
 
