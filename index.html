@@ -82,6 +82,32 @@
     </section>
   </main>
 
+  <!-- Perfil: nombre a mostrar y juego de cada region -->
+  <div class="mon-editor" id="perfilPanel" hidden>
+    <div class="mon-caja ancha" role="dialog" aria-modal="true" aria-labelledby="perfilTitulo">
+      <p class="eyebrow" id="perfilTitulo">Mi perfil</p>
+
+      <form class="mon-form" id="perfilForm">
+        <label class="mon-campo">
+          <span>Nombre a mostrar</span>
+          <input id="perfilNombre" maxlength="32" required autocomplete="off">
+        </label>
+        <p class="perfil-datos">
+          <span id="perfilHandle"></span> · <span id="perfilCorreo"></span>
+        </p>
+        <p class="mon-mensaje" id="perfilMensaje"></p>
+        <div class="mon-botones">
+          <button type="submit" class="boton primary">Guardar nombre</button>
+          <button type="button" class="boton" id="perfilCerrar">Cerrar</button>
+        </div>
+      </form>
+
+      <p class="eyebrow perfil-sub">Juego de cada region</p>
+      <p class="perfil-nota">Define el color de esa pestaña.</p>
+      <div class="perfil-juegos" id="perfilJuegos"></div>
+    </div>
+  </div>
+
   <!-- Editor de un hueco del equipo o de favoritos -->
   <div class="mon-editor" id="monEditor" hidden>
     <div class="mon-caja" role="dialog" aria-modal="true" aria-labelledby="monTitulo">
@@ -149,5 +175,6 @@
   <script src="data/teams.js"></script>
   <script src="js/app.js"></script>
   <script src="js/datos.js"></script>
+  <script src="js/perfil.js"></script>
 </body>
 </html>

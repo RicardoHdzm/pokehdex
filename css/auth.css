@@ -346,3 +346,44 @@ body.con-sesion .dex-tile { cursor: pointer; }
 .plate-empty.editable .plate-figure { border-color: color-mix(in srgb, var(--accent) 45%, var(--rule)); }
 .plate-empty.editable:hover .plate-figure { border-color: var(--accent); }
 .plate-empty.editable .empty-mark { color: var(--accent); }
+
+/* ---------- Panel de perfil ---------- */
+
+.mon-caja.ancha { width: min(34rem, 100%); }
+
+.perfil-datos { margin: -.4rem 0 0; color: var(--ink-2); font-size: .95rem; }
+
+.perfil-sub { margin-top: 2rem; padding-top: 1.5rem; border-top: 2px solid var(--rule); }
+
+.perfil-nota { margin: .4rem 0 1rem; color: var(--ink-2); font-size: 1rem; }
+
+.perfil-juegos { display: flex; flex-direction: column; gap: .55rem; }
+
+.perfil-fila { display: flex; align-items: center; gap: .7rem; }
+
+.perfil-muestra {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--rule);
+  transition: background .2s ease;
+}
+
+.perfil-region {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 1.05rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.perfil-fila .juego-select { flex: 0 0 auto; max-width: 14rem; }
+
+.mon-mensaje.ok     { color: #7ee787; }
+.mon-mensaje.neutro { color: var(--ink-2); }
+
+@media (max-width: 520px) {
+  .perfil-fila { flex-wrap: wrap; }
+  .perfil-fila .juego-select { flex: 1 1 100%; max-width: none; }
+}

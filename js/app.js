@@ -619,24 +619,10 @@ function nombreJuegoDe(gen) {
   return j ? j.name : (gen.game || "");
 }
 
-/* Desplegable con los juegos de esa generacion, solo en el perfil propio */
+/* El juego se elige en el perfil; aqui solo se enseña cual es */
 function selectorDeJuego(gen) {
-  const lista = (typeof GAMES !== "undefined" && GAMES[gen.generation]) || [];
-  if (!lista.length) return "";
-
-  const puedeElegir = typeof esMiPerfil === "function" && esMiPerfil();
-  if (!puedeElegir) {
-    const n = nombreJuegoDe(gen);
-    return n ? '<span class="dot">·</span> <b>' + n + "</b>" : "";
-  }
-
-  const actual = juegoDeGen(gen);
-  const opciones = lista.map((j) =>
-    '<option value="' + j.id + '"' + (actual && actual.id === j.id ? " selected" : "") + ">" +
-    j.name + "</option>").join("");
-
-  return '<span class="dot">·</span> <select class="juego-select" id="juegoSel" ' +
-         'aria-label="Juego de esta region">' + opciones + "</select>";
+  const n = nombreJuegoDe(gen);
+  return n ? '<span class="dot">·</span> <b>' + n + "</b>" : "";
 }
 
 function genHead(gen) {
@@ -918,27 +904,6 @@ function conectarEditor() {
   });
 }
 
-function conectarSelectorJuego() {
-  panelEl.addEventListener("change", async (e) => {
-    if (e.target.id !== "juegoSel" || !genEnPantalla) return;
-
-    const gen = genEnPantalla;
-    const elegido = e.target.value;
-
-    /* Se pinta el color al momento y luego se guarda */
-    const juego = juegoDe(gen.generation, elegido);
-    if (juego) document.documentElement.style.setProperty("--accent", juego.color);
-
-    const res = await guardarJuego(gen.generation, elegido);
-    if (!res.ok) {
-      document.documentElement.style.setProperty("--accent", colorDe(gen));
-      return;
-    }
-    buildIndex();
-    selectGeneration(gen.id, false);
-  });
-}
-
 function conectarMarcado() {
   panelEl.addEventListener("click", async (e) => {
     const tile = e.target.closest(".dex-tile");
@@ -995,7 +960,6 @@ function init() {
   buildIndex();
   conectarModos();
   conectarMarcado();
-  conectarSelectorJuego();
   conectarEditor();
 
   const fromHash = location.hash.slice(1);
