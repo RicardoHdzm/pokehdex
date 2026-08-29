@@ -460,6 +460,27 @@ function dexTile(entrada, capturados) {
     </li>`;
 }
 
+/* La entradilla lleva el total capturado de todas las regiones juntas.
+   El numero va rellenado con ceros al ancho del total para que la linea
+   no baile cada vez que se marca uno. */
+async function actualizarEntradilla() {
+  const rotulo = document.querySelector(".masthead .eyebrow");
+  if (!rotulo) return;
+
+  if (!perfilVisto || typeof construirCatalogo !== "function") {
+    rotulo.textContent = "Pokedex · 10 generaciones";
+    return;
+  }
+
+  const catalogo = await construirCatalogo();
+  const total = catalogo.size;
+  let tengo = 0;
+  CAPTURAS.normal.forEach((id) => { if (catalogo.has(id)) tengo++; });
+
+  rotulo.textContent = "Pokedex · " + String(tengo).padStart(String(total).length, "0") +
+                       " de " + total + " capturados";
+}
+
 /* Las cajas del PC de los juegos son de 30, en seis columnas por cinco filas */
 const POR_CAJA = 30;
 
@@ -512,6 +533,7 @@ async function renderDex(gen, token) {
   const pct = total ? Math.round((tengo / total) * 100) : 0;
 
   document.title = tituloDe(gen, tengo, total);
+  actualizarEntradilla();
 
   const marcador = panelEl.querySelector(".dex-count");
   if (marcador) marcador.textContent = tengo + " / " + total;
@@ -1209,6 +1231,7 @@ function actualizarMarcadorDex(gen) {
   const pct = total ? Math.round((tengo / total) * 100) : 0;
 
   document.title = tituloDe(gen, tengo, total);
+  actualizarEntradilla();
 
   const c = panelEl.querySelector(".dex-count");
   const p = panelEl.querySelector(".dex-pct");
