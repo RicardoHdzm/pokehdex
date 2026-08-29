@@ -1,0 +1,68 @@
+/* ============================================================
+   FUENTES PROPIAS
+   ------------------------------------------------------------
+   Las tres estan alojadas en assets/fonts/, sin depender de
+   Google Fonts ni de cdnjs. Si esos servicios fallan o estan
+   bloqueados, el sitio se sigue viendo igual.
+
+   De Press Start 2P y VT323 se guarda solo el subconjunto
+   "latin" (U+0000-00FF y puntuacion), que es lo unico que usa
+   el sitio: no hay tildes en ningun texto y la eñe entra ahi.
+
+   Font Awesome trae la fuente entera porque no hay forma comoda
+   de recortarla, pero en lugar de sus 74 KB de CSS aqui solo se
+   declaran los ocho iconos que se usan de verdad.
+
+   Licencias: Press Start 2P y VT323 son Open Font License;
+   Font Awesome Free 6, CC BY 4.0 para los iconos y OFL para la
+   fuente. Las tres permiten alojarlas uno mismo.
+   ============================================================ */
+
+@font-face {
+  font-family: "Press Start 2P";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/press-start-2p.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "VT323";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/vt323.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Font Awesome 6 Free";
+  font-style: normal;
+  font-weight: 900;
+  font-display: block;
+  src: url("../assets/fonts/fa-solid-900.woff2") format("woff2");
+}
+
+/* ---------- Iconos ---------- */
+
+.fa-solid {
+  display: inline-block;
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  font-style: normal;
+  font-variant: normal;
+  line-height: 1;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+}
+
+.fa-solid::before { content: var(--fa); }
+
+/* Los ocho que usa el sitio, con su codigo de Font Awesome 6.7.2 */
+.fa-user                { --fa: "\f007"; }
+.fa-star                { --fa: "\f005"; }
+.fa-trophy              { --fa: "\f091"; }
+.fa-eye                 { --fa: "\f06e"; }
+.fa-mars                { --fa: "\f222"; }
+.fa-venus               { --fa: "\f221"; }
+.fa-genderless          { --fa: "\f22d"; }
+.fa-up-down-left-right  { --fa: "\f0b2"; }
