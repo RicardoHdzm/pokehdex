@@ -868,6 +868,11 @@ function selectGeneration(id, push = true) {
   });
 
   renderGeneration(gen);
+
+  /* Aqui y no dentro de renderDex: Favoritos y Champions no tienen Pokedex,
+     y si no la entradilla se quedaba con el texto de reserva */
+  actualizarEntradilla();
+
   if (push) history.replaceState(null, "", "#" + gen.id);
   document.title = tituloDe(gen);
 }
