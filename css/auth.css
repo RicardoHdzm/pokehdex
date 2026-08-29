@@ -579,7 +579,9 @@ body.con-sesion .dex-tile { cursor: pointer; }
   /* Mas estrecho que el contenido y centrado: ocupando todo el ancho
      parecia pegado al borde, aunque estuviera alineado con el resto */
   max-width: 46rem;
-  margin: 1.75rem auto 0;
+  /* Mas hueco abajo que arriba: por encima ya hay el relleno de la
+     cabecera, y sin esto quedaba pegado al indice de regiones */
+  margin: 1.75rem auto 3rem;
 
   display: flex;
   flex-wrap: wrap;
