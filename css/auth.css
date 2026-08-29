@@ -392,7 +392,14 @@ body.con-sesion .dex-tile { cursor: pointer; }
   color: var(--ink-2);
 }
 
-.perfil-fila .juego-select { flex: 0 0 auto; max-width: 14rem; }
+/* Todos del mismo ancho: el nombre mas largo es "Champions", nueve
+   caracteres, y VT323 es monoespaciada. Los 3rem cubren el relleno, el
+   borde y el hueco de la flecha. */
+.perfil-fila .juego-select {
+  flex: 0 0 auto;
+  width: calc(9ch + 3rem);
+  text-align: left;
+}
 
 .mon-mensaje.ok     { color: #7ee787; }
 .mon-mensaje.neutro { color: var(--ink-2); }
