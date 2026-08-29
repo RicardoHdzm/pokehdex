@@ -81,7 +81,16 @@ const BALL_ES = {
   "heavy-ball": "Heavy Ball",     "fast-ball": "Fast Ball",
   "dream-ball": "Dream Ball",     "beast-ball": "Beast Ball",
   "sport-ball": "Sport Ball",     "cherish-ball": "Cherish Ball",
-  "park-ball": "Park Ball"
+  "park-ball": "Park Ball",
+
+  /* Las de Leyendas Arceus. En PokeAPI llevan el prefijo "la", y cuatro
+     repiten nombre con las modernas, de ahi la aclaracion entre parentesis. */
+  "lapoke-ball": "Poke Ball (Hisui)",   "lagreat-ball": "Great Ball (Hisui)",
+  "laultra-ball": "Ultra Ball (Hisui)", "laheavy-ball": "Heavy Ball (Hisui)",
+  "lafeather-ball": "Feather Ball",     "lawing-ball": "Wing Ball",
+  "lajet-ball": "Jet Ball",             "laleaden-ball": "Leaden Ball",
+  "lagigaton-ball": "Gigaton Ball",     "laorigin-ball": "Origin Ball",
+  "lastrange-ball": "Strange Ball"
 };
 
 const navEl = document.getElementById("gamePills");
@@ -845,7 +854,8 @@ async function abrirEditor(seccion, indice) {
   /* La lista de especies alimenta el buscador */
   const especies = await fetchSpecies();
   document.getElementById("monLista").innerHTML = especies
-    .map(([id, slug]) => '<option value="' + nombreEspecie(slug) + '" data-dex="' + id + '">')
+    .map(([id, slug]) => '<option value="' + nombreEspecie(slug) + '" data-dex="' + id +
+      '" data-slug="' + slug + '">')
     .join("");
 
   document.getElementById("monBall").innerHTML = opcionesDeBall();
@@ -857,6 +867,11 @@ async function abrirEditor(seccion, indice) {
     b.setAttribute("aria-pressed", String((mon ? mon.gender : "m") === b.dataset.genero));
   });
 
+  const slugActual = mon
+    ? (especies.find(([id]) => id === mon.dex) || [])[1]
+    : null;
+  await pintarFormas(slugActual, mon ? mon.form : null);
+
   document.getElementById("monBorrar").hidden = !mon;
   document.getElementById("monTitulo").textContent =
     (mon ? "Editar" : "Añadir") + " · hueco " + plateNum(indice + 1);
@@ -864,6 +879,34 @@ async function abrirEditor(seccion, indice) {
 
   dlg.hidden = false;
   document.getElementById("monEspecie").focus();
+}
+
+/* Busca las variantes de una especie en el listado completo de PokeAPI:
+   todo lo que empieza por "sunombre-" es una forma suya. */
+async function pintarFormas(slugEspecie, formaActual) {
+  const campo = document.getElementById("monFormaCampo");
+  const sel = document.getElementById("monForma");
+
+  if (!slugEspecie) { campo.hidden = true; sel.innerHTML = ""; return; }
+
+  const variantes = await fetchVariantes();
+  const suyas = variantes
+    .filter(([, slug]) => slug.startsWith(slugEspecie + "-"))
+    .map(([, slug]) => slug.slice(slugEspecie.length + 1));
+
+  if (!suyas.length) { campo.hidden = true; sel.innerHTML = ""; return; }
+
+  sel.innerHTML = '<option value="">Normal</option>' + suyas.map((f) =>
+    '<option value="' + f + '"' + (f === formaActual ? " selected" : "") + ">" +
+    formLabel(f) + "</option>").join("");
+  campo.hidden = false;
+}
+
+/* Del nombre escrito a su entrada del buscador */
+function opcionDeEspecie() {
+  const nombre = document.getElementById("monEspecie").value.trim().toLowerCase();
+  return [...document.getElementById("monLista").options]
+    .find((o) => o.value.toLowerCase() === nombre) || null;
 }
 
 function cerrarEditor() {
@@ -887,11 +930,13 @@ async function guardarDelEditor(e) {
 
   if (!opcion) { aviso.textContent = "Elige una especie de la lista."; return; }
 
+  const forma = document.getElementById("monForma").value;
   const mon = {
     dex: Number(opcion.dataset.dex),
     species: opcion.value,
     nickname: document.getElementById("monApodo").value.trim(),
     gender: generoElegido(),
+    form: forma || undefined,
     ball: document.getElementById("monBall").value,
     shiny: document.getElementById("monShiny").checked
   };
@@ -1031,6 +1076,11 @@ function conectarEditor() {
   });
 
   document.getElementById("monForm").addEventListener("submit", guardarDelEditor);
+
+  document.getElementById("monEspecie").addEventListener("input", () => {
+    const op = opcionDeEspecie();
+    pintarFormas(op ? op.dataset.slug : null, null);
+  });
   document.getElementById("monBorrar").addEventListener("click", borrarDelEditor);
   document.getElementById("monCancelar").addEventListener("click", cerrarEditor);
 
