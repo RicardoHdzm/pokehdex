@@ -477,3 +477,31 @@ body.con-sesion .dex-tile { cursor: pointer; }
   color: var(--ink-2);
   font-size: 1.05rem;
 }
+
+/* ---------- Reordenar el equipo ---------- */
+
+.plate-orden {
+  display: flex;
+  gap: .4rem;
+  margin-top: .8rem;
+  padding-top: .7rem;
+  border-top: 2px solid var(--rule);
+}
+
+.orden-btn {
+  flex: 1;
+  padding: .4rem;
+  background: var(--panel-2);
+  border: 2px solid var(--rule);
+  color: var(--ink-2);
+  font-size: .85rem;
+  cursor: pointer;
+  transition: color .15s ease, border-color .15s ease;
+}
+
+.orden-btn:hover:not(:disabled) { color: var(--accent); border-color: var(--accent); }
+.orden-btn:disabled { opacity: .3; cursor: default; }
+.orden-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* El rotulo del equipo comparte fila con el boton de vaciar */
+.section-head #vaciarEquipo { flex: 0 0 auto; margin-left: auto; }
