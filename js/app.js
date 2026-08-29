@@ -453,7 +453,7 @@ function dexTile(entrada, capturados) {
   return `
     <li class="dex-tile${tengo ? " caught" : ""}${entrada.region ? " variante" : ""}"
         data-id="${entrada.id}" title="${etiqueta} ${entrada.nombre}${estado}">
-      <img class="dex-sprite" loading="lazy" alt="" aria-hidden="true"
+      <img class="dex-sprite" loading="lazy" decoding="async" alt="" aria-hidden="true"
            src="${spriteDex(entrada.id)}">
       <span class="dex-num">${etiqueta}</span>
       <span class="dex-name">${entrada.nombre}</span>
@@ -535,7 +535,7 @@ async function renderDex(gen, token) {
     const tanda = entradas.slice(i, i + POR_CAJA);
     const tengoEnCaja = tanda.filter((e) => capturados.has(e.id)).length;
     html += `
-      <section class="dex-caja">
+      <section class="dex-caja" style="--filas:${Math.ceil(tanda.length / 6)}">
         <h4 class="dex-caja-titulo">
           <span>Box ${Math.floor(i / POR_CAJA) + 1}</span>
           <span class="dex-caja-cuenta">${tengoEnCaja}/${tanda.length}</span>

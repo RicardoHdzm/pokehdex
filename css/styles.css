@@ -33,15 +33,24 @@ body {
   font-size: 20px;
   line-height: 1.45;
 
-  /* Rejilla de HUD sobre el negro: una fina cada 32px y otra marcada cada 128.
-     Va fija, asi que se comporta como una capa de pantalla y no arrastra al hacer scroll. */
   background-color: var(--bg);
+}
+
+/* Rejilla de HUD sobre el negro: una fina cada 32px y otra marcada cada 128.
+   Va en su propia capa fija en lugar de en el body con background-attachment:
+   fixed, que en movil obliga al navegador a repintar los cuatro degradados en
+   cada fotograma del scroll. Se ve exactamente igual y ya no repinta. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background-image:
     repeating-linear-gradient(to right,  rgba(255, 255, 255, .05) 0 1px, transparent 1px 128px),
     repeating-linear-gradient(to bottom, rgba(255, 255, 255, .05) 0 1px, transparent 1px 128px),
     repeating-linear-gradient(to right,  rgba(255, 255, 255, .022) 0 1px, transparent 1px 32px),
     repeating-linear-gradient(to bottom, rgba(255, 255, 255, .022) 0 1px, transparent 1px 32px);
-  background-attachment: fixed;
 }
 
 /* Lineas de barrido CRT */
@@ -584,6 +593,21 @@ a { color: var(--accent); text-underline-offset: .2em; }
   gap: clamp(1.75rem, 3vw, 2.75rem);
 }
 
+/* Una generacion son hasta seis cajas y 156 casillas con su sprite. Con esto
+   el navegador se salta el dibujado (y la carga de imagenes) de las cajas que
+   no estan a la vista; la medida de reserva es la altura real de una caja
+   llena para que la barra de scroll no pegue saltos. */
+.dex-caja {
+  /* Alto de una fila de casillas y de la cabecera, medidos en pantalla */
+  --fila: 148px;
+  --cabecera: 26px;
+  content-visibility: auto;
+  /* La reserva se calcula con las filas que trae la caja (--filas la pone
+     app.js) para que la ultima, que va incompleta, no reserve de mas. En
+     cuanto se pinta una vez, "auto" se queda con su alto real. */
+  contain-intrinsic-size: auto calc(var(--filas, 5) * var(--fila) + var(--cabecera));
+}
+
 .dex-caja-titulo {
   display: flex;
   align-items: center;
@@ -726,6 +750,17 @@ a { color: var(--accent); text-underline-offset: .2em; }
   .dex-name { display: none; }
   .dex-num { font-size: .34rem; }
   .dex-caja-titulo { font-size: .48rem; }
+  .dex-caja { --fila: 70px; --cabecera: 29px; }
+}
+
+/* En pantalla tactil el desenfoque del indice fijo sale caro: el navegador
+   lo recalcula en cada fotograma del scroll. Como el fondo es casi negro,
+   dejarlo opaco se ve practicamente igual y quita ese trabajo. */
+@media (hover: none) {
+  .index-nav {
+    background: var(--bg);
+    backdrop-filter: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -9,9 +9,18 @@
    "latin" (U+0000-00FF y puntuacion), que es lo unico que usa
    el sitio: no hay tildes en ningun texto y la eñe entra ahi.
 
-   Font Awesome trae la fuente entera porque no hay forma comoda
-   de recortarla, pero en lugar de sus 74 KB de CSS aqui solo se
-   declaran los ocho iconos que se usan de verdad.
+   De Font Awesome se guardan solo los ocho glifos que se usan:
+   la fuente entera pesa 155 KB y recortada se queda en 1.4 KB.
+   Para rehacerla si algun dia hacen falta mas iconos, sobre el
+   fa-solid-900.woff2 original de la version 6.7.2:
+
+     npm i subset-font
+     subsetFont(buffer, "",
+                { targetFormat: "woff2" })
+
+   Los codigos son los mismos que van abajo en cada clase. Ademas,
+   en lugar de los 74 KB de CSS de Font Awesome, aqui solo se
+   declaran esos ocho iconos.
 
    Licencias: Press Start 2P y VT323 son Open Font License;
    Font Awesome Free 6, CC BY 4.0 para los iconos y OFL para la
