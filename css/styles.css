@@ -259,11 +259,9 @@ a { color: var(--accent); text-underline-offset: .2em; }
 
 .gen-meta .dot { margin: 0 .5rem; opacity: .55; }
 
-/* El trofeo del Salon de la Fama, en el indice y como marca de agua */
+/* El icono del indice ocupa mas caja que un numeral */
 .index-hall .roman { font-size: .82rem; }
 
-/* Los iconos ocupan mas caja que un numeral, hay que encogerlos */
-.gen-watermark .fa-solid { font-size: .75em; }
 
 .hall-empty {
   margin: 0;
@@ -497,7 +495,29 @@ a { color: var(--accent); text-underline-offset: .2em; }
 }
 
 /* El rotulo del equipo va antes de las laminas */
-.plates + .dex-section { margin-top: clamp(3rem, 6vw, 4.5rem); }
+/* Separacion marcada entre el equipo campeon y la Pokedex: son dos
+   bloques distintos y antes se leian como uno solo. Ademas de aire, una
+   linea que cruza el ancho completo. */
+.plates + .dex-section {
+  position: relative;
+  margin-top: clamp(4rem, 8vw, 6.5rem);
+  padding-top: clamp(3rem, 5vw, 4rem);
+  border-top: 2px solid var(--rule);
+}
+
+/* Un cuadrito del color de la region partiendo la linea */
+.plates + .dex-section::before {
+  content: "";
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  transform: translateX(-50%) rotate(45deg);
+  background: var(--bg);
+  border: 2px solid var(--accent);
+  transition: border-color .35s ease;
+}
 
 .section-label + .plates { margin-top: 1.5rem; }
 

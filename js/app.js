@@ -616,7 +616,6 @@ let renderToken = 0;
 function hallHead(sec) {
   return `
     <header class="gen-head">
-      <span class="gen-watermark" aria-hidden="true"><i class="fa-solid fa-star"></i></span>
       <p class="eyebrow">Salon de la Fama</p>
       <h2 class="gen-title">${sec.title || "Mis favoritos"}</h2>
       <p class="gen-meta">
@@ -653,8 +652,7 @@ function selectorDeJuego(gen) {
 function champHead(gen) {
   return `
     <header class="gen-head">
-      <span class="gen-watermark" aria-hidden="true"><i class="fa-solid fa-trophy"></i></span>
-      <p class="eyebrow">Combate</p>
+      <p class="eyebrow">Team Actual</p>
       <h2 class="gen-title">${gen.title || gen.region}</h2>
       <p class="gen-meta">Equipo de ${gen.team.length} de 6</p>
     </header>`;
@@ -798,7 +796,9 @@ async function fillMissingTypes(gen, token) {
    primero se pone el nombre y luego se completa. */
 function tituloDe(gen, tengo, total) {
   const cola = " — POKEHDEX";
-  if (!gen) return "POKEHDEX";
+  /* Sin sesion la puerta tapa la pagina: enseñar ahi la region que se este
+     pintando por detras no tiene sentido */
+  if (!gen || !document.body.classList.contains("con-sesion")) return "POKEHDEX";
   if (gen.hall || gen.soloEquipo) return (gen.title || gen.region) + cola;
   if (total == null) return gen.region + cola;
   return gen.region + " " + (modoShiny ? "★ " : "") + tengo + "/" + total + cola;

@@ -220,7 +220,6 @@ async function initAuth() {
     if (perfil) {
       perfilVisto = perfil;
       await cargarPerfilCompleto(perfil.id);
-      if (typeof refrescarTodo === "function") refrescarTodo();
     }
     /* Limpia los tokens que el enlace deja colgando en la direccion */
     if (location.hash.includes("access_token")) {
@@ -235,6 +234,10 @@ async function initAuth() {
 
   mostrarPuerta(!sesion);
   pintarSesion();
+
+  /* Se repinta despues de abrir la puerta: hasta ese momento el body no
+     esta marcado con sesion y el titulo se quedaria en el generico */
+  if (sesion && perfil && typeof refrescarTodo === "function") refrescarTodo();
 
   sb.auth.onAuthStateChange((evento) => {
     if (evento === "PASSWORD_RECOVERY") { esRecuperacion = true; mostrarPanelClave(); return; }
