@@ -127,13 +127,6 @@ a { color: var(--accent); text-underline-offset: .2em; }
   transition: color .35s ease, text-shadow .35s ease;
 }
 
-.masthead-note {
-  max-width: 46ch;
-  margin: 1.75rem auto 0;
-  color: var(--ink-2);
-  font-size: 1.15rem;
-}
-
 /* ===== Indice de generaciones ===== */
 
 .index-nav {

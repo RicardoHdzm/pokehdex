@@ -473,9 +473,20 @@ async function actualizarEntradilla() {
   }
 
   const catalogo = await construirCatalogo();
-  const total = catalogo.size;
-  let tengo = 0;
-  CAPTURAS.normal.forEach((id) => { if (catalogo.has(id)) tengo++; });
+
+  /* Cuenta especies, no entradas: cada forma regional apunta a su especie
+     con "base", asi que tener el Marowak de Kanto y el de Alola suma uno,
+     no dos. El total son las entradas cuyo id es su propia base, o sea
+     las especies sin contar formas. */
+  let total = 0;
+  catalogo.forEach((info, id) => { if (info.base === id) total++; });
+
+  const especies = new Set();
+  CAPTURAS.normal.forEach((id) => {
+    const info = catalogo.get(id);
+    if (info) especies.add(info.base);
+  });
+  const tengo = especies.size;
 
   rotulo.textContent = "Pokedex · " + String(tengo).padStart(String(total).length, "0") +
                        " de " + total + " capturados";
