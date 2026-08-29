@@ -401,13 +401,13 @@ a { color: var(--accent); text-underline-offset: .2em; }
 }
 
 .type-chip {
-  /* Todos los badges igual de anchos, tomando el nombre mas largo: "Electrico"
-     y "Siniestro", de 9 caracteres. Press Start 2P es monoespaciada, asi que
-     9ch mas el espaciado entre letras da el ancho exacto. Va en content-box
+  /* Todos los badges igual de anchos, tomando el nombre mas largo: "Electric"
+     y "Fighting", de 8 caracteres. Press Start 2P es monoespaciada, asi que
+     8ch mas el espaciado entre letras da el ancho exacto. Va en content-box
      para que el relleno y el borde se sumen aparte y siga cuadrando en movil,
      donde el padding es menor. */
   box-sizing: content-box;
-  min-width: calc(9ch + .36em);
+  min-width: calc(8ch + .32em);
   text-align: center;
   padding: .38rem .5rem .3rem;
   border: 2px solid color-mix(in srgb, var(--t) 65%, transparent);

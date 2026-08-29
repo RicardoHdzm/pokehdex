@@ -42,12 +42,13 @@ const ROMAN = [
   "", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"
 ];
 
+/* Nombres de los tipos, en ingles */
 const TYPE_ES = {
-  normal: "Normal", fire: "Fuego", water: "Agua", electric: "Electrico",
-  grass: "Planta", ice: "Hielo", fighting: "Lucha", poison: "Veneno",
-  ground: "Tierra", flying: "Volador", psychic: "Psiquico", bug: "Bicho",
-  rock: "Roca", ghost: "Fantasma", dragon: "Dragon", dark: "Siniestro",
-  steel: "Acero", fairy: "Hada"
+  normal: "Normal", fire: "Fire", water: "Water", electric: "Electric",
+  grass: "Grass", ice: "Ice", fighting: "Fighting", poison: "Poison",
+  ground: "Ground", flying: "Flying", psychic: "Psychic", bug: "Bug",
+  rock: "Rock", ghost: "Ghost", dragon: "Dragon", dark: "Dark",
+  steel: "Steel", fairy: "Fairy"
 };
 
 /* Iconos de genero de Font Awesome 6 (se carga desde el CDN en index.html) */
