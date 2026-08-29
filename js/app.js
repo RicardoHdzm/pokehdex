@@ -543,7 +543,8 @@ function plate(mon, index, section) {
   const title = nickname || mon.species;
 
   return `
-    <article class="plate" style="animation-delay:${index * 70}ms">
+    <article class="plate${typeof esMiPerfil === "function" && esMiPerfil() ? " editable" : ""}"
+             data-slot="${index}" style="animation-delay:${index * 70}ms">
       <div class="plate-figure">
         <img class="plate-img" loading="lazy" alt="${mon.species}"
              src="${spriteSrc(mon)}" data-fallback="${spriteAlt(mon)}">
@@ -566,14 +567,16 @@ function plate(mon, index, section) {
 }
 
 function emptyPlate(index) {
+  const mio = typeof esMiPerfil === "function" && esMiPerfil();
   return `
-    <article class="plate plate-empty" style="animation-delay:${index * 70}ms">
-      <div class="plate-figure"><span class="empty-mark">—</span></div>
+    <article class="plate plate-empty${mio ? " editable" : ""}" data-slot="${index}"
+             style="animation-delay:${index * 70}ms"${mio ? ' role="button" tabindex="0"' : ""}>
+      <div class="plate-figure"><span class="empty-mark">${mio ? "+" : "—"}</span></div>
       <div class="plate-index">
         <span class="num">${plateNum(index + 1)} / 06</span>
         <span>#————</span>
       </div>
-      <h3 class="plate-name">Sin registrar</h3>
+      <h3 class="plate-name">${mio ? "Añadir" : "Sin registrar"}</h3>
     </article>`;
 }
 
@@ -797,6 +800,123 @@ function conectarModos() {
 }
 
 /* Marcar y desmarcar desde la propia Pokedex, solo en el perfil propio */
+/* ---------- Editor de un hueco del equipo ---------- */
+
+let editando = null;   // { seccion, indice }
+
+function opcionesDeBall() {
+  return Object.entries(BALL_ES)
+    .map(([id, nombre]) => '<option value="' + id + '">' + nombre + "</option>")
+    .join("");
+}
+
+async function abrirEditor(seccion, indice) {
+  editando = { seccion, indice };
+  const mon = seccion.team[indice] || null;
+  const dlg = document.getElementById("monEditor");
+
+  /* La lista de especies alimenta el buscador */
+  const especies = await fetchSpecies();
+  document.getElementById("monLista").innerHTML = especies
+    .map(([id, slug]) => '<option value="' + nombreEspecie(slug) + '" data-dex="' + id + '">')
+    .join("");
+
+  document.getElementById("monEspecie").value = mon ? mon.species : "";
+  document.getElementById("monApodo").value = mon ? mon.nickname || "" : "";
+  document.getElementById("monBall").value = mon && mon.ball ? mon.ball : "poke-ball";
+  document.getElementById("monShiny").checked = Boolean(mon && mon.shiny);
+  document.querySelectorAll(".mon-genero").forEach((b) => {
+    b.setAttribute("aria-pressed", String((mon ? mon.gender : "m") === b.dataset.genero));
+  });
+
+  document.getElementById("monBorrar").hidden = !mon;
+  document.getElementById("monTitulo").textContent =
+    (mon ? "Editar" : "Añadir") + " · hueco " + plateNum(indice + 1);
+  document.getElementById("monMensaje").textContent = "";
+
+  dlg.hidden = false;
+  document.getElementById("monEspecie").focus();
+}
+
+function cerrarEditor() {
+  editando = null;
+  document.getElementById("monEditor").hidden = true;
+}
+
+function generoElegido() {
+  const b = document.querySelector('.mon-genero[aria-pressed="true"]');
+  return b ? b.dataset.genero : "m";
+}
+
+async function guardarDelEditor(e) {
+  e.preventDefault();
+  if (!editando) return;
+
+  const aviso = document.getElementById("monMensaje");
+  const nombre = document.getElementById("monEspecie").value.trim();
+  const opcion = [...document.getElementById("monLista").options]
+    .find((o) => o.value.toLowerCase() === nombre.toLowerCase());
+
+  if (!opcion) { aviso.textContent = "Elige una especie de la lista."; return; }
+
+  const mon = {
+    dex: Number(opcion.dataset.dex),
+    species: opcion.value,
+    nickname: document.getElementById("monApodo").value.trim(),
+    gender: generoElegido(),
+    ball: document.getElementById("monBall").value,
+    shiny: document.getElementById("monShiny").checked
+  };
+
+  aviso.textContent = "Guardando...";
+  const res = await guardarMon(editando.seccion, editando.indice, mon);
+  if (!res.ok) { aviso.textContent = "No se pudo guardar: " + res.error; return; }
+
+  const seccion = editando.seccion;
+  cerrarEditor();
+  selectGeneration(seccion.id, false);
+}
+
+async function borrarDelEditor() {
+  if (!editando) return;
+  const aviso = document.getElementById("monMensaje");
+
+  aviso.textContent = "Borrando...";
+  const res = await borrarMon(editando.seccion, editando.indice);
+  if (!res.ok) { aviso.textContent = "No se pudo borrar: " + res.error; return; }
+
+  const seccion = editando.seccion;
+  cerrarEditor();
+  selectGeneration(seccion.id, false);
+}
+
+function conectarEditor() {
+  panelEl.addEventListener("click", (e) => {
+    const plate = e.target.closest(".plate.editable");
+    if (!plate || !genEnPantalla) return;
+    abrirEditor(genEnPantalla, Number(plate.dataset.slot));
+  });
+
+  document.getElementById("monForm").addEventListener("submit", guardarDelEditor);
+  document.getElementById("monBorrar").addEventListener("click", borrarDelEditor);
+  document.getElementById("monCancelar").addEventListener("click", cerrarEditor);
+
+  document.querySelectorAll(".mon-genero").forEach((b) => {
+    b.addEventListener("click", () => {
+      document.querySelectorAll(".mon-genero").forEach((o) =>
+        o.setAttribute("aria-pressed", String(o === b)));
+    });
+  });
+
+  document.getElementById("monEditor").addEventListener("click", (e) => {
+    if (e.target.id === "monEditor") cerrarEditor();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && editando) cerrarEditor();
+  });
+}
+
 function conectarSelectorJuego() {
   panelEl.addEventListener("change", async (e) => {
     if (e.target.id !== "juegoSel" || !genEnPantalla) return;
@@ -875,6 +995,7 @@ function init() {
   conectarModos();
   conectarMarcado();
   conectarSelectorJuego();
+  conectarEditor();
 
   const fromHash = location.hash.slice(1);
   if (TEAMS.some((g) => g.id === fromHash)) return selectGeneration(fromHash, false);

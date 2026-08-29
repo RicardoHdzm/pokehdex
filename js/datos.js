@@ -52,8 +52,84 @@ async function cargarJuegos(userId) {
   data.forEach((f) => JUEGOS_ELEGIDOS.set(f.generation, f.game_id));
 }
 
+/* Equipos y favoritos: mandan los de la base. Un perfil recien creado los
+   tiene vacios, y cada quien se los va montando. */
+function filaAMon(f) {
+  return {
+    dex: f.dex_id, species: f.species, nickname: f.nickname || "",
+    gender: f.gender || "n", form: f.form || undefined,
+    ball: f.ball || undefined, shiny: Boolean(f.shiny)
+  };
+}
+
+async function cargarEquipos(userId) {
+  TEAMS.forEach((s) => { s.team = []; });
+  if (!sb) return;
+
+  const [eq, fav] = await Promise.all([
+    sb.from("teams").select("generation, slot, dex_id, species, nickname, gender, form, ball, shiny")
+      .eq("user_id", userId).order("generation").order("slot"),
+    sb.from("favourites").select("position, dex_id, species, nickname, gender, form, ball, shiny")
+      .eq("user_id", userId).order("position")
+  ]);
+
+  if (eq.error) console.warn("equipos:", eq.error.message);
+  else {
+    const porGen = new Map();
+    eq.data.forEach((f) => {
+      if (!porGen.has(f.generation)) porGen.set(f.generation, []);
+      porGen.get(f.generation).push(filaAMon(f));
+    });
+    TEAMS.forEach((s) => { if (!s.hall) s.team = porGen.get(s.generation) || []; });
+  }
+
+  if (fav.error) console.warn("favoritos:", fav.error.message);
+  else {
+    const hall = TEAMS.find((s) => s.hall);
+    if (hall) hall.team = fav.data.map(filaAMon);
+  }
+}
+
 async function cargarPerfilCompleto(userId) {
-  await Promise.all([cargarCapturas(userId), cargarJuegos(userId)]);
+  await Promise.all([cargarCapturas(userId), cargarJuegos(userId), cargarEquipos(userId)]);
+}
+
+/* ---------- Editar un hueco del equipo o de favoritos ---------- */
+
+/* seccion es la del indice: la del Salon de la Fama va a otra tabla */
+async function guardarMon(seccion, indice, mon) {
+  if (!sb || !sesion) return { ok: false, error: "sin sesion" };
+
+  const comun = {
+    user_id: sesion.user.id, dex_id: mon.dex, species: mon.species,
+    nickname: mon.nickname || null, gender: mon.gender || "n",
+    form: mon.form || null, ball: mon.ball || null, shiny: Boolean(mon.shiny)
+  };
+
+  const { error } = seccion.hall
+    ? await sb.from("favourites").upsert({ ...comun, position: indice + 1 }, { onConflict: "user_id,position" })
+    : await sb.from("teams").upsert({ ...comun, generation: seccion.generation, slot: indice + 1 },
+        { onConflict: "user_id,generation,slot" });
+
+  if (error) return { ok: false, error: error.message };
+
+  seccion.team[indice] = mon;
+  return { ok: true };
+}
+
+async function borrarMon(seccion, indice) {
+  if (!sb || !sesion) return { ok: false, error: "sin sesion" };
+
+  const { error } = seccion.hall
+    ? await sb.from("favourites").delete()
+        .match({ user_id: sesion.user.id, position: indice + 1 })
+    : await sb.from("teams").delete()
+        .match({ user_id: sesion.user.id, generation: seccion.generation, slot: indice + 1 });
+
+  if (error) return { ok: false, error: error.message };
+
+  seccion.team.splice(indice, 1);
+  return { ok: true };
 }
 
 /* ---------- Escritura ---------- */
