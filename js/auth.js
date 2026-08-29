@@ -159,13 +159,23 @@ async function cargarPerfil() {
 
 function pintarSesion() {
   const barra = document.getElementById("authBarra");
+  const nombre = document.getElementById("authNombre");
   if (!barra) return;
 
-  if (!sesion) { barra.innerHTML = ""; return; }
+  if (!sesion) {
+    barra.innerHTML = "";
+    if (nombre) nombre.innerHTML = "";
+    return;
+  }
 
   const quien = (perfil && (perfil.display_name || perfil.handle)) || sesion.user.email;
+
+  /* El nombre se queda arriba del todo; los botones van bajo la entradilla */
+  if (nombre) {
+    nombre.innerHTML = '<span class="auth-quien"><i class="fa-solid fa-user"></i> ' + quien + "</span>";
+  }
+
   barra.innerHTML = `
-    <span class="auth-quien"><i class="fa-solid fa-user"></i> ${quien}</span>
     <button class="auth-salir" type="button" id="authComparar">Comparar</button>
     <button class="auth-salir" type="button" id="authPerfil">Perfil</button>
     <button class="auth-salir" type="button" id="authSalir">Salir</button>`;

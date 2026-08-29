@@ -552,3 +552,13 @@ body.con-sesion .dex-tile { cursor: pointer; }
   .dex-masivo { width: 100%; }
   .dex-masivo .boton { flex: 1 1 auto; }
 }
+
+/* El nombre vuelve arriba a la derecha, separado de los botones */
+.auth-nombre {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  min-height: 1.5rem;
+  font-size: 1rem;
+  color: var(--ink-2);
+}
