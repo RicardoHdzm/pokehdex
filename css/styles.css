@@ -144,10 +144,14 @@ a { color: var(--accent); text-underline-offset: .2em; }
   border-bottom: 2px solid var(--rule);
 }
 
+/* El indice puede pasarse del ancho del contenido: con doce pestañas
+   no cabian y se cortaban las ultimas */
+.index-nav .wrap { width: min(1560px, 100% - 2rem); }
+
 .index-row {
   display: flex;
   justify-content: center;
-  gap: clamp(.9rem, 3vw, 2.4rem);
+  gap: clamp(.8rem, 2.2vw, 2rem);
   padding: .85rem 0 .7rem;
   overflow-x: auto;
   scrollbar-width: none;

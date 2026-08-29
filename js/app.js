@@ -66,22 +66,22 @@ const FORM_ES = {
   bloodmoon: "Luna Carmesi", amped: "Aguda", "low-key": "Grave"
 };
 
-/* Nombres en español de las Poke Balls (clave = archivo del sprite) */
+/* Nombres de las Poke Balls, en ingles (clave = archivo del sprite) */
 const BALL_ES = {
-  "poke-ball": "Poke Ball",       "great-ball": "Super Ball",
+  "poke-ball": "Poke Ball",       "great-ball": "Great Ball",
   "ultra-ball": "Ultra Ball",     "master-ball": "Master Ball",
-  "premier-ball": "Honor Ball",   "luxury-ball": "Lujo Ball",
-  "dusk-ball": "Ocaso Ball",      "quick-ball": "Veloz Ball",
-  "net-ball": "Malla Ball",       "dive-ball": "Buceo Ball",
-  "nest-ball": "Nido Ball",       "repeat-ball": "Acopio Ball",
-  "timer-ball": "Turno Ball",     "heal-ball": "Sana Ball",
-  "safari-ball": "Safari Ball",   "level-ball": "Nivel Ball",
-  "lure-ball": "Cebo Ball",       "moon-ball": "Luna Ball",
-  "friend-ball": "Amiga Ball",    "love-ball": "Amor Ball",
-  "heavy-ball": "Peso Ball",      "fast-ball": "Rapid Ball",
-  "dream-ball": "Ensueño Ball",   "beast-ball": "Ente Ball",
-  "sport-ball": "Competi Ball",   "cherish-ball": "Gloria Ball",
-  "park-ball": "Parque Ball"
+  "premier-ball": "Premier Ball", "luxury-ball": "Luxury Ball",
+  "dusk-ball": "Dusk Ball",       "quick-ball": "Quick Ball",
+  "net-ball": "Net Ball",         "dive-ball": "Dive Ball",
+  "nest-ball": "Nest Ball",       "repeat-ball": "Repeat Ball",
+  "timer-ball": "Timer Ball",     "heal-ball": "Heal Ball",
+  "safari-ball": "Safari Ball",   "level-ball": "Level Ball",
+  "lure-ball": "Lure Ball",       "moon-ball": "Moon Ball",
+  "friend-ball": "Friend Ball",   "love-ball": "Love Ball",
+  "heavy-ball": "Heavy Ball",     "fast-ball": "Fast Ball",
+  "dream-ball": "Dream Ball",     "beast-ball": "Beast Ball",
+  "sport-ball": "Sport Ball",     "cherish-ball": "Cherish Ball",
+  "park-ball": "Park Ball"
 };
 
 const navEl = document.getElementById("gamePills");
@@ -642,7 +642,7 @@ function selectorDeJuego(gen) {
 function champHead(gen) {
   return `
     <header class="gen-head">
-      <span class="gen-watermark" aria-hidden="true"><i class="fa-solid fa-medal"></i></span>
+      <span class="gen-watermark" aria-hidden="true"><i class="fa-solid fa-trophy"></i></span>
       <p class="eyebrow">Combate</p>
       <h2 class="gen-title">${gen.title || gen.region}</h2>
       <p class="gen-meta">Equipo de ${gen.team.length} de 6</p>
@@ -796,7 +796,7 @@ function buildIndex() {
     <button class="index-item${g.hall || g.soloEquipo ? " index-hall" : ""}" role="tab" type="button"
             data-id="${g.id}" aria-selected="false">
       <span class="roman">${g.hall ? '<i class="fa-solid fa-star"></i>'
-        : g.soloEquipo ? '<i class="fa-solid fa-medal"></i>' : roman(g.generation)}</span>
+        : g.soloEquipo ? '<i class="fa-solid fa-trophy"></i>' : roman(g.generation)}</span>
       <span class="region">${g.hall ? "Favoritos" : g.region}</span>
     </button>`).join("");
 
