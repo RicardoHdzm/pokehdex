@@ -801,8 +801,8 @@ function selectGeneration(id, push = true) {
   renderGeneration(gen);
   if (push) history.replaceState(null, "", "#" + gen.id);
   document.title = gen.hall || gen.soloEquipo
-    ? `${gen.title || gen.region} — PPVDEX`
-    : `${ORDINAL[gen.generation]} generacion · ${gen.region} — PPVDEX`;
+    ? `${gen.title || gen.region} — POKEHDEX`
+    : `${ORDINAL[gen.generation]} generacion · ${gen.region} — POKEHDEX`;
 }
 
 function buildIndex() {

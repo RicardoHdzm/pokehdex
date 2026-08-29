@@ -1,5 +1,5 @@
 -- ============================================================
---  PPVDEX — esquema de Supabase
+--  POKEHDEX — esquema de Supabase
 --  Ejecutar entero en el editor SQL del proyecto (SQL Editor > New query).
 --  Es idempotente: se puede volver a lanzar sin romper nada.
 -- ============================================================
