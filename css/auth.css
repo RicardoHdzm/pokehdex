@@ -228,3 +228,34 @@ body.con-sesion .dex-tile { cursor: pointer; }
 }
 
 .boton:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Desplegable de juego en la cabecera de la generacion */
+.juego-select {
+  padding: .2rem 1.4rem .2rem .4rem;
+  background: var(--panel);
+  border: 2px solid var(--rule);
+  color: var(--accent);
+  font-family: var(--term);
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  cursor: pointer;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+                    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: right .7rem center, right .45rem center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  transition: border-color .15s ease;
+}
+
+.juego-select:hover { border-color: var(--accent); }
+
+.juego-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* El desplegable del sistema se pinta aparte: hay que forzar el fondo */
+.juego-select option {
+  background: var(--panel);
+  color: var(--ink);
+  text-transform: none;
+}

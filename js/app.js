@@ -599,6 +599,43 @@ function hallHead(sec) {
     </header>`;
 }
 
+/* El juego elegido en el perfil manda sobre lo que diga data/teams.js */
+function juegoDeGen(gen) {
+  if (typeof JUEGOS_ELEGIDOS === "undefined" || typeof juegoDe !== "function") return null;
+  const elegido = JUEGOS_ELEGIDOS.get(gen.generation);
+  return elegido ? juegoDe(gen.generation, elegido) : null;
+}
+
+function colorDe(gen) {
+  const j = juegoDeGen(gen);
+  return (j && j.color) || gen.color || "#ff5a4d";
+}
+
+function nombreJuegoDe(gen) {
+  const j = juegoDeGen(gen);
+  return j ? j.name : (gen.game || "");
+}
+
+/* Desplegable con los juegos de esa generacion, solo en el perfil propio */
+function selectorDeJuego(gen) {
+  const lista = (typeof GAMES !== "undefined" && GAMES[gen.generation]) || [];
+  if (!lista.length) return "";
+
+  const puedeElegir = typeof esMiPerfil === "function" && esMiPerfil();
+  if (!puedeElegir) {
+    const n = nombreJuegoDe(gen);
+    return n ? '<span class="dot">·</span> <b>' + n + "</b>" : "";
+  }
+
+  const actual = juegoDeGen(gen);
+  const opciones = lista.map((j) =>
+    '<option value="' + j.id + '"' + (actual && actual.id === j.id ? " selected" : "") + ">" +
+    j.name + "</option>").join("");
+
+  return '<span class="dot">·</span> <select class="juego-select" id="juegoSel" ' +
+         'aria-label="Juego de esta region">' + opciones + "</select>";
+}
+
 function genHead(gen) {
   return `
     <header class="gen-head">
@@ -607,7 +644,7 @@ function genHead(gen) {
       <h2 class="gen-title">${ORDINAL[gen.generation] || gen.generation} generacion</h2>
       <p class="gen-meta">
         Region <b>${gen.region}</b>
-        ${gen.game ? '<span class="dot">·</span> <b>' + gen.game + "</b>" : ""}
+        ${selectorDeJuego(gen)}
         <span class="dot">·</span>
         ${gen.team.length} de 6 registrados
       </p>
@@ -616,7 +653,7 @@ function genHead(gen) {
 
 function renderGeneration(gen) {
   const token = ++renderToken;
-  document.documentElement.style.setProperty("--accent", gen.color || "#ff5a4d");
+  document.documentElement.style.setProperty("--accent", colorDe(gen));
 
   /* Una generacion siempre enseña seis huecos; el Salon de la Fama, los que haya. */
   const mostrados = gen.hall ? gen.team : gen.team.slice(0, 6);
@@ -760,6 +797,27 @@ function conectarModos() {
 }
 
 /* Marcar y desmarcar desde la propia Pokedex, solo en el perfil propio */
+function conectarSelectorJuego() {
+  panelEl.addEventListener("change", async (e) => {
+    if (e.target.id !== "juegoSel" || !genEnPantalla) return;
+
+    const gen = genEnPantalla;
+    const elegido = e.target.value;
+
+    /* Se pinta el color al momento y luego se guarda */
+    const juego = juegoDe(gen.generation, elegido);
+    if (juego) document.documentElement.style.setProperty("--accent", juego.color);
+
+    const res = await guardarJuego(gen.generation, elegido);
+    if (!res.ok) {
+      document.documentElement.style.setProperty("--accent", colorDe(gen));
+      return;
+    }
+    buildIndex();
+    selectGeneration(gen.id, false);
+  });
+}
+
 function conectarMarcado() {
   panelEl.addEventListener("click", async (e) => {
     const tile = e.target.closest(".dex-tile");
@@ -816,6 +874,7 @@ function init() {
   buildIndex();
   conectarModos();
   conectarMarcado();
+  conectarSelectorJuego();
 
   const fromHash = location.hash.slice(1);
   if (TEAMS.some((g) => g.id === fromHash)) return selectGeneration(fromHash, false);
