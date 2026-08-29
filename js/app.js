@@ -17,6 +17,12 @@ const SPECIES_KEY = "pkmnteam:species";
    nuevos cuando se publica una generacion, sin tener que limpiar el navegador. */
 const CADUCIDAD = 7 * 24 * 60 * 60 * 1000;
 
+/* leerLista tiene que parsear 17 y 25 KB de JSON, y estas dos listas se piden
+   muchas veces: al cambiar de region, al abrir el editor y en cada tecla del
+   buscador de especies. Una vez leidas se quedan aqui ya parseadas. */
+let ESPECIES_MEM = null;
+let VARIANTES_MEM = null;
+
 function leerLista(clave) {
   try {
     const c = JSON.parse(localStorage.getItem(clave));
@@ -228,8 +234,10 @@ function nombreEspecie(slug) {
 
 /* La lista completa de especies se pide una sola vez y se guarda en el navegador */
 async function fetchSpecies() {
+  if (ESPECIES_MEM) return ESPECIES_MEM;
+
   const guardado = leerLista(SPECIES_KEY);
-  if (guardado && guardado.length > 900) return guardado;
+  if (guardado && guardado.length > 900) return (ESPECIES_MEM = guardado);
 
   try {
     const res = await fetch(SPECIES_URL);
@@ -240,7 +248,7 @@ async function fetchSpecies() {
       .filter(([id]) => id > 0)
       .sort((a, b) => a[0] - b[0]);
     guardarLista(SPECIES_KEY, lista);
-    return lista;
+    return (ESPECIES_MEM = lista);
   } catch {
     return [];
   }
@@ -259,8 +267,10 @@ const ES_REGIONAL = /-(alola|galar|hisui|paldea)$|-paldea-(combat|blaze|aqua)-br
    y no solo las regionales, para poder añadir formas sueltas (Luna Carmesi,
    Gigamax...) sin tener que volver a pedirlo. Una peticion, cacheada. */
 async function fetchVariantes() {
+  if (VARIANTES_MEM) return VARIANTES_MEM;
+
   const guardado = leerLista(FORMAS_KEY);
-  if (guardado && guardado.length > 1000) return guardado;
+  if (guardado && guardado.length > 1000) return (VARIANTES_MEM = guardado);
 
   try {
     const res = await fetch(FORMAS_URL);
@@ -270,7 +280,7 @@ async function fetchVariantes() {
       .map((r) => [Number(r.url.split("/").filter(Boolean).pop()), r.name])
       .sort((a, b) => a[0] - b[0]);
     guardarLista(FORMAS_KEY, lista);
-    return lista;
+    return (VARIANTES_MEM = lista);
   } catch {
     return [];
   }
@@ -930,19 +940,30 @@ function opcionesDeBall() {
     .join("");
 }
 
+/* El buscador son 1025 <option> y siempre los mismos: montarlos de nuevo en
+   cada apertura era lo que trababa el editor al abrirlo en el movil. Se hace
+   una sola vez y a partir de ahi la ventana abre al momento. */
+let listaMontada = false;
+
+async function montarListaEspecies() {
+  if (listaMontada) return;
+
+  const especies = await fetchSpecies();
+  if (!especies.length) return;   // sin lista todavia: se reintenta al abrir
+
+  document.getElementById("monLista").innerHTML = especies
+    .map(([id, slug]) => '<option value="' + nombreEspecie(slug) + '" data-dex="' + id +
+      '" data-slug="' + slug + '">')
+    .join("");
+  listaMontada = true;
+}
+
 async function abrirEditor(seccion, indice) {
   editando = { seccion, indice };
   const mon = seccion.team[indice] || null;
   const dlg = document.getElementById("monEditor");
 
-  /* La lista de especies alimenta el buscador */
-  const especies = await fetchSpecies();
-  document.getElementById("monLista").innerHTML = especies
-    .map(([id, slug]) => '<option value="' + nombreEspecie(slug) + '" data-dex="' + id +
-      '" data-slug="' + slug + '">')
-    .join("");
-
-  document.getElementById("monBall").innerHTML = opcionesDeBall();
+  /* Primero lo que no depende de PokeAPI, para que la ventana salga ya */
   document.getElementById("monEspecie").value = mon ? mon.species : "";
   document.getElementById("monApodo").value = mon ? mon.nickname || "" : "";
   document.getElementById("monBall").value = mon && mon.ball ? mon.ball : "poke-ball";
@@ -951,11 +972,8 @@ async function abrirEditor(seccion, indice) {
     b.setAttribute("aria-pressed", String((mon ? mon.gender : "m") === b.dataset.genero));
   });
 
-  const slugActual = mon
-    ? (especies.find(([id]) => id === mon.dex) || [])[1]
-    : null;
-  await pintarFormas(slugActual, mon ? mon.form : null);
-
+  document.getElementById("monForma").innerHTML = "";
+  document.getElementById("monFormaCampo").hidden = true;
   document.getElementById("monBorrar").hidden = !mon;
   document.getElementById("monTitulo").textContent =
     (mon ? "Editar" : "Añadir") + " · hueco " + plateNum(indice + 1);
@@ -963,6 +981,18 @@ async function abrirEditor(seccion, indice) {
 
   dlg.hidden = false;
   document.getElementById("monEspecie").focus();
+
+  /* Y ya con la ventana abierta, lo que puede tardar */
+  await montarListaEspecies();
+
+  /* Se puede haber cerrado o cambiado de hueco mientras tanto */
+  if (!editando || editando.seccion !== seccion || editando.indice !== indice) return;
+
+  const especies = await fetchSpecies();
+  const slugActual = mon
+    ? (especies.find(([id]) => id === mon.dex) || [])[1]
+    : null;
+  await pintarFormas(slugActual, mon ? mon.form : null);
 }
 
 /* Busca las variantes de una especie en el listado completo de PokeAPI:
@@ -1159,6 +1189,7 @@ function conectarEditor() {
     abrirEditor(genEnPantalla, Number(plate.dataset.slot));
   });
 
+  document.getElementById("monBall").innerHTML = opcionesDeBall();
   document.getElementById("monForm").addEventListener("submit", guardarDelEditor);
 
   document.getElementById("monEspecie").addEventListener("input", () => {
