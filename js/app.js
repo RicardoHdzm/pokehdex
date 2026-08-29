@@ -546,7 +546,7 @@ function asaDeArrastre(index, section) {
   return `
     <button type="button" class="plate-asa" data-desde="${index}"
             title="Arrastra para cambiarlo de sitio" aria-label="Arrastrar para reordenar">
-      <i class="fa-solid fa-hand"></i>
+      <i class="fa-solid fa-up-down-left-right"></i>
     </button>`;
 }
 
@@ -574,7 +574,7 @@ function plate(mon, index, section) {
         ${nickname ? (mon.form ? formName(mon) : mon.species) + '<span class="sep">·</span>' : ""}
         <span class="gender ${mon.gender || "n"}" role="img"
               title="${g.label}" aria-label="${g.label}">${g.icon}</span>
-        ${mon.shiny ? '<span class="plate-note">Ejemplar variocolor</span>' : ""}
+        ${mon.shiny ? '<i class="fa-solid fa-star plate-shiny" title="Variocolor" aria-label="Variocolor"></i>' : ""}
       </p>
       <ul class="plate-types">${typeChips(mon.types || [])}</ul>
     </article>`;

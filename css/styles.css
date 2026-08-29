@@ -375,15 +375,13 @@ a { color: var(--accent); text-underline-offset: .2em; }
 .gender.f { color: var(--female); }
 .gender.n { color: var(--neutral); }
 
-.plate-note {
-  display: block;
-  margin-top: .35rem;
-  font-family: var(--pixel);
-  font-size: .48rem;
-  line-height: 1.6;
-  text-transform: uppercase;
+/* Variocolor: una estrella junto al genero, en la misma linea */
+.plate-shiny {
+  margin-left: .35rem;
+  font-size: .85em;
   color: #ffd45c;
-  text-shadow: 0 0 12px rgba(255, 212, 92, .5);
+  text-shadow: 0 0 10px rgba(255, 212, 92, .6);
+  vertical-align: .04em;
 }
 
 /* Tipos: bloques de HUD */
