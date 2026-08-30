@@ -416,6 +416,77 @@ body.con-sesion .dex-tile { cursor: pointer; }
 
 .comp-caja { width: min(56rem, 100%); }
 
+/* ===== Quien tiene lo que te falta ===== */
+
+.comp-ranking { margin: 0 0 1.5rem; }
+.comp-ranking[hidden] { display: none; }
+
+.comp-ranking-lista {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  margin: .75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.comp-ranking-fila {
+  display: grid;
+  grid-template-columns: minmax(6rem, 10rem) 1fr auto auto;
+  align-items: center;
+  gap: .75rem;
+  width: 100%;
+  padding: .55rem .7rem;
+  background: var(--panel);
+  border: 2px solid var(--rule);
+  color: var(--ink);
+  font-family: var(--term);
+  font-size: 1rem;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s ease;
+}
+
+.comp-ranking-fila:hover { border-color: var(--accent); }
+
+.comp-ranking-nombre {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* La barra deja ver de un vistazo quien destaca sobre los demas */
+.comp-ranking-barra {
+  height: 8px;
+  background: color-mix(in srgb, var(--ink-2) 25%, transparent);
+}
+
+.comp-ranking-barra > span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.comp-ranking-cuenta {
+  min-width: 3ch;
+  font-family: var(--pixel);
+  font-size: .6rem;
+  text-align: right;
+  color: var(--accent);
+}
+
+.comp-ranking-vuelta {
+  font-size: .82rem;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  /* En movil no cabe todo en una linea: se cae el "le das N" */
+  .comp-ranking-fila { grid-template-columns: minmax(5rem, 1fr) 1fr auto; }
+  .comp-ranking-vuelta { display: none; }
+}
+
 .comp-controles {
   display: flex;
   flex-wrap: wrap;

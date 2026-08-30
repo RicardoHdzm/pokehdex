@@ -544,6 +544,126 @@ const TOPE_FAVORITOS = 12;
 /* Las cajas del PC de los juegos son de 30, en seis columnas por cinco filas */
 const POR_CAJA = 30;
 
+/* Lo que hay escrito en el buscador y que filtro esta puesto. Se guarda
+   entre pestañas a proposito: "los que me faltan" es util de region en
+   region, y como los dos controles se ven en pantalla no es estado oculto. */
+let dexBusqueda = "";
+let dexFiltro = "todos";   // todos | faltan | tengo
+
+/* La ultima Pokedex pintada, para poder filtrar sin volver a calcularla */
+let dexUltima = null;      // { gen, entradas, capturados }
+
+/* Un Pokemon entra en la busqueda por nombre o por numero: "char" saca a
+   los Charmander y "25" saca al 0025. */
+function coincide(entrada, texto) {
+  if (!texto) return true;
+  if (entrada.nombre.toLowerCase().includes(texto)) return true;
+  return dexNum(entrada.base || entrada.id).toLowerCase().includes(texto);
+}
+
+function entradasFiltradas(entradas, capturados) {
+  const texto = dexBusqueda.trim().toLowerCase();
+  return entradas.filter((e) => {
+    if (!coincide(e, texto)) return false;
+    if (dexFiltro === "faltan") return !capturados.has(e.id);
+    if (dexFiltro === "tengo") return capturados.has(e.id);
+    return true;
+  });
+}
+
+/* Con un filtro puesto las cajas del PC pierden el sentido: lo que sale es
+   un resultado de busqueda, asi que va en una sola rejilla. */
+function cajasHTML(entradas, capturados, filtrando) {
+  if (filtrando) {
+    if (!entradas.length) {
+      return `<p class="dex-vacio">Ningun Pokemon coincide con lo que buscas.</p>`;
+    }
+    return `
+      <section class="dex-caja" style="--filas:${Math.ceil(entradas.length / 6)}">
+        <h4 class="dex-caja-titulo">
+          <span>${entradas.length} ${entradas.length === 1 ? "resultado" : "resultados"}</span>
+          <span class="dex-caja-cuenta">${entradas.filter((e) => capturados.has(e.id)).length}/${entradas.length}</span>
+        </h4>
+        <ul class="dex-grid">${entradas.map((e) => dexTile(e, capturados)).join("")}</ul>
+      </section>`;
+  }
+
+  /* Se parte en cajas de 30, como en el juego. La ultima queda incompleta
+     igual que alli cuando la generacion no es multiplo de treinta. */
+  let html = "";
+  for (let i = 0; i < entradas.length; i += POR_CAJA) {
+    const tanda = entradas.slice(i, i + POR_CAJA);
+    const tengoEnCaja = tanda.filter((e) => capturados.has(e.id)).length;
+    html += `
+      <section class="dex-caja" style="--filas:${Math.ceil(tanda.length / 6)}">
+        <h4 class="dex-caja-titulo">
+          <span>Box ${Math.floor(i / POR_CAJA) + 1}</span>
+          <span class="dex-caja-cuenta">${tengoEnCaja}/${tanda.length}</span>
+        </h4>
+        <ul class="dex-grid">${tanda.map((e) => dexTile(e, capturados)).join("")}</ul>
+      </section>`;
+  }
+  return html;
+}
+
+/* Repinta solo las cajas, sin recalcular nada: es lo que corre al escribir */
+function repintarCajas() {
+  if (!dexUltima) return;
+  const grid = panelEl.querySelector("#dexCajas");
+  if (!grid) return;
+
+  const { entradas, capturados } = dexUltima;
+  const filtrando = Boolean(dexBusqueda.trim()) || dexFiltro !== "todos";
+  grid.innerHTML = cajasHTML(entradasFiltradas(entradas, capturados), capturados, filtrando);
+}
+
+/* Resumen de las diez regiones, para la Nacional: cuanto llevas en cada una
+   sin tener que entrar pestaña por pestaña. Se calcula con las mismas
+   funciones que pintan cada Pokedex, asi que los numeros son los suyos. */
+function resumenPorRegion(especies, variantes) {
+  return generacionesReales().map((sec) => {
+    const entradas = entradasDe(sec, especies, variantes);
+    const capturados = modoShiny
+      ? shinyDe(sec, entradas, variantes)
+      : capturadosDe(sec, entradas, variantes);
+    const tengo = entradas.filter((e) => capturados.has(e.id)).length;
+
+    return {
+      id: sec.id,
+      region: sec.region,
+      generacion: sec.generation,
+      color: colorDe(sec),
+      tengo,
+      total: entradas.length
+    };
+  });
+}
+
+function resumenHTML(filas) {
+  return `
+    <section class="resumen">
+      <h3 class="section-label">Por region</h3>
+      <ul class="resumen-lista">
+        ${filas.map((f) => {
+          const pct = f.total ? Math.round((f.tengo / f.total) * 100) : 0;
+          return `
+            <li>
+              <button type="button" class="resumen-fila" data-id="${f.id}"
+                      style="--tono:${f.color}">
+                <span class="resumen-roman">${roman(f.generacion)}</span>
+                <span class="resumen-region">${f.region}</span>
+                <span class="resumen-barra" aria-hidden="true">
+                  <span style="width:${pct}%"></span>
+                </span>
+                <span class="resumen-cuenta">${f.tengo}/${f.total}</span>
+                <span class="resumen-pct">${pct}%</span>
+              </button>
+            </li>`;
+        }).join("")}
+      </ul>
+    </section>`;
+}
+
 async function renderDex(gen, token) {
   const grid = panelEl.querySelector("#dexCajas");
   if (!grid) return;
@@ -571,22 +691,13 @@ async function renderDex(gen, token) {
     return;
   }
 
-  /* Se parte en cajas de 30, como en el juego. La ultima queda incompleta
-     igual que alli cuando la generacion no es multiplo de treinta. */
-  let html = "";
-  for (let i = 0; i < entradas.length; i += POR_CAJA) {
-    const tanda = entradas.slice(i, i + POR_CAJA);
-    const tengoEnCaja = tanda.filter((e) => capturados.has(e.id)).length;
-    html += `
-      <section class="dex-caja" style="--filas:${Math.ceil(tanda.length / 6)}">
-        <h4 class="dex-caja-titulo">
-          <span>Box ${Math.floor(i / POR_CAJA) + 1}</span>
-          <span class="dex-caja-cuenta">${tengoEnCaja}/${tanda.length}</span>
-        </h4>
-        <ul class="dex-grid">${tanda.map((e) => dexTile(e, capturados)).join("")}</ul>
-      </section>`;
-  }
-  grid.innerHTML = html;
+  dexUltima = { gen, entradas, capturados };
+
+  /* La Nacional lleva ademas el desglose por region, encima de las cajas */
+  const hueco = panelEl.querySelector("#dexResumen");
+  if (hueco) hueco.innerHTML = gen.nacional ? resumenHTML(resumenPorRegion(especies, variantes)) : "";
+
+  repintarCajas();
 
   const tengo = entradas.filter((e) => capturados.has(e.id)).length;
   const total = entradas.length;
@@ -847,6 +958,20 @@ function renderGeneration(gen) {
         </p>
       </div>
       <div class="dex-bar"><span class="dex-bar-fill"></span></div>
+      <div id="dexResumen"></div>
+      <div class="dex-buscador">
+        <input type="search" id="dexBuscar" class="dex-buscar" autocomplete="off"
+               placeholder="Buscar por nombre o numero..." aria-label="Buscar en la Pokedex"
+               value="${dexBusqueda.replace(/"/g, "&quot;")}">
+        <div class="dex-filtros" role="tablist" aria-label="Que Pokemon mostrar">
+          <button class="dex-filtro" type="button" role="tab" data-filtro="todos"
+                  aria-selected="${dexFiltro === "todos"}">Todos</button>
+          <button class="dex-filtro" type="button" role="tab" data-filtro="faltan"
+                  aria-selected="${dexFiltro === "faltan"}">Me faltan</button>
+          <button class="dex-filtro" type="button" role="tab" data-filtro="tengo"
+                  aria-selected="${dexFiltro === "tengo"}">Los tengo</button>
+        </div>
+      </div>
       <div class="dex-cajas" id="dexCajas"></div>
     </section>`;
 
@@ -954,6 +1079,36 @@ function buildIndex() {
   navEl.addEventListener("click", (e) => {
     const item = e.target.closest(".index-item");
     if (item) selectGeneration(item.dataset.id);
+  });
+}
+
+/* Buscador y filtro de la Pokedex */
+function conectarBuscador() {
+  let temporizador = null;
+
+  panelEl.addEventListener("input", (e) => {
+    const campo = e.target.closest("#dexBuscar");
+    if (!campo) return;
+
+    /* Se espera un poco a que pares de escribir: repintar mil casillas en
+       cada tecla se nota, y casi siempre la siguiente letra llega antes. */
+    dexBusqueda = campo.value;
+    clearTimeout(temporizador);
+    temporizador = setTimeout(repintarCajas, 150);
+  });
+
+  panelEl.addEventListener("click", (e) => {
+    const fila = e.target.closest(".resumen-fila");
+    if (fila) return selectGeneration(fila.dataset.id);
+
+    const boton = e.target.closest(".dex-filtro");
+    if (!boton || boton.dataset.filtro === dexFiltro) return;
+
+    dexFiltro = boton.dataset.filtro;
+    panelEl.querySelectorAll(".dex-filtro").forEach((b) => {
+      b.setAttribute("aria-selected", String(b.dataset.filtro === dexFiltro));
+    });
+    repintarCajas();
   });
 }
 
@@ -1370,6 +1525,7 @@ function init() {
   }
   buildIndex();
   conectarModos();
+  conectarBuscador();
   conectarMarcado();
   conectarMarcadoMasivo();
   conectarEditor();

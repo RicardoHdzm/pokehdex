@@ -580,6 +580,146 @@ a { color: var(--accent); text-underline-offset: .2em; }
   transition: width .5s steps(12);
 }
 
+/* ===== Resumen por region (Pokedex Nacional) ===== */
+
+.resumen { margin: 0 0 2rem; }
+
+.resumen-lista {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  margin: .9rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Cada fila lleva el color de su region en --tono, el mismo que su pestaña */
+.resumen-fila {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(5rem, 9rem) 1fr auto 3rem;
+  align-items: center;
+  gap: .75rem;
+  width: 100%;
+  padding: .5rem .7rem;
+  background: var(--panel);
+  border: 2px solid var(--rule);
+  color: var(--ink);
+  font-family: var(--term);
+  font-size: 1rem;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s ease;
+}
+
+.resumen-fila:hover { border-color: var(--tono); }
+
+.resumen-roman {
+  font-family: var(--pixel);
+  font-size: .55rem;
+  color: var(--tono);
+}
+
+.resumen-region {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.resumen-barra {
+  height: 8px;
+  background: color-mix(in srgb, var(--ink-2) 25%, transparent);
+}
+
+.resumen-barra > span {
+  display: block;
+  height: 100%;
+  background: var(--tono);
+}
+
+.resumen-cuenta {
+  font-family: var(--pixel);
+  font-size: .5rem;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.resumen-pct {
+  font-family: var(--pixel);
+  font-size: .55rem;
+  text-align: right;
+  color: var(--tono);
+}
+
+@media (max-width: 640px) {
+  /* En movil sobra el recuento largo: se deja el romano, la barra y el % */
+  .resumen-fila { grid-template-columns: 2rem 1fr 2.6rem; gap: .5rem; }
+  .resumen-region, .resumen-cuenta { display: none; }
+}
+
+/* ===== Buscador y filtro de la Pokedex ===== */
+
+.dex-buscador {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .75rem;
+  margin: 1.25rem 0 1.75rem;
+}
+
+.dex-buscar {
+  flex: 1 1 14rem;
+  min-width: 0;
+  padding: .6rem .7rem .5rem;
+  background: var(--panel);
+  border: 2px solid var(--rule);
+  color: var(--ink);
+  font-family: var(--term);
+  font-size: 1rem;
+  line-height: 1.3;
+  transition: border-color .15s ease;
+}
+
+.dex-buscar::placeholder { color: var(--ink-2); }
+
+.dex-buscar:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Misma caja de pestañas que Normal / Shiny, para que se lean como pareja */
+.dex-filtros {
+  display: flex;
+  border: 2px solid var(--rule);
+}
+
+.dex-filtro {
+  padding: .5rem .8rem .42rem;
+  border: 0;
+  background: none;
+  color: var(--ink-2);
+  font-family: var(--pixel);
+  font-size: .5rem;
+  line-height: 1.5;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color .15s ease, background .15s ease;
+}
+
+.dex-filtro + .dex-filtro { border-left: 2px solid var(--rule); }
+
+.dex-filtro:hover { color: var(--ink); }
+
+.dex-filtro[aria-selected="true"] {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--ink);
+}
+
+.dex-vacio {
+  padding: 2rem 0;
+  color: var(--ink-2);
+}
+
 /* Cajas del PC: seis columnas fijas y treinta por caja, como en el juego */
 .dex-cajas {
   display: flex;
@@ -744,6 +884,9 @@ a { color: var(--accent); text-underline-offset: .2em; }
   .dex-name { display: none; }
   .dex-num { font-size: .34rem; }
   .dex-caja-titulo { font-size: .48rem; }
+  .dex-buscar { flex-basis: 100%; }
+  .dex-filtros { width: 100%; }
+  .dex-filtro { flex: 1; text-align: center; }
   .dex-caja { --fila: 70px; --cabecera: 29px; }
 }
 

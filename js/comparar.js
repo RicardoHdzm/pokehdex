@@ -8,6 +8,7 @@
 
 let perfilesCache = null;
 let cruceActual = null;      // { el_me_da: [], yo_le_doy: [] }
+let crucesCache = null;      // Map<idPerfil, cruce>, uno por amigo
 let compShiny = false;
 let compGen = "todas";
 
@@ -61,7 +62,62 @@ async function cruzarCon(otroId) {
   return cruce;
 }
 
+/* Cruza contra todos los perfiles de golpe. Es lo que alimenta el ranking,
+   y de paso deja cada cruce guardado: al elegir a alguien del desplegable ya
+   no hay que volver a preguntarle a la base. */
+async function cruzarConTodos(perfiles) {
+  if (crucesCache) return crucesCache;
+
+  const cruces = await Promise.all(perfiles.map((p) => cruzarCon(p.id)));
+
+  crucesCache = new Map();
+  perfiles.forEach((p, i) => {
+    if (!cruces[i].error) crucesCache.set(p.id, cruces[i]);
+  });
+  return crucesCache;
+}
+
 /* ---------- Pintado ---------- */
+
+/* El ranking: quien te puede dar mas, de mayor a menor. El numero va en el
+   modo que este elegido arriba, asi que al cambiar a Shiny se reordena. */
+function pintarRanking() {
+  const seccion = document.getElementById("compRanking");
+  const lista = document.getElementById("compRankingLista");
+  if (!seccion || !crucesCache || !perfilesCache) return;
+
+  const filas = perfilesCache
+    .map((p) => {
+      const cruce = crucesCache.get(p.id);
+      if (!cruce) return null;
+      return {
+        id: p.id,
+        nombre: p.display_name || p.handle || "",
+        meDa: filtrar(cruce.el_me_da).length,
+        leDoy: filtrar(cruce.yo_le_doy).length
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.meDa - a.meDa);
+
+  if (!filas.length) { seccion.hidden = true; return; }
+
+  const tope = filas[0].meDa || 1;
+
+  lista.innerHTML = filas.map((f) => `
+    <li>
+      <button type="button" class="comp-ranking-fila" data-id="${f.id}">
+        <span class="comp-ranking-nombre">${f.nombre}</span>
+        <span class="comp-ranking-barra" aria-hidden="true">
+          <span style="width:${Math.round((f.meDa / tope) * 100)}%"></span>
+        </span>
+        <span class="comp-ranking-cuenta">${f.meDa}</span>
+        <span class="comp-ranking-vuelta">le das ${f.leDoy}</span>
+      </button>
+    </li>`).join("");
+
+  seccion.hidden = false;
+}
 
 function fichaComparacion(item) {
   const info = CATALOGO_IDS.get(item.id);
@@ -192,8 +248,12 @@ async function abrirComparar() {
       '<option value="' + p.id + '">' + (p.display_name || p.handle) + "</option>"
     ).join("");
 
-  aviso.textContent = "";
   document.getElementById("compResultado").hidden = true;
+
+  aviso.textContent = "Viendo quien tiene lo que te falta...";
+  await cruzarConTodos(perfiles);
+  aviso.textContent = "";
+  pintarRanking();
 }
 
 function cerrarComparar() {
@@ -210,7 +270,7 @@ async function elegirPerfil(e) {
   if (!id) { res.hidden = true; return; }
 
   aviso.textContent = "Cruzando las dos Pokedex...";
-  const cruce = await cruzarCon(id);
+  const cruce = (crucesCache && crucesCache.get(id)) || await cruzarCon(id);
 
   if (cruce.error) {
     aviso.textContent = "No se pudo comparar: " + cruce.error;
@@ -232,6 +292,16 @@ function conectarComparar() {
   document.getElementById("compGen").addEventListener("change", (e) => {
     compGen = e.target.value;
     pintarCruce();
+    pintarRanking();
+  });
+
+  /* Pinchar una fila del ranking es elegir a esa persona abajo */
+  document.getElementById("compRankingLista").addEventListener("click", (e) => {
+    const fila = e.target.closest(".comp-ranking-fila");
+    if (!fila) return;
+    const sel = document.getElementById("compQuien");
+    sel.value = fila.dataset.id;
+    sel.dispatchEvent(new Event("change", { bubbles: true }));
   });
   document.getElementById("compCerrar").addEventListener("click", cerrarComparar);
 
@@ -248,6 +318,7 @@ function conectarComparar() {
     document.querySelectorAll("#compModos .dex-modo").forEach((o) =>
       o.setAttribute("aria-selected", String((o.dataset.modo === "shiny") === compShiny)));
     pintarCruce();
+    pintarRanking();
   });
 
   panel.addEventListener("click", (e) => { if (e.target === panel) cerrarComparar(); });
