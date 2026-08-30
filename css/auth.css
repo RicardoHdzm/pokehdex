@@ -636,7 +636,7 @@ body.con-sesion .dex-tile { cursor: pointer; }
   width: 34px;
   height: 34px;
   padding: 0;
-  background: rgba(var(--sombra), .88);
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
   border: 2px solid var(--rule);
   box-shadow: 3px 3px 0 rgba(var(--sombra), .5);
   color: var(--ink-2);

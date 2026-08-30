@@ -195,27 +195,15 @@ a { color: var(--accent); text-underline-offset: .2em; }
 
 .tema-boton:hover { border-color: var(--accent); }
 
-/* Un sol de pixeles: cuadrado con cuatro rayos, hecho con sombras */
-.tema-sol {
-  width: 6px;
-  height: 6px;
-  background: var(--ink-2);
-  box-shadow:
-    -8px 0 0 0 var(--ink-2),  8px 0 0 0 var(--ink-2),
-     0 -8px 0 0 var(--ink-2), 0  8px 0 0 var(--ink-2);
-  transition: background .15s ease, box-shadow .15s ease;
+/* Enseña el destino, no el estado: sol para pasar a claro, luna para volver
+   a oscuro. Es lo mismo que dice el texto del title. */
+.tema-boton i {
+  font-size: .9rem;
+  color: var(--ink-2);
+  transition: color .15s ease;
 }
 
-.tema-boton:hover .tema-sol,
-.tema-boton[aria-pressed="true"] .tema-sol {
-  background: var(--accent);
-  box-shadow:
-    -8px 0 0 0 var(--accent),  8px 0 0 0 var(--accent),
-     0 -8px 0 0 var(--accent), 0  8px 0 0 var(--accent);
-}
-
-/* En claro el sol se rellena, para que se vea que esta encendido */
-:root[data-tema="claro"] .tema-sol { width: 10px; height: 10px; }
+.tema-boton:hover i { color: var(--accent); }
 
 @media (max-width: 640px) {
   .tema-boton { top: .6rem; width: 2.1rem; height: 2.1rem; }
@@ -515,7 +503,9 @@ a { color: var(--accent); text-underline-offset: .2em; }
   bottom: .55rem;
   left: .55rem;
   padding: .4rem .5rem .32rem;
-  background: rgba(var(--sombra), .88);
+  /* El panel del tema y no un negro fijo: sobre claro, aquel dejaba un
+     recuadro marron con el texto encima sin apenas contraste */
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
   border: 2px solid color-mix(in srgb, var(--accent) 70%, var(--rule));
   box-shadow: 3px 3px 0 rgba(var(--sombra), .5);
   font-family: var(--pixel);
@@ -970,6 +960,7 @@ a { color: var(--accent); text-underline-offset: .2em; }
 :root[data-tema="claro"] .dex-tile.caught .dex-sprite { filter: none; }
 
 /* El resplandor de los textos con acento no pinta nada sobre claro */
+:root[data-tema="claro"] .form-mark,
 :root[data-tema="claro"] .masthead .eyebrow,
 :root[data-tema="claro"] .gen-title,
 :root[data-tema="claro"] .plate-index .num,

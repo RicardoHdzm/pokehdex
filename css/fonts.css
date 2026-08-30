@@ -9,18 +9,18 @@
    "latin" (U+0000-00FF y puntuacion), que es lo unico que usa
    el sitio: no hay tildes en ningun texto y la eñe entra ahi.
 
-   De Font Awesome se guardan solo los diez glifos que se usan:
+   De Font Awesome se guardan solo los doce glifos que se usan:
    la fuente entera pesa 155 KB y recortada se queda en 1.6 KB.
    Para rehacerla si algun dia hacen falta mas iconos, sobre el
    fa-solid-900.woff2 original de la version 6.7.2:
 
      npm i subset-font
-     subsetFont(buffer, "\uf007\uf005\uf091\uf06e\uf222\uf221\uf22d\uf0b2\uf0ac\uf004",
+     subsetFont(buffer, "\uf007\uf005\uf091\uf06e\uf222\uf221\uf22d\uf0b2\uf0ac\uf004\uf185\uf186",
                 { targetFormat: "woff2" })
 
    Los codigos son los mismos que van abajo en cada clase. Ademas,
    en lugar de los 74 KB de CSS de Font Awesome, aqui solo se
-   declaran esos diez iconos.
+   declaran esos doce iconos.
 
    Licencias: Press Start 2P y VT323 son Open Font License;
    Font Awesome Free 6, CC BY 4.0 para los iconos y OFL para la
@@ -66,7 +66,7 @@
 
 .fa-solid::before { content: var(--fa); }
 
-/* Los diez que usa el sitio, con su codigo de Font Awesome 6.7.2 */
+/* Los doce que usa el sitio, con su codigo de Font Awesome 6.7.2 */
 .fa-user                { --fa: "\f007"; }
 .fa-star                { --fa: "\f005"; }
 .fa-heart               { --fa: "\f004"; }
@@ -77,3 +77,5 @@
 .fa-genderless          { --fa: "\f22d"; }
 .fa-up-down-left-right  { --fa: "\f0b2"; }
 .fa-globe               { --fa: "\f0ac"; }
+.fa-sun                 { --fa: "\f185"; }
+.fa-moon                { --fa: "\f186"; }

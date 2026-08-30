@@ -905,6 +905,9 @@ function aplicarTema(tema) {
     boton.setAttribute("aria-pressed", String(claro));
     boton.title = claro ? "Cambiar a modo oscuro" : "Cambiar a modo claro";
     boton.setAttribute("aria-label", boton.title);
+
+    const icono = document.getElementById("temaIcono");
+    if (icono) icono.className = "fa-solid " + (claro ? "fa-moon" : "fa-sun");
   }
 
   /* El acento se recalcula: es el unico color que depende del tema por JS */
