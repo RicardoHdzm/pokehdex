@@ -573,7 +573,7 @@ function entradasFiltradas(entradas, capturados) {
 
 /* Con un filtro puesto las cajas del PC pierden el sentido: lo que sale es
    un resultado de busqueda, asi que va en una sola rejilla. */
-function cajasHTML(entradas, capturados, filtrando) {
+function cajasHTML(entradas, capturados, filtrando, salto) {
   if (filtrando) {
     if (!entradas.length) {
       return `<p class="dex-vacio">Ningun Pokemon coincide con lo que buscas.</p>`;
@@ -597,7 +597,7 @@ function cajasHTML(entradas, capturados, filtrando) {
     html += `
       <section class="dex-caja" style="--filas:${Math.ceil(tanda.length / 6)}">
         <h4 class="dex-caja-titulo">
-          <span>Box ${Math.floor(i / POR_CAJA) + 1}</span>
+          <span>Box ${(salto || 0) + Math.floor(i / POR_CAJA) + 1}</span>
           <span class="dex-caja-cuenta">${tengoEnCaja}/${tanda.length}</span>
         </h4>
         <ul class="dex-grid">${tanda.map((e) => dexTile(e, capturados)).join("")}</ul>
@@ -614,7 +614,13 @@ function repintarCajas() {
 
   const { entradas, capturados } = dexUltima;
   const filtrando = Boolean(dexBusqueda.trim()) || dexFiltro !== "todos";
-  grid.innerHTML = cajasHTML(entradasFiltradas(entradas, capturados), capturados, filtrando);
+
+  /* Las cajas de la shiny siguen numerando donde acaban las de la normal:
+     si Kanto llega a la caja 6, la primera de shiny es la 7. Se cuenta sobre
+     el total de la region, no sobre lo filtrado, para que no baile al buscar. */
+  const salto = modoShiny ? Math.ceil(entradas.length / POR_CAJA) : 0;
+
+  grid.innerHTML = cajasHTML(entradasFiltradas(entradas, capturados), capturados, filtrando, salto);
 }
 
 /* Resumen de las diez regiones, para la Nacional: cuanto llevas en cada una
