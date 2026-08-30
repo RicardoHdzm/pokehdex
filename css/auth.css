@@ -2,6 +2,10 @@
    Puerta de acceso y barra de sesion
    ============================================================ */
 
+/* En claro el neutro del gate se da la vuelta: si no, el titulo y el rotulo
+   quedarian en blanco sobre fondo claro, o sea invisibles */
+:root[data-tema="claro"] .auth-puerta { --accent: #2f2d28; }
+
 .auth-puerta {
   /* Acento propio y neutro: si heredara el global cambiaria de color segun
      la ultima region que se hubiera pintado al arrancar */
@@ -106,7 +110,7 @@
 
 .auth-mensaje:not(:empty) { margin-top: 1.1rem; }
 .auth-mensaje.ok    { color: #7ee787; }
-.auth-mensaje.error { color: #ff8f8f; }
+.auth-mensaje.error { color: var(--peligro); }
 
 .auth-pie {
   margin: 1.35rem 0 0;
@@ -178,7 +182,7 @@
 
 .import-estado { margin: .9rem 0 0; min-height: 1.4rem; color: var(--ink-2); font-size: 1rem; }
 .import-estado.ok    { color: #7ee787; }
-.import-estado.error { color: #ff8f8f; }
+.import-estado.error { color: var(--peligro); }
 
 /* ---------- Marcado en vivo ---------- */
 
@@ -192,7 +196,7 @@ body.con-sesion .dex-tile { cursor: pointer; }
 .pintando .dex-tile { cursor: cell; }
 
 .dex-tile.fallo {
-  border-color: #ff8f8f;
+  border-color: var(--peligro);
   animation: sacudir .25s steps(3) 2;
 }
 
@@ -355,12 +359,12 @@ body.con-sesion .dex-tile { cursor: pointer; }
 .mon-check { display: flex; align-items: center; gap: .5rem; color: var(--ink-2); font-size: 1.05rem; }
 .mon-check input { width: 1.1rem; height: 1.1rem; accent-color: var(--accent); }
 
-.mon-mensaje { margin: 0; min-height: 1.3rem; color: #ff8f8f; font-size: 1rem; }
+.mon-mensaje { margin: 0; min-height: 1.3rem; color: var(--peligro); font-size: 1rem; }
 
 .mon-botones { display: flex; flex-wrap: wrap; gap: .5rem; }
 
-.boton.peligro { border-color: #ff8f8f; color: #ff8f8f; margin-left: auto; }
-.boton.peligro:hover:not(:disabled) { background: rgba(255, 143, 143, .12); color: #ff8f8f; }
+.boton.peligro { border-color: var(--peligro); color: var(--peligro); margin-left: auto; }
+.boton.peligro:hover:not(:disabled) { background: color-mix(in srgb, var(--peligro) calc(.12 * 100%), transparent); color: var(--peligro); }
 
 /* Huecos y laminas editables */
 .plate.editable { cursor: pointer; }
