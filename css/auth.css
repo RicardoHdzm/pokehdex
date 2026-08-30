@@ -187,6 +187,10 @@ body.con-sesion .dex-tile { cursor: pointer; }
 
 .dex-tile.guardando { opacity: .55; }
 
+/* Mientras se arrastra no debe quedar texto seleccionado por el camino */
+.pintando { user-select: none; }
+.pintando .dex-tile { cursor: cell; }
+
 .dex-tile.fallo {
   border-color: #ff8f8f;
   animation: sacudir .25s steps(3) 2;

@@ -715,6 +715,12 @@ a { color: var(--accent); text-underline-offset: .2em; }
   color: var(--ink);
 }
 
+.dex-ayuda {
+  margin: -1rem 0 1.5rem;
+  font-size: .88rem;
+  color: var(--ink-2);
+}
+
 .dex-vacio {
   padding: 2rem 0;
   color: var(--ink-2);

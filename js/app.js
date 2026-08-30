@@ -972,6 +972,7 @@ function renderGeneration(gen) {
                   aria-selected="${dexFiltro === "tengo"}">Los tengo</button>
         </div>
       </div>
+      ${puedeEditar ? '<p class="dex-ayuda">Arrastra por encima para marcar varias de una vez.</p>' : ""}
       <div class="dex-cajas" id="dexCajas"></div>
     </section>`;
 
@@ -1471,7 +1472,10 @@ function conectarMarcado() {
   panelEl.addEventListener("click", async (e) => {
     const tile = e.target.closest(".dex-tile");
     if (!tile || !tile.dataset.id) return;
-    if (typeof esMiPerfil !== "function" || !esMiPerfil()) return;
+    if (!puedoMarcar()) return;
+
+    /* Con raton, el pincel ya marco esta casilla al pulsar */
+    if (pincelUsado) { pincelUsado = false; return; }
 
     const id = Number(tile.dataset.id);
     const tenerlo = !tile.classList.contains("caught");
@@ -1490,6 +1494,117 @@ function conectarMarcado() {
     }
     if (genEnPantalla) actualizarMarcadorDex(genEnPantalla);
   });
+}
+
+/* ---------- Marcar varias arrastrando ---------- */
+
+/* El primer Pokemon que tocas decide que hace el resto del arrastre: si
+   estaba sin marcar, se marca todo lo que pises; si estaba marcado, se
+   desmarca. Es como el rellenar arrastrando de una hoja de calculo. */
+let pincel = null;        // { tener, tocadas: Map<id, tile> }
+let pincelEspera = null;  // temporizador del toque largo en tactil
+let pincelOrigen = null;  // desde donde empezo el dedo, para saber si es scroll
+let pincelUsado = false;  // para tragarse el clic que llega despues
+
+function puedoMarcar() {
+  return typeof esMiPerfil === "function" && esMiPerfil();
+}
+
+function pintarCasilla(tile) {
+  if (!pincel || !tile || !tile.dataset.id) return;
+
+  const id = Number(tile.dataset.id);
+  if (pincel.tocadas.has(id)) return;
+  /* Las que ya estan como quieres dejarlas no se tocan */
+  if (tile.classList.contains("caught") === pincel.tener) return;
+
+  pincel.tocadas.set(id, tile);
+  tile.classList.toggle("caught", pincel.tener);
+  tile.classList.add("guardando");
+  if (genEnPantalla) actualizarMarcadorDex(genEnPantalla);
+}
+
+function arrancarPincel(tile) {
+  pincelEspera = null;
+  pincel = { tener: !tile.classList.contains("caught"), tocadas: new Map() };
+  panelEl.classList.add("pintando");
+  pintarCasilla(tile);
+}
+
+function cancelarEspera() {
+  clearTimeout(pincelEspera);
+  pincelEspera = null;
+  pincelOrigen = null;
+}
+
+/* Al soltar se guarda todo de una vez: arrastrar por treinta casillas son
+   treinta cambios, pero una sola escritura. */
+async function soltarPincel() {
+  cancelarEspera();
+  if (!pincel) return;
+
+  const { tener, tocadas } = pincel;
+  pincel = null;
+  panelEl.classList.remove("pintando");
+
+  if (!tocadas.size) return;
+  pincelUsado = true;
+
+  const ids = [...tocadas.keys()];
+  const res = await marcarTodas(ids, modoShiny, tener);
+
+  tocadas.forEach((tile) => {
+    tile.classList.remove("guardando");
+    if (!res.ok) {
+      tile.classList.toggle("caught", !tener);
+      tile.classList.add("fallo");
+      setTimeout(() => tile.classList.remove("fallo"), 1200);
+    }
+  });
+
+  if (genEnPantalla) actualizarMarcadorDex(genEnPantalla);
+  actualizarEntradilla();
+}
+
+function conectarPincel() {
+  panelEl.addEventListener("pointerdown", (e) => {
+    const tile = e.target.closest(".dex-tile");
+    if (!tile || !tile.dataset.id || !puedoMarcar()) return;
+
+    if (e.pointerType === "touch") {
+      /* En tactil un arrastre normal es hacer scroll, asi que el pincel solo
+         entra si mantienes el dedo quieto un momento sobre una casilla. */
+      pincelOrigen = { x: e.clientX, y: e.clientY };
+      pincelEspera = setTimeout(() => arrancarPincel(tile), 350);
+    } else {
+      arrancarPincel(tile);
+    }
+  });
+
+  panelEl.addEventListener("pointermove", (e) => {
+    /* Si el dedo se mueve antes de tiempo es que querias desplazar la pagina */
+    if (pincelEspera && pincelOrigen) {
+      const lejos = Math.abs(e.clientX - pincelOrigen.x) > 10 ||
+                    Math.abs(e.clientY - pincelOrigen.y) > 10;
+      if (lejos) cancelarEspera();
+      return;
+    }
+    if (!pincel) return;
+
+    /* En tactil el navegador manda todos los eventos a la casilla donde
+       empezaste, asi que hay que mirar que hay debajo del dedo */
+    const debajo = document.elementFromPoint(e.clientX, e.clientY);
+    pintarCasilla(debajo && debajo.closest(".dex-tile"));
+  });
+
+  /* Mientras se pinta, el dedo no debe arrastrar la pagina */
+  panelEl.addEventListener("touchmove", (e) => {
+    if (pincel) e.preventDefault();
+  }, { passive: false });
+
+  panelEl.addEventListener("pointerup", soltarPincel);
+  panelEl.addEventListener("pointercancel", soltarPincel);
+  panelEl.addEventListener("pointerleave", soltarPincel);
 }
 
 /* Recalcula contador, porcentaje y barra sin repintar toda la rejilla */
@@ -1527,6 +1642,7 @@ function init() {
   conectarModos();
   conectarBuscador();
   conectarMarcado();
+  conectarPincel();
   conectarMarcadoMasivo();
   conectarEditor();
   conectarArrastre();
