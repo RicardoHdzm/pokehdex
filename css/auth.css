@@ -676,18 +676,53 @@ body.con-sesion .dex-tile { cursor: pointer; }
 /* El rotulo del equipo comparte fila con el boton de vaciar */
 .section-head #vaciarEquipo { flex: 0 0 auto; margin-left: auto; }
 
-/* Marcar / desmarcar una generacion entera */
-.dex-masivo {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .5rem;
+/* Marcar / desmarcar una generacion entera. Van plegados: son las dos
+   acciones que menos se usan y ocupaban una fila entera de la cabecera. */
+.dex-masivo { position: relative; }
+
+.dex-masivo-abrir {
+  padding: .5rem .7rem .42rem;
+  border: 2px solid var(--rule);
+  list-style: none;
+  cursor: pointer;
+  font-family: var(--pixel);
+  font-size: .5rem;
+  line-height: 1.5;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  white-space: nowrap;
+  transition: color .15s ease, border-color .15s ease;
 }
 
-.dex-masivo .boton.peligro { margin-left: 0; }
+.dex-masivo-abrir::-webkit-details-marker { display: none; }
+
+.dex-masivo-abrir::after {
+  content: "\25BE";
+  margin-left: .5rem;
+}
+
+.dex-masivo-abrir:hover { color: var(--ink); border-color: var(--accent); }
+
+.dex-masivo[open] .dex-masivo-abrir { color: var(--ink); border-color: var(--accent); }
+
+/* Flotan sobre el contenido para no empujar la cabecera al abrirse */
+.dex-masivo-opciones {
+  position: absolute;
+  right: 0;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+  min-width: max-content;
+  margin-top: .4rem;
+  padding: .5rem;
+  background: var(--bg);
+  border: 2px solid var(--rule);
+}
 
 @media (max-width: 640px) {
-  .dex-masivo { width: 100%; }
-  .dex-masivo .boton { flex: 1 1 auto; }
+  /* En movil se abre hacia la izquierda para no salirse de la pantalla */
+  .dex-masivo-opciones { right: auto; left: 0; }
 }
 
 /* El nombre va donde estaba la descripcion, bajo el titulo, con los
