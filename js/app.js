@@ -348,6 +348,23 @@ function parseNumeros(valor) {
    id de PokeAPI (10000 en adelante) para las formas. Ese id es el que se apunta
    en "missing". */
 function entradasDe(gen, especies, variantes) {
+  /* La Nacional no tiene rango propio: son las entradas de todas las
+     generaciones juntas, sin repetir, ordenadas por numero. Las formas
+     llevan ids de 10000 en adelante, asi que caen solas al final. */
+  if (gen.nacional) {
+    const vistas = new Set();
+    const todas = [];
+    for (const sec of TEAMS) {
+      if (sec.hall || sec.soloEquipo || sec.nacional) continue;
+      for (const e of entradasDe(sec, especies, variantes)) {
+        if (vistas.has(e.id)) continue;
+        vistas.add(e.id);
+        todas.push(e);
+      }
+    }
+    return todas.sort((a, b) => a.id - b.id);
+  }
+
   const { desde, hasta } = rangoDex(gen.generation);
   const porNombre = new Map(especies.map(([id, slug]) => [slug, id]));
 
@@ -407,13 +424,16 @@ function shinyDe(gen, entradas, variantes) {
     return set;
   }
 
-  const tengo = parseNumeros(gen.shinies);
+  const fuentes = gen.nacional ? generacionesReales() : [gen];
+  const tengo = new Set();
+  fuentes.forEach((sec) => parseNumeros(sec.shinies).forEach((n) => tengo.add(n)));
+
   const ids = new Set(entradas.map((e) => e.id));
 
   /* Un Pokemon del equipo marcado como variocolor cuenta solo en esta lista */
-  gen.team.forEach((m) => {
+  fuentes.forEach((sec) => sec.team.forEach((m) => {
     if (m.shiny) tengo.add(idDeEquipo(m, variantes, ids));
-  });
+  }));
 
   const set = new Set();
   entradas.forEach((e) => { if (tengo.has(e.id)) set.add(e.id); });
@@ -422,6 +442,11 @@ function shinyDe(gen, entradas, variantes) {
 
 /* En teams.js se apuntan los que FALTAN. Todo lo demas se da por capturado,
    que para una Pokedex casi completa es mucho menos que escribir. */
+/* Las generaciones de verdad, sin el Salon de la Fama, Champions ni la Nacional */
+function generacionesReales() {
+  return TEAMS.filter((s) => !s.hall && !s.soloEquipo && !s.nacional);
+}
+
 function capturadosDe(gen, entradas, variantes) {
   /* Con sesion manda la base; el archivo solo sirve de arranque */
   if (typeof CAPTURAS !== "undefined" && perfilVisto) {
@@ -430,11 +455,16 @@ function capturadosDe(gen, entradas, variantes) {
     return set;
   }
 
-  const faltan = parseNumeros(gen.missing);
+  /* La Nacional no tiene listas propias: junta las de todas las generaciones */
+  const fuentes = gen.nacional ? generacionesReales() : [gen];
+  const faltan = new Set();
+  fuentes.forEach((sec) => parseNumeros(sec.missing).forEach((n) => faltan.add(n)));
+
   const ids = new Set(entradas.map((e) => e.id));
 
   /* Si lo llevaste en el equipo lo tienes, aunque este en la lista de faltantes */
-  gen.team.forEach((m) => faltan.delete(idDeEquipo(m, variantes, ids)));
+  fuentes.forEach((sec) =>
+    sec.team.forEach((m) => faltan.delete(idDeEquipo(m, variantes, ids))));
 
   const set = new Set();
   entradas.forEach((e) => { if (!faltan.has(e.id)) set.add(e.id); });
@@ -730,6 +760,16 @@ function champHead(gen) {
     </header>`;
 }
 
+function nacionalHead(gen) {
+  return `
+    <header class="gen-head">
+      <span class="gen-watermark" aria-hidden="true"><i class="fa-solid fa-globe"></i></span>
+      <p class="eyebrow">Todas las regiones</p>
+      <h2 class="gen-title">${gen.title || "Pokedex Nacional"}</h2>
+      <p class="gen-meta">Las diez generaciones juntas</p>
+    </header>`;
+}
+
 function genHead(gen) {
   return `
     <header class="gen-head">
@@ -775,7 +815,8 @@ function renderGeneration(gen) {
     return;
   }
 
-  const equipo = gen.hall ? cuerpo : `
+  /* La Nacional es lo contrario que Champions: Pokedex y nada de equipo */
+  const equipo = (gen.hall || gen.nacional) ? (gen.nacional ? "" : cuerpo) : `
     <div class="section-head">
       <h3 class="section-label">Equipo campeon</h3>
       ${vaciar}
@@ -785,7 +826,7 @@ function renderGeneration(gen) {
   const dex = gen.hall ? "" : `
     <section class="dex-section">
       <div class="section-head">
-        <h3 class="section-label">Pokedex de ${gen.region}</h3>
+        <h3 class="section-label">${gen.nacional ? "Pokedex Nacional" : "Pokedex de " + gen.region}</h3>
         <div class="dex-modos" role="tablist" aria-label="Tipo de Pokedex">
           <button class="dex-modo" type="button" role="tab" data-modo="normal"
                   aria-selected="${!modoShiny}">Normal</button>
@@ -806,7 +847,9 @@ function renderGeneration(gen) {
       <div class="dex-cajas" id="dexCajas"></div>
     </section>`;
 
-  panelEl.innerHTML = (gen.hall ? hallHead(gen) : genHead(gen)) + equipo + dex;
+  panelEl.innerHTML = (gen.hall ? hallHead(gen)
+    : gen.nacional ? nacionalHead(gen)
+    : genHead(gen)) + equipo + dex;
 
   genEnPantalla = gen;
   wireSprites();
@@ -873,6 +916,7 @@ function tituloDe(gen, tengo, total) {
      pintando por detras no tiene sentido */
   if (!gen || !document.body.classList.contains("con-sesion")) return "POKEHDEX";
   if (gen.hall || gen.soloEquipo) return (gen.title || gen.region) + cola;
+  if (gen.nacional && total == null) return (gen.title || gen.region) + cola;
   if (total == null) return gen.region + cola;
   return gen.region + " " + (modoShiny ? "★ " : "") + tengo + "/" + total + cola;
 }
@@ -896,10 +940,11 @@ function selectGeneration(id, push = true) {
 
 function buildIndex() {
   navEl.innerHTML = TEAMS.map((g) => `
-    <button class="index-item${g.hall || g.soloEquipo ? " index-hall" : ""}" role="tab" type="button"
+    <button class="index-item${g.hall || g.soloEquipo || g.nacional ? " index-hall" : ""}" role="tab" type="button"
             data-id="${g.id}" aria-selected="false">
       <span class="roman">${g.hall ? '<i class="fa-solid fa-star"></i>'
-        : g.soloEquipo ? '<i class="fa-solid fa-trophy"></i>' : roman(g.generation)}</span>
+        : g.soloEquipo ? '<i class="fa-solid fa-trophy"></i>'
+        : g.nacional ? '<i class="fa-solid fa-globe"></i>' : roman(g.generation)}</span>
       <span class="region">${g.hall ? "Favoritos" : g.region}</span>
     </button>`).join("");
 

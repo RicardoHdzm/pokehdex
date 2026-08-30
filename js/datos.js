@@ -315,6 +315,9 @@ async function importarDesdeArchivo(alProgresar) {
       continue;
     }
 
+    /* La Nacional no tiene datos propios: sale de las demas */
+    if (seccion.nacional) continue;
+
     avisar("Generacion " + seccion.generation + "...");
 
     const entradas = entradasDe(seccion, especies, variantes);

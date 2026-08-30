@@ -26,6 +26,12 @@
                    aqui. Los numeros fuera del rango de la generacion se ignoran.
      team       -> lista de hasta 6 Pokemon (dejala vacia [] si aun no la has jugado)
 
+   Hay tres secciones que no son generaciones y llevan su propia marca:
+     hall       -> el Salon de la Fama (favoritos de todas las regiones)
+     soloEquipo -> solo equipo, sin Pokedex (Pokemon Champions)
+     nacional   -> solo Pokedex, sin equipo. Junta las entradas de todas
+                   las generaciones, asi que no necesita missing ni shinies.
+
    Cada Pokemon:
      dex      -> numero de la Pokedex Nacional (para el sprite)
      species  -> nombre de la especie
@@ -232,6 +238,17 @@ const TEAMS = [
     title: "Pokemon Champions",
     region: "Champions",
     color: "#ffab00",
+    team: []
+  },
+  /* --- Pokedex Nacional: las diez generaciones juntas. No lleva equipo ni
+         datos propios; sale de sumar las entradas de todas las de arriba,
+         asi que lo que marques aqui es lo mismo que marcas en su region. --- */
+  {
+    id: "nacional",
+    nacional: true,
+    title: "Pokedex Nacional",
+    region: "Nacional",
+    color: "#e2e8f0",
     team: []
   }
 ];

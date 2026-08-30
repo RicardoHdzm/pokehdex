@@ -21,7 +21,7 @@ async function construirCatalogo() {
   const mapa = new Map();
 
   for (const seccion of TEAMS) {
-    if (seccion.hall || seccion.soloEquipo) continue;
+    if (seccion.hall || seccion.soloEquipo || seccion.nacional) continue;
     for (const e of entradasDe(seccion, especies, variantes)) {
       mapa.set(e.id, { nombre: e.nombre, base: e.base || e.id, generacion: seccion.generation });
     }
