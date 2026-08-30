@@ -75,6 +75,17 @@ const TEAMS = [
       { dex: 212, species: "Scizor",     nickname: "Redsteel",     gender: "m", types: ["bug", "steel"], ball: "poke-ball" },
     ]
   },
+  /* --- Pokemon Champions: solo equipo de combate. No tiene Pokedex propia
+         porque los Pokemon se traen de HOME, ni region asociada. --- */
+  {
+    id: "champions",
+    generation: 11,
+    soloEquipo: true,
+    title: "Pokemon Champions",
+    region: "Champions",
+    color: "#ffab00",
+    team: []
+  },
   {
     id: "gen-1",
     generation: 1,
@@ -227,17 +238,6 @@ const TEAMS = [
     shinies: "",
     missing: "",
     color: "#22d3ee",
-    team: []
-  },
-  /* --- Pokemon Champions: solo equipo de combate. No tiene Pokedex propia
-         porque los Pokemon se traen de HOME, ni region asociada. --- */
-  {
-    id: "champions",
-    generation: 11,
-    soloEquipo: true,
-    title: "Pokemon Champions",
-    region: "Champions",
-    color: "#ffab00",
     team: []
   },
   /* --- Pokedex Nacional: las diez generaciones juntas. No lleva equipo ni

@@ -624,8 +624,9 @@ const CORTES_DEX = [151, 251, 386, 493, 649, 721, 809, 905, 1025];
 const GEN_DE_FORMA = { alola: 7, galar: 8, hisui: 8, paldea: 9, mega: 6, gmax: 8 };
 
 function generacionDe(mon) {
-  /* 1º: la generacion en la que tu lo usaste */
-  const enEquipo = TEAMS.find((s) => !s.hall && s.team.some(
+  /* 1º: la generacion en la que tu lo usaste. Champions no cuenta: es un
+     juego aparte, no una generacion, y devolveria un "XI" que no existe. */
+  const enEquipo = generacionesReales().find((s) => s.team.some(
     (m) => m.dex === mon.dex && (m.form || "") === (mon.form || "")
   ));
   if (enEquipo) return enEquipo.generation;
@@ -1377,8 +1378,11 @@ function init() {
   const fromHash = location.hash.slice(1);
   if (TEAMS.some((g) => g.id === fromHash)) return selectGeneration(fromHash, false);
 
-  /* Sin favoritos todavia, no tiene sentido abrir la pagina en una seccion vacia */
-  const inicio = TEAMS.find((g) => !g.hall || g.team.length) || TEAMS[0];
+  /* Sin favoritos todavia, no tiene sentido abrir la pagina en una seccion
+     vacia: se cae a la primera generacion de verdad, no a Champions ni a la
+     Nacional, que ahora van antes y despues de ellas en el indice. */
+  const inicio = TEAMS.find((g) => g.hall && g.team.length)
+    || generacionesReales()[0] || TEAMS[0];
   selectGeneration(inicio.id, false);
 }
 
