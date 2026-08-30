@@ -237,7 +237,7 @@ const TEAMS = [
     region: "???",
     shinies: "",
     missing: "",
-    color: "#22d3ee",
+    color: "#7ef0c6",
     team: []
   },
   /* --- Pokedex Nacional: las diez generaciones juntas. No lleva equipo ni

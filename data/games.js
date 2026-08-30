@@ -58,8 +58,8 @@ const GAMES = {
     { id: "violet",  name: "Violet",  color: "#b46cff" }
   ],
   10: [
-    { id: "waves", name: "Waves", color: "#22d3ee" },
-    { id: "winds", name: "Winds", color: "#7ef0c6" }
+    { id: "winds", name: "Winds", color: "#7ef0c6" },
+    { id: "waves", name: "Waves", color: "#22d3ee" }
   ],
   11: [
     { id: "champions", name: "Champions", color: "#ffab00" }
