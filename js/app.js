@@ -611,6 +611,15 @@ function cajasHTML(entradas, capturados, filtrando, salto) {
   return html;
 }
 
+/* Mantiene al dia la lista con la que trabaja el filtro. Sin esto, marcabas
+   un shiny, pedias "los tengo" y no salia: la foto de capturados era la de
+   cuando se pinto la Pokedex. */
+function apuntarEnLaFoto(id, tener) {
+  if (!dexUltima) return;
+  if (tener) dexUltima.capturados.add(id);
+  else dexUltima.capturados.delete(id);
+}
+
 /* Repinta solo las cajas, sin recalcular nada: es lo que corre al escribir */
 function repintarCajas() {
   if (!dexUltima) return;
@@ -1634,12 +1643,14 @@ function conectarMarcado() {
 
     tile.classList.toggle("caught", tenerlo);
     tile.classList.add("guardando");
+    apuntarEnLaFoto(id, tenerlo);
 
     const res = await alternarCaptura(id, modoShiny, tenerlo);
 
     tile.classList.remove("guardando");
     if (!res.ok) {
       tile.classList.toggle("caught", !tenerlo);
+      apuntarEnLaFoto(id, !tenerlo);
       tile.classList.add("fallo");
       setTimeout(() => tile.classList.remove("fallo"), 1200);
       return;
@@ -1716,6 +1727,7 @@ function pintarCasilla(tile) {
   pincel.tocadas.set(id, tile);
   tile.classList.toggle("caught", pincel.tener);
   tile.classList.add("guardando");
+  apuntarEnLaFoto(id, pincel.tener);
   if (genEnPantalla) actualizarMarcadorDex(genEnPantalla);
 }
 
@@ -1751,10 +1763,11 @@ async function soltarPincel() {
   const ids = [...tocadas.keys()];
   const res = await marcarTodas(ids, modoShiny, tener);
 
-  tocadas.forEach((tile) => {
+  tocadas.forEach((tile, id) => {
     tile.classList.remove("guardando");
     if (!res.ok) {
       tile.classList.toggle("caught", !tener);
+      apuntarEnLaFoto(id, !tener);
       tile.classList.add("fallo");
       setTimeout(() => tile.classList.remove("fallo"), 1200);
     }
