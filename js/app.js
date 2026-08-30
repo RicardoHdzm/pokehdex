@@ -918,7 +918,7 @@ function renderGeneration(gen) {
   /* Solo las generaciones llevan Pokedex; el Salon de la Fama no */
   const puedeEditar = typeof esMiPerfil === "function" && esMiPerfil();
   const vaciar = puedeEditar && gen.team.length
-    ? '<button type="button" class="boton peligro" id="vaciarEquipo">Vaciar equipo</button>'
+    ? '<button type="button" class="boton" id="vaciarEquipo">Vaciar equipo</button>'
     : "";
 
   if (gen.soloEquipo) {
@@ -950,7 +950,7 @@ function renderGeneration(gen) {
         ${puedeEditar ? `
           <div class="dex-masivo">
             <button type="button" class="boton" id="dexTodos">Marcar todos</button>
-            <button type="button" class="boton peligro" id="dexNinguno">Desmarcar todos</button>
+            <button type="button" class="boton" id="dexNinguno">Desmarcar todos</button>
           </div>` : ""}
         <p class="dex-progress">
           <span class="dex-count">...</span>
@@ -1375,10 +1375,12 @@ function conectarEditor() {
       e.stopPropagation();
       if (vaciar.dataset.confirmando !== "si") {
         vaciar.dataset.confirmando = "si";
+        vaciar.classList.add("peligro");
         vaciar.textContent = "¿Seguro? Pulsa otra vez";
         setTimeout(() => {
           if (!vaciar.isConnected) return;
           vaciar.dataset.confirmando = "";
+          vaciar.classList.remove("peligro");
           vaciar.textContent = "Vaciar equipo";
         }, 4000);
         return;
@@ -1440,11 +1442,15 @@ function conectarMarcadoMasivo() {
 
     /* Desmarcar borra el avance de toda una region: se pide confirmacion */
     if (!tener && boton.dataset.confirmando !== "si") {
+      /* El rojo aparece solo aqui: mientras esta en reposo es un boton mas,
+         y la alarma la da el paso que de verdad va a borrar algo. */
       boton.dataset.confirmando = "si";
+      boton.classList.add("peligro");
       boton.textContent = "¿Seguro? Pulsa otra vez";
       setTimeout(() => {
         if (!boton.isConnected) return;
         boton.dataset.confirmando = "";
+        boton.classList.remove("peligro");
         boton.textContent = "Desmarcar todos";
       }, 4000);
       return;
