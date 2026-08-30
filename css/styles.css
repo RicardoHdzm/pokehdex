@@ -949,10 +949,18 @@ a { color: var(--accent); text-underline-offset: .2em; }
    del badge se oscurece hasta que se lee; el marco y el relleno se quedan,
    que son los que le dan el color al ojo. */
 :root[data-tema="claro"] .type-chip {
-  color: color-mix(in srgb, var(--t) 55%, #000);
+  /* 45% y no mas: con los amarillos, cualquier mezcla mas suave se queda
+     por debajo del minimo de contraste sobre el fondo claro */
+  color: color-mix(in srgb, var(--t) 45%, #000);
   border-color: color-mix(in srgb, var(--t) 80%, #000);
   background: color-mix(in srgb, var(--t) 22%, transparent);
 }
+
+/* Sin capturar, el sprite se apaga con brightness(.42), que sobre negro lo
+   hunde en el fondo. Sobre claro haria justo lo contrario: lo dejaria casi
+   negro y mas llamativo que los que si tienes. Aqui se desvanece. */
+:root[data-tema="claro"] .dex-sprite { filter: grayscale(1) opacity(.3); }
+:root[data-tema="claro"] .dex-tile.caught .dex-sprite { filter: none; }
 
 /* El resplandor de los textos con acento no pinta nada sobre claro */
 :root[data-tema="claro"] .masthead .eyebrow,
