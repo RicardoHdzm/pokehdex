@@ -301,6 +301,9 @@ body.con-sesion .dex-tile { cursor: pointer; }
 .mon-form { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.25rem; }
 
 .mon-campo { display: flex; flex-direction: column; gap: .35rem; }
+/* Sin esto, el display de arriba le gana al atributo hidden y el campo de
+   forma salia vacio en todo Pokemon que no tiene formas alternas */
+.mon-campo[hidden] { display: none; }
 
 .mon-campo > span {
   font-family: var(--pixel);

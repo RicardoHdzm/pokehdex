@@ -1190,6 +1190,14 @@ function conectarEditor() {
   });
 
   document.getElementById("monBall").innerHTML = opcionesDeBall();
+
+  /* Se monta el buscador en cuanto el navegador tenga un rato libre, sin
+     competir con la primera pintada. Asi la primera apertura tampoco tiene
+     que esperar a nada. Si no hay requestIdleCallback (Safari viejo), se
+     hace un poco despues de cargar. */
+  const alRatoLibre = window.requestIdleCallback || ((fn) => setTimeout(fn, 1200));
+  alRatoLibre(() => montarListaEspecies());
+
   document.getElementById("monForm").addEventListener("submit", guardarDelEditor);
 
   document.getElementById("monEspecie").addEventListener("input", () => {
