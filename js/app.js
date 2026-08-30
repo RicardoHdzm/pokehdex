@@ -1071,7 +1071,7 @@ function buildIndex() {
   navEl.innerHTML = TEAMS.map((g) => `
     <button class="index-item${g.hall || g.soloEquipo || g.nacional ? " index-hall" : ""}" role="tab" type="button"
             data-id="${g.id}" aria-selected="false">
-      <span class="roman">${g.hall ? '<i class="fa-solid fa-star"></i>'
+      <span class="roman">${g.hall ? '<i class="fa-solid fa-heart"></i>'
         : g.soloEquipo ? '<i class="fa-solid fa-trophy"></i>'
         : g.nacional ? '<i class="fa-solid fa-globe"></i>' : roman(g.generation)}</span>
       <span class="region">${g.hall ? "Favoritos" : g.region}</span>
