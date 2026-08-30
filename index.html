@@ -96,10 +96,13 @@
       <p class="eyebrow" id="compTitulo">Ver Pokedex</p>
 
       <!-- Quien de todos tiene mas de lo que te falta, de un vistazo -->
-      <section class="comp-ranking" id="compRanking" hidden>
-        <h3 class="section-label">Quien tiene lo que te falta</h3>
+      <details class="comp-ranking" id="compRanking" hidden>
+        <summary class="comp-ranking-titulo">
+          Quien tiene lo que te falta
+          <span class="comp-ranking-pista" id="compRankingPista"></span>
+        </summary>
         <ul class="comp-ranking-lista" id="compRankingLista"></ul>
-      </section>
+      </details>
 
       <div class="comp-controles">
         <select id="compQuien" aria-label="Con quien comparar"></select>

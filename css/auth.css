@@ -418,15 +418,55 @@ body.con-sesion .dex-tile { cursor: pointer; }
 
 /* ===== Quien tiene lo que te falta ===== */
 
-.comp-ranking { margin: 0 0 1.5rem; }
+.comp-ranking {
+  margin: 0 0 1.5rem;
+  border: 2px solid var(--rule);
+}
+
 .comp-ranking[hidden] { display: none; }
+
+/* Va cerrado: se abre solo si te interesa el desglose */
+.comp-ranking-titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .6rem;
+  padding: .7rem .8rem .6rem;
+  list-style: none;
+  cursor: pointer;
+  font-family: var(--pixel);
+  font-size: .55rem;
+  line-height: 1.6;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  transition: color .15s ease;
+}
+
+/* Safari pinta su propio triangulo si no se le quita asi */
+.comp-ranking-titulo::-webkit-details-marker { display: none; }
+
+.comp-ranking-titulo::before {
+  content: "\25B8";
+  color: var(--accent);
+}
+
+.comp-ranking[open] .comp-ranking-titulo::before { content: "\25BE"; }
+
+.comp-ranking-titulo:hover { color: var(--ink); }
+
+.comp-ranking-pista {
+  font-family: var(--term);
+  font-size: .95rem;
+  text-transform: none;
+  color: var(--accent);
+}
 
 .comp-ranking-lista {
   display: flex;
   flex-direction: column;
   gap: .35rem;
-  margin: .75rem 0 0;
-  padding: 0;
+  margin: 0;
+  padding: 0 .8rem .8rem;
   list-style: none;
 }
 

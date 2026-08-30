@@ -102,6 +102,15 @@ function pintarRanking() {
 
   if (!filas.length) { seccion.hidden = true; return; }
 
+  /* Va cerrado, asi que el titulo tiene que decir si hay algo dentro */
+  const conAlgo = filas.filter((f) => f.meDa > 0);
+  const pista = document.getElementById("compRankingPista");
+  if (pista) {
+    pista.textContent = conAlgo.length
+      ? conAlgo.length + (conAlgo.length === 1 ? " puede darte algo" : " pueden darte algo")
+      : "nadie tiene nada que te falte";
+  }
+
   const tope = filas[0].meDa || 1;
 
   lista.innerHTML = filas.map((f) => `
