@@ -1501,13 +1501,35 @@ function conectarMarcado() {
 /* El primer Pokemon que tocas decide que hace el resto del arrastre: si
    estaba sin marcar, se marca todo lo que pises; si estaba marcado, se
    desmarca. Es como el rellenar arrastrando de una hoja de calculo. */
-let pincel = null;        // { tener, tocadas: Map<id, tile> }
+let pincel = null;        // { tener, tocadas: Map<id, tile>, ultimo: {x, y} }
 let pincelEspera = null;  // temporizador del toque largo en tactil
 let pincelOrigen = null;  // desde donde empezo el dedo, para saber si es scroll
 let pincelUsado = false;  // para tragarse el clic que llega despues
 
 function puedoMarcar() {
   return typeof esMiPerfil === "function" && esMiPerfil();
+}
+
+/* El navegador no manda un evento por pixel: en un arrastre rapido puede
+   saltar de una casilla a otra tres columnas mas alla. Asi que se recorre a
+   mano la linea entre el punto anterior y el nuevo, a pasos cortos, para no
+   dejarse ninguna por el camino. */
+function pintarCamino(x, y) {
+  const desde = pincel.ultimo || { x, y };
+  const dx = x - desde.x;
+  const dy = y - desde.y;
+  const largo = Math.hypot(dx, dy);
+
+  /* Un paso de 16px: mas fino que cualquier casilla, hasta en movil */
+  const pasos = Math.max(1, Math.ceil(largo / 16));
+  for (let i = 1; i <= pasos; i++) {
+    const px = desde.x + (dx * i) / pasos;
+    const py = desde.y + (dy * i) / pasos;
+    const bajo = document.elementFromPoint(px, py);
+    pintarCasilla(bajo && bajo.closest(".dex-tile"));
+  }
+
+  pincel.ultimo = { x, y };
 }
 
 function pintarCasilla(tile) {
@@ -1526,9 +1548,11 @@ function pintarCasilla(tile) {
 
 function arrancarPincel(tile) {
   pincelEspera = null;
-  pincel = { tener: !tile.classList.contains("caught"), tocadas: new Map() };
+  pincel = { tener: !tile.classList.contains("caught"), tocadas: new Map(), ultimo: null };
   panelEl.classList.add("pintando");
   pintarCasilla(tile);
+  const r = tile.getBoundingClientRect();
+  pincel.ultimo = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
 }
 
 function cancelarEspera() {
@@ -1593,8 +1617,7 @@ function conectarPincel() {
 
     /* En tactil el navegador manda todos los eventos a la casilla donde
        empezaste, asi que hay que mirar que hay debajo del dedo */
-    const debajo = document.elementFromPoint(e.clientX, e.clientY);
-    pintarCasilla(debajo && debajo.closest(".dex-tile"));
+    pintarCamino(e.clientX, e.clientY);
   });
 
   /* Mientras se pinta, el dedo no debe arrastrar la pagina */
