@@ -829,11 +829,22 @@ let genEnPantalla = null;
    generacion anterior, se descarta en vez de pintar sobre la nueva. */
 let renderToken = 0;
 
+/* De quien es la Pokedex que se esta viendo: la tuya o la de quien visitas */
+function nombreDelPerfil() {
+  const quien = perfilVisto || (typeof perfil !== "undefined" ? perfil : null);
+  return (quien && (quien.display_name || quien.handle)) || "";
+}
+
 function hallHead(sec) {
+  /* El titulo es de quien son los favoritos; el rotulo dice que son. Al
+     visitar a otro deja de ser "mis", que sobre su nombre no cuadraria. */
+  const mio = typeof esMiPerfil !== "function" || esMiPerfil();
+  const nombre = nombreDelPerfil();
+
   return `
     <header class="gen-head">
-      <p class="eyebrow">Salon de la Fama</p>
-      <h2 class="gen-title">${sec.title || "Mis favoritos"}</h2>
+      <p class="eyebrow">${mio ? "Mis Favoritos" : "Favoritos"}</p>
+      <h2 class="gen-title">${nombre || sec.title || "Mis favoritos"}</h2>
       <p class="gen-meta">
         ${sec.subtitle || "De todas las regiones"}
         <span class="dot">·</span>
