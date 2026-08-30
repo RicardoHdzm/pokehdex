@@ -65,7 +65,7 @@ const TEAMS = [
     hall: true,
     title: "Mis favoritos",
     subtitle: "De todas las regiones",
-    color: "#8c1430",
+    color: "#e2365e",
     team: [
       { dex: 9,   species: "Blastoise",  nickname: "Shellshock", gender: "m", types: ["water"], ball: "poke-ball" },
       { dex: 26,  species: "Raichu",     nickname: "Raider",       gender: "m", types: ["electric"], ball: "poke-ball" },
