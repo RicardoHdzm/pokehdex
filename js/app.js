@@ -930,7 +930,7 @@ function aplicarTema(tema) {
     boton.setAttribute("aria-label", boton.title);
 
     const icono = document.getElementById("temaIcono");
-    if (icono) icono.className = "fa-solid " + (claro ? "fa-moon" : "fa-sun");
+    if (icono) icono.className = "fa-solid " + (claro ? "fa-moon" : "fa-bolt");
   }
 
   /* El acento se recalcula: es el unico color que depende del tema por JS */

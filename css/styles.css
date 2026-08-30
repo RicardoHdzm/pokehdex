@@ -195,8 +195,8 @@ a { color: var(--accent); text-underline-offset: .2em; }
 
 .tema-boton:hover { border-color: var(--accent); }
 
-/* Enseña el destino, no el estado: sol para pasar a claro, luna para volver
-   a oscuro. Es lo mismo que dice el texto del title. */
+/* Enseña el destino, no el estado: rayo para encender la luz, luna para
+   volver a oscuro. Es lo mismo que dice el texto del title. */
 .tema-boton i {
   font-size: .9rem;
   color: var(--ink-2);

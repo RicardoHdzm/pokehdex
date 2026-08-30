@@ -15,7 +15,7 @@
    fa-solid-900.woff2 original de la version 6.7.2:
 
      npm i subset-font
-     subsetFont(buffer, "\uf007\ue4dc\uf091\uf06e\uf222\uf221\uf22d\uf0b2\uf0ac\uf004\uf185\uf186",
+     subsetFont(buffer, "\uf007\ue4dc\uf091\uf06e\uf222\uf221\uf22d\uf0b2\uf0ac\uf004\uf0e7\uf186",
                 { targetFormat: "woff2" })
 
    Los codigos son los mismos que van abajo en cada clase. Ademas,
@@ -77,5 +77,5 @@
 .fa-genderless          { --fa: "\f22d"; }
 .fa-up-down-left-right  { --fa: "\f0b2"; }
 .fa-globe               { --fa: "\f0ac"; }
-.fa-sun                 { --fa: "\f185"; }
+.fa-bolt                { --fa: "\f0e7"; }
 .fa-moon                { --fa: "\f186"; }
