@@ -577,7 +577,6 @@ a { color: var(--accent); text-underline-offset: .2em; }
   height: 100%;
   background: var(--accent);
   box-shadow: 0 0 14px -2px var(--accent);
-  transition: width .5s steps(12);
 }
 
 /* ===== Resumen por region (Pokedex Nacional) ===== */
