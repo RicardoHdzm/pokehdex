@@ -23,6 +23,14 @@
   <link rel="stylesheet" href="css/auth.css">
 </head>
 <body>
+  <!-- Antes de pintar nada: si no, al recargar en claro se ve un fogonazo negro -->
+  <script>
+    try {
+      var g = localStorage.getItem("pkmnteam:tema");
+      document.documentElement.dataset.tema = g === "claro" ? "claro" : "oscuro";
+    } catch (e) { document.documentElement.dataset.tema = "oscuro"; }
+  </script>
+
 
   <!-- Puerta de acceso: tapa la pagina mientras no haya sesion -->
   <div class="auth-puerta" id="authPuerta" hidden>
@@ -67,6 +75,10 @@
 
   <header class="masthead">
     <div class="wrap">
+      <button class="tema-boton" id="temaBoton" type="button" aria-pressed="false"
+              title="Cambiar a modo claro" aria-label="Cambiar a modo claro">
+        <span class="tema-sol" aria-hidden="true"></span>
+      </button>
       <p class="eyebrow">Pokedex · 0000 de 1025 capturados</p>
       <h1 class="masthead-title">POKE<em>HDEX</em></h1>
       <div class="auth-nombre" id="authNombre"></div>

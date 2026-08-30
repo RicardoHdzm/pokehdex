@@ -15,8 +15,8 @@
   padding: 1.5rem;
   background: var(--bg);
   background-image:
-    repeating-linear-gradient(to right,  rgba(255, 255, 255, .05) 0 1px, transparent 1px 128px),
-    repeating-linear-gradient(to bottom, rgba(255, 255, 255, .05) 0 1px, transparent 1px 128px);
+    repeating-linear-gradient(to right,  rgba(var(--linea), .05) 0 1px, transparent 1px 128px),
+    repeating-linear-gradient(to bottom, rgba(var(--linea), .05) 0 1px, transparent 1px 128px);
 }
 
 .auth-puerta[hidden] { display: none; }
@@ -26,7 +26,7 @@
   padding: clamp(1.75rem, 5vw, 2.75rem);
   background: var(--panel);
   border: 2px solid var(--rule);
-  box-shadow: 6px 6px 0 rgba(0, 0, 0, .6);
+  box-shadow: 6px 6px 0 rgba(var(--sombra), .6);
   text-align: center;
 }
 
@@ -36,13 +36,13 @@
   font-weight: 400;
   font-size: clamp(1.5rem, 7vw, 2rem);
   line-height: 1.5;
-  text-shadow: 3px 3px 0 rgba(0, 0, 0, .55);
+  text-shadow: 3px 3px 0 rgba(var(--sombra), .55);
 }
 
 .auth-titulo em {
   font-style: normal;
   color: var(--accent);
-  text-shadow: 3px 3px 0 rgba(0, 0, 0, .55),
+  text-shadow: 3px 3px 0 rgba(var(--sombra), .55),
                0 0 20px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
@@ -287,7 +287,7 @@ body.con-sesion .dex-tile { cursor: pointer; }
   display: grid;
   place-items: center;
   padding: 1.5rem;
-  background: rgba(0, 0, 0, .82);
+  background: rgba(var(--sombra), .82);
 }
 
 .mon-editor[hidden] { display: none; }
@@ -299,7 +299,7 @@ body.con-sesion .dex-tile { cursor: pointer; }
   padding: 1.75rem;
   background: var(--panel);
   border: 2px solid var(--rule);
-  box-shadow: 6px 6px 0 rgba(0, 0, 0, .6);
+  box-shadow: 6px 6px 0 rgba(var(--sombra), .6);
 }
 
 .mon-form { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.25rem; }
@@ -632,9 +632,9 @@ body.con-sesion .dex-tile { cursor: pointer; }
   width: 34px;
   height: 34px;
   padding: 0;
-  background: rgba(0, 0, 0, .88);
+  background: rgba(var(--sombra), .88);
   border: 2px solid var(--rule);
-  box-shadow: 3px 3px 0 rgba(0, 0, 0, .5);
+  box-shadow: 3px 3px 0 rgba(var(--sombra), .5);
   color: var(--ink-2);
   font-size: .85rem;
   cursor: grab;

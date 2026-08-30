@@ -850,6 +850,77 @@ function juegoDeGen(gen) {
   return juegoDe(gen.generation, JUEGOS_ELEGIDOS.get(gen.generation));
 }
 
+/* ---------- Tema claro / oscuro ---------- */
+
+const TEMA_CLAVE = "pkmnteam:tema";
+
+function temaActual() {
+  return document.documentElement.dataset.tema === "claro" ? "claro" : "oscuro";
+}
+
+/* Luminancia relativa de WCAG, para poder medir el contraste de verdad */
+function luminancia([r, g, b]) {
+  const c = [r, g, b].map((v) => {
+    v /= 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+}
+
+function contraste(a, b) {
+  const [alto, bajo] = [luminancia(a), luminancia(b)].sort((x, y) => y - x);
+  return (alto + 0.05) / (bajo + 0.05);
+}
+
+function aRgb(hex) {
+  const h = hex.replace("#", "");
+  const largo = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+  return [0, 2, 4].map((i) => parseInt(largo.slice(i, i + 2), 16));
+}
+
+/* Los colores de los juegos estan elegidos sobre negro: el blanco de Teselia
+   o el gris de la Nacional desaparecerian sobre fondo claro. Se oscurecen lo
+   justo para que se lean, conservando el tono. */
+function acentoLegible(hex, fondo) {
+  let rgb = aRgb(hex);
+  for (let i = 0; i < 24 && contraste(rgb, fondo) < 4.5; i++) {
+    rgb = rgb.map((v) => Math.max(0, Math.round(v * 0.9)));
+  }
+  return "#" + rgb.map((v) => v.toString(16).padStart(2, "0")).join("");
+}
+
+/* El acento que toca segun el tema */
+function acentoDelTema(hex) {
+  if (temaActual() !== "claro") return hex;
+  return acentoLegible(hex, [230, 227, 219]);   /* el --bg del modo claro */
+}
+
+function aplicarTema(tema) {
+  document.documentElement.dataset.tema = tema === "claro" ? "claro" : "oscuro";
+  try { localStorage.setItem(TEMA_CLAVE, temaActual()); } catch { /* modo privado */ }
+
+  const boton = document.getElementById("temaBoton");
+  if (boton) {
+    const claro = temaActual() === "claro";
+    boton.setAttribute("aria-pressed", String(claro));
+    boton.title = claro ? "Cambiar a modo oscuro" : "Cambiar a modo claro";
+    boton.setAttribute("aria-label", boton.title);
+  }
+
+  /* El acento se recalcula: es el unico color que depende del tema por JS */
+  if (genEnPantalla) {
+    document.documentElement.style.setProperty("--accent", acentoDelTema(colorDe(genEnPantalla)));
+  }
+}
+
+function conectarTema() {
+  const boton = document.getElementById("temaBoton");
+  if (boton) boton.addEventListener("click", () => {
+    aplicarTema(temaActual() === "claro" ? "oscuro" : "claro");
+  });
+  aplicarTema(temaActual());
+}
+
 function colorDe(gen) {
   const j = juegoDeGen(gen);
   return (j && j.color) || gen.color || "#ff5a4d";
@@ -901,7 +972,7 @@ function genHead(gen) {
 
 function renderGeneration(gen) {
   const token = ++renderToken;
-  document.documentElement.style.setProperty("--accent", colorDe(gen));
+  document.documentElement.style.setProperty("--accent", acentoDelTema(colorDe(gen)));
 
   /* Una generacion siempre enseña seis huecos; el Salon de la Fama, los que haya. */
   const mostrados = gen.team.slice(0, gen.hall ? TOPE_FAVORITOS : 6);
@@ -1693,6 +1764,7 @@ function init() {
     return;
   }
   buildIndex();
+  conectarTema();
   conectarModos();
   conectarBuscador();
   conectarMarcado();

@@ -19,6 +19,31 @@
 
   --pixel: "Press Start 2P", "Courier New", monospace;
   --term:  "VT323", "Courier New", monospace;
+
+  /* Las dos que cambian con el tema y estaban repartidas a mano por la hoja:
+     la sombra dura de los pixeles y las lineas de las rejillas. */
+  --sombra: 0, 0, 0;
+  --linea:  255, 255, 255;
+}
+
+/* ===== Modo claro =====
+   No es el oscuro invertido: es la pantalla de una consola apagada, en
+   gris calido, conservando el marco de pixeles y la rejilla. Las lineas de
+   barrido del CRT desaparecen, que sobre claro solo ensucian. */
+:root[data-tema="claro"] {
+  --bg:       #e6e3db;
+  --panel:    #f2f0ea;
+  --panel-2:  #dbd7cd;
+  --ink:      #191919;
+  --ink-2:    #56534c;
+  --rule:     #b2ada0;
+
+  --male:   #1f6fb8;
+  --female: #c23c7e;
+  --neutral: #56534c;
+
+  --sombra: 40, 36, 28;
+  --linea:  0, 0, 0;
 }
 
 * { box-sizing: border-box; }
@@ -47,13 +72,15 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background-image:
-    repeating-linear-gradient(to right,  rgba(255, 255, 255, .05) 0 1px, transparent 1px 128px),
-    repeating-linear-gradient(to bottom, rgba(255, 255, 255, .05) 0 1px, transparent 1px 128px),
-    repeating-linear-gradient(to right,  rgba(255, 255, 255, .022) 0 1px, transparent 1px 32px),
-    repeating-linear-gradient(to bottom, rgba(255, 255, 255, .022) 0 1px, transparent 1px 32px);
+    repeating-linear-gradient(to right,  rgba(var(--linea), .05) 0 1px, transparent 1px 128px),
+    repeating-linear-gradient(to bottom, rgba(var(--linea), .05) 0 1px, transparent 1px 128px),
+    repeating-linear-gradient(to right,  rgba(var(--linea), .022) 0 1px, transparent 1px 32px),
+    repeating-linear-gradient(to bottom, rgba(var(--linea), .022) 0 1px, transparent 1px 32px);
 }
 
 /* Lineas de barrido CRT */
+:root[data-tema="claro"] body::after { display: none; }
+
 body::after {
   content: "";
   position: fixed;
@@ -62,7 +89,7 @@ body::after {
   pointer-events: none;
   background: repeating-linear-gradient(
     to bottom,
-    rgba(0, 0, 0, .22) 0 1px,
+    rgba(var(--sombra), .22) 0 1px,
     transparent 1px 3px
   );
   opacity: .55;
@@ -126,16 +153,65 @@ a { color: var(--accent); text-underline-offset: .2em; }
      la mitad caian debajo, separando el titulo del nombre */
   line-height: 1.12;
   letter-spacing: -.01em;
-  text-shadow: 4px 4px 0 rgba(0, 0, 0, .55);
+  text-shadow: 4px 4px 0 rgba(var(--sombra), .55);
 }
 
 .masthead-title em {
   font-style: normal;
   color: var(--accent);
   text-shadow:
-    4px 4px 0 rgba(0, 0, 0, .55),
+    4px 4px 0 rgba(var(--sombra), .55),
     0 0 22px color-mix(in srgb, var(--accent) 60%, transparent);
   transition: color .35s ease, text-shadow .35s ease;
+}
+
+/* El boton se coloca contra el ancho del contenido, no contra el borde de
+   la pantalla, para que quede alineado con el titulo */
+.masthead .wrap { position: relative; }
+
+/* Interruptor de tema: va en la esquina de la cabecera, fuera del flujo
+   para no mover el titulo ni el nombre de usuario */
+.tema-boton {
+  position: absolute;
+  top: 1.1rem;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  padding: 0;
+  background: var(--panel);
+  border: 2px solid var(--rule);
+  cursor: pointer;
+  transition: border-color .15s ease;
+}
+
+.tema-boton:hover { border-color: var(--accent); }
+
+/* Un sol de pixeles: cuadrado con cuatro rayos, hecho con sombras */
+.tema-sol {
+  width: 6px;
+  height: 6px;
+  background: var(--ink-2);
+  box-shadow:
+    -8px 0 0 0 var(--ink-2),  8px 0 0 0 var(--ink-2),
+     0 -8px 0 0 var(--ink-2), 0  8px 0 0 var(--ink-2);
+  transition: background .15s ease, box-shadow .15s ease;
+}
+
+.tema-boton:hover .tema-sol,
+.tema-boton[aria-pressed="true"] .tema-sol {
+  background: var(--accent);
+  box-shadow:
+    -8px 0 0 0 var(--accent),  8px 0 0 0 var(--accent),
+     0 -8px 0 0 var(--accent), 0  8px 0 0 var(--accent);
+}
+
+/* En claro el sol se rellena, para que se vea que esta encendido */
+:root[data-tema="claro"] .tema-sol { width: 10px; height: 10px; }
+
+@media (max-width: 640px) {
+  .tema-boton { top: .6rem; width: 2.1rem; height: 2.1rem; }
 }
 
 /* ===== Indice de generaciones ===== */
@@ -243,7 +319,7 @@ a { color: var(--accent); text-underline-offset: .2em; }
   font-size: clamp(.95rem, 2.9vw, 1.7rem);
   line-height: 1.5;
   text-transform: uppercase;
-  text-shadow: 3px 3px 0 rgba(0, 0, 0, .5);
+  text-shadow: 3px 3px 0 rgba(var(--sombra), .5);
 }
 
 .gen-meta {
@@ -287,11 +363,11 @@ a { color: var(--accent); text-underline-offset: .2em; }
   aspect-ratio: 1;
   padding: 1.25rem;
   background:
-    repeating-linear-gradient(to right, rgba(255, 255, 255, .045) 0 1px, transparent 1px 10px),
-    repeating-linear-gradient(to bottom, rgba(255, 255, 255, .045) 0 1px, transparent 1px 10px),
+    repeating-linear-gradient(to right, rgba(var(--linea), .045) 0 1px, transparent 1px 10px),
+    repeating-linear-gradient(to bottom, rgba(var(--linea), .045) 0 1px, transparent 1px 10px),
     var(--panel);
   border: 2px solid var(--rule);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .55);
+  box-shadow: inset 0 0 0 1px rgba(var(--sombra), .55);
   overflow: hidden;
   transition: border-color .2s ease, box-shadow .2s ease;
 }
@@ -299,7 +375,7 @@ a { color: var(--accent); text-underline-offset: .2em; }
 .plate:hover .plate-figure {
   border-color: color-mix(in srgb, var(--accent) 75%, var(--rule));
   box-shadow:
-    inset 0 0 0 1px rgba(0, 0, 0, .55),
+    inset 0 0 0 1px rgba(var(--sombra), .55),
     0 0 22px -6px var(--accent);
 }
 
@@ -308,7 +384,7 @@ a { color: var(--accent); text-underline-offset: .2em; }
   height: 100%;
   object-fit: contain;
   image-rendering: pixelated;
-  filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, .45));
+  filter: drop-shadow(4px 4px 0 rgba(var(--sombra), .45));
   transition: transform .18s steps(3);
 }
 
@@ -339,7 +415,7 @@ a { color: var(--accent); text-underline-offset: .2em; }
   font-size: .82rem;
   line-height: 1.5;
   overflow-wrap: anywhere;
-  text-shadow: 2px 2px 0 rgba(0, 0, 0, .5);
+  text-shadow: 2px 2px 0 rgba(var(--sombra), .5);
 }
 
 .plate-species {
@@ -414,9 +490,9 @@ a { color: var(--accent); text-underline-offset: .2em; }
   padding: 5px;
   object-fit: contain;
   image-rendering: pixelated;
-  background: rgba(0, 0, 0, .88);
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
   border: 2px solid var(--rule);
-  box-shadow: 3px 3px 0 rgba(0, 0, 0, .5);
+  box-shadow: 3px 3px 0 rgba(var(--sombra), .5);
   transition: transform .18s steps(3), border-color .2s ease;
 }
 
@@ -432,9 +508,9 @@ a { color: var(--accent); text-underline-offset: .2em; }
   bottom: .55rem;
   left: .55rem;
   padding: .4rem .5rem .32rem;
-  background: rgba(0, 0, 0, .88);
+  background: rgba(var(--sombra), .88);
   border: 2px solid color-mix(in srgb, var(--accent) 70%, var(--rule));
-  box-shadow: 3px 3px 0 rgba(0, 0, 0, .5);
+  box-shadow: 3px 3px 0 rgba(var(--sombra), .5);
   font-family: var(--pixel);
   font-size: .48rem;
   line-height: 1.3;
@@ -567,7 +643,7 @@ a { color: var(--accent); text-underline-offset: .2em; }
   margin-bottom: .9rem;
   background: var(--panel);
   border: 2px solid var(--rule);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .55);
+  box-shadow: inset 0 0 0 1px rgba(var(--sombra), .55);
   overflow: hidden;
 }
 
@@ -868,6 +944,23 @@ a { color: var(--accent); text-underline-offset: .2em; }
 .t-dark     { --t: #8b81a0; }
 .t-steel    { --t: #6fa9bf; }
 .t-fairy    { --t: #ec8fe6; }
+
+/* Los colores de tipo estan elegidos sobre fondo negro. En claro, el texto
+   del badge se oscurece hasta que se lee; el marco y el relleno se quedan,
+   que son los que le dan el color al ojo. */
+:root[data-tema="claro"] .type-chip {
+  color: color-mix(in srgb, var(--t) 55%, #000);
+  border-color: color-mix(in srgb, var(--t) 80%, #000);
+  background: color-mix(in srgb, var(--t) 22%, transparent);
+}
+
+/* El resplandor de los textos con acento no pinta nada sobre claro */
+:root[data-tema="claro"] .masthead .eyebrow,
+:root[data-tema="claro"] .gen-title,
+:root[data-tema="claro"] .plate-index .num,
+:root[data-tema="claro"] .masthead-title em { text-shadow: none; }
+
+:root[data-tema="claro"] .masthead-title { text-shadow: 3px 3px 0 rgba(var(--sombra), .18); }
 
 /* ===== Responsive ===== */
 
