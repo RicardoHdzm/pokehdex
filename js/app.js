@@ -349,8 +349,10 @@ function parseNumeros(valor) {
    en "missing". */
 function entradasDe(gen, especies, variantes) {
   /* La Nacional no tiene rango propio: son las entradas de todas las
-     generaciones juntas, sin repetir, ordenadas por numero. Las formas
-     llevan ids de 10000 en adelante, asi que caen solas al final. */
+     generaciones juntas, sin repetir y por numero de Pokedex. Cada forma
+     regional va detras de su especie (Raichu, Raichu de Alola), que es
+     como se ordena por "base"; el id solo desempata entre las formas de
+     una misma especie, porque las formas los tienen de 10000 en adelante. */
   if (gen.nacional) {
     const vistas = new Set();
     const todas = [];
@@ -362,7 +364,8 @@ function entradasDe(gen, especies, variantes) {
         todas.push(e);
       }
     }
-    return todas.sort((a, b) => a.id - b.id);
+    return todas.sort((a, b) =>
+      ((a.base || a.id) - (b.base || b.id)) || (a.id - b.id));
   }
 
   const { desde, hasta } = rangoDex(gen.generation);
