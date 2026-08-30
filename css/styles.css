@@ -278,12 +278,6 @@ a { color: var(--accent); text-underline-offset: .2em; }
 .plate {
   display: flex;
   flex-direction: column;
-  animation: pop .35s steps(4) backwards;
-}
-
-@keyframes pop {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: none; }
 }
 
 .plate-figure {

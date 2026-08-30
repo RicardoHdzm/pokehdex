@@ -636,7 +636,7 @@ function plate(mon, index, section) {
 
   return `
     <article class="plate${typeof esMiPerfil === "function" && esMiPerfil() ? " editable" : ""}"
-             data-slot="${index}" style="animation-delay:${index * 70}ms">
+             data-slot="${index}">
       <div class="plate-figure">
         <img class="plate-img" loading="lazy" alt="${mon.species}"
              src="${spriteSrc(mon)}" data-fallback="${spriteAlt(mon)}">
@@ -666,7 +666,7 @@ function emptyPlate(index, section) {
 
   return `
     <article class="plate plate-empty${mio ? " editable" : ""}" data-slot="${index}"
-             style="animation-delay:${index * 70}ms"${mio ? ' role="button" tabindex="0"' : ""}>
+            ${mio ? ' role="button" tabindex="0"' : ""}>
       <div class="plate-figure"><span class="empty-mark">${mio ? "+" : "—"}</span></div>
       <div class="plate-index">
         <span class="num">${etiqueta}</span>
