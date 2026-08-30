@@ -949,7 +949,7 @@ function renderGeneration(gen) {
         </div>
         ${puedeEditar ? `
           <details class="dex-masivo">
-            <summary class="dex-masivo-abrir" title="Marcar o desmarcar la region entera">Region</summary>
+            <summary class="dex-masivo-abrir" title="Marcar o desmarcar la region entera">Accion</summary>
             <div class="dex-masivo-opciones">
               <button type="button" class="boton" id="dexTodos">Marcar todos</button>
               <button type="button" class="boton" id="dexNinguno">Desmarcar todos</button>
