@@ -766,7 +766,6 @@ function champHead(gen) {
 function nacionalHead(gen) {
   return `
     <header class="gen-head">
-      <span class="gen-watermark" aria-hidden="true"><i class="fa-solid fa-globe"></i></span>
       <p class="eyebrow">Todas las regiones</p>
       <h2 class="gen-title">${gen.title || "Pokedex Nacional"}</h2>
       <p class="gen-meta">Las diez generaciones juntas</p>
