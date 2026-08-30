@@ -948,10 +948,13 @@ function renderGeneration(gen) {
                   aria-selected="${modoShiny}">Shiny</button>
         </div>
         ${puedeEditar ? `
-          <div class="dex-masivo">
-            <button type="button" class="boton" id="dexTodos">Marcar todos</button>
-            <button type="button" class="boton" id="dexNinguno">Desmarcar todos</button>
-          </div>` : ""}
+          <details class="dex-masivo">
+            <summary class="dex-masivo-abrir" title="Marcar o desmarcar la region entera">Region</summary>
+            <div class="dex-masivo-opciones">
+              <button type="button" class="boton" id="dexTodos">Marcar todos</button>
+              <button type="button" class="boton" id="dexNinguno">Desmarcar todos</button>
+            </div>
+          </details>` : ""}
         <p class="dex-progress">
           <span class="dex-count">...</span>
           <span class="dex-pct">0%</span>
@@ -972,7 +975,7 @@ function renderGeneration(gen) {
                   aria-selected="${dexFiltro === "tengo"}">Los tengo</button>
         </div>
       </div>
-      ${puedeEditar ? '<p class="dex-ayuda">Arrastra por encima para marcar varias de una vez.</p>' : ""}
+      ${puedeEditar && !ayudaAprendida() ? '<p class="dex-ayuda">Arrastra por encima para marcar varias de una vez.</p>' : ""}
       <div class="dex-cajas" id="dexCajas"></div>
     </section>`;
 
@@ -1504,6 +1507,27 @@ function conectarMarcado() {
 
 /* ---------- Marcar varias arrastrando ---------- */
 
+/* La linea de ayuda solo sirve hasta que lo descubres. Se cuenta cuantas
+   veces has arrastrado de verdad y a la tercera deja de salir. */
+const AYUDA_CLAVE = "pkmnteam:ayudaPincel";
+const AYUDA_VECES = 3;
+
+function ayudaAprendida() {
+  try { return Number(localStorage.getItem(AYUDA_CLAVE) || 0) >= AYUDA_VECES; }
+  catch { return false; }   /* modo privado: se sigue enseñando */
+}
+
+function apuntarUsoDelPincel() {
+  try {
+    const n = Number(localStorage.getItem(AYUDA_CLAVE) || 0) + 1;
+    localStorage.setItem(AYUDA_CLAVE, String(n));
+    if (n >= AYUDA_VECES) {
+      const ayuda = panelEl.querySelector(".dex-ayuda");
+      if (ayuda) ayuda.remove();
+    }
+  } catch { /* sin localStorage no pasa nada */ }
+}
+
 /* El primer Pokemon que tocas decide que hace el resto del arrastre: si
    estaba sin marcar, se marca todo lo que pises; si estaba marcado, se
    desmarca. Es como el rellenar arrastrando de una hoja de calculo. */
@@ -1579,6 +1603,7 @@ async function soltarPincel() {
 
   if (!tocadas.size) return;
   pincelUsado = true;
+  if (tocadas.size > 1) apuntarUsoDelPincel();
 
   const ids = [...tocadas.keys()];
   const res = await marcarTodas(ids, modoShiny, tener);
