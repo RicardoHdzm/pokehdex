@@ -15,7 +15,7 @@
    fa-solid-900.woff2 original de la version 6.7.2:
 
      npm i subset-font
-     subsetFont(buffer, "\uf007\uf005\uf091\uf06e\uf222\uf221\uf22d\uf0b2\uf0ac\uf004\uf185\uf186",
+     subsetFont(buffer, "\uf007\ue4dc\uf091\uf06e\uf222\uf221\uf22d\uf0b2\uf0ac\uf004\uf185\uf186",
                 { targetFormat: "woff2" })
 
    Los codigos son los mismos que van abajo en cada clase. Ademas,
@@ -68,7 +68,7 @@
 
 /* Los doce que usa el sitio, con su codigo de Font Awesome 6.7.2 */
 .fa-user                { --fa: "\f007"; }
-.fa-star                { --fa: "\f005"; }
+.fa-burst               { --fa: "\e4dc"; }
 .fa-heart               { --fa: "\f004"; }
 .fa-trophy              { --fa: "\f091"; }
 .fa-eye                 { --fa: "\f06e"; }

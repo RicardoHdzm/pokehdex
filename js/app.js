@@ -798,7 +798,7 @@ function plate(mon, index, section) {
         ${nickname ? (mon.form ? formName(mon) : mon.species) + '<span class="sep">·</span>' : ""}
         <span class="gender ${mon.gender || "n"}" role="img"
               title="${g.label}" aria-label="${g.label}">${g.icon}</span>
-        ${mon.shiny ? '<i class="fa-solid fa-star plate-shiny" title="Shiny" aria-label="Shiny"></i>' : ""}
+        ${mon.shiny ? '<i class="fa-solid fa-burst plate-shiny" title="Shiny" aria-label="Shiny"></i>' : ""}
       </p>
       <ul class="plate-types">${typeChips(mon.types || [])}</ul>
     </article>`;
