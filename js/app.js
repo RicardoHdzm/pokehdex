@@ -836,15 +836,16 @@ function nombreDelPerfil() {
 }
 
 function hallHead(sec) {
-  /* El titulo es de quien son los favoritos; el rotulo dice que son. Al
-     visitar a otro deja de ser "mis", que sobre su nombre no cuadraria. */
+  /* Arriba de quien son, debajo que son. Mismo esquema que las generaciones,
+     que llevan "Team 01" encima de "Primera generacion". Al visitar a otro el
+     titulo deja de ser "mis", que sobre su nombre no cuadraria. */
   const mio = typeof esMiPerfil !== "function" || esMiPerfil();
   const nombre = nombreDelPerfil();
 
   return `
     <header class="gen-head">
-      <p class="eyebrow">${mio ? "Mis Favoritos" : "Favoritos"}</p>
-      <h2 class="gen-title">${nombre || sec.title || "Mis favoritos"}</h2>
+      <p class="eyebrow">${nombre || "Favoritos"}</p>
+      <h2 class="gen-title">${mio ? "Mis Favoritos" : "Favoritos"}</h2>
       <p class="gen-meta">
         ${sec.subtitle || "De todas las regiones"}
         <span class="dot">·</span>
