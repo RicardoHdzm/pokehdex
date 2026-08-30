@@ -314,12 +314,28 @@ body.con-sesion .dex-tile { cursor: pointer; }
 .mon-campo[hidden] { display: none; }
 
 .mon-campo > span {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .6rem;
   font-family: var(--pixel);
   font-size: .5rem;
   line-height: 1.5;
   text-transform: uppercase;
   color: var(--ink-2);
 }
+
+/* Contador del apodo. Doce es el tope de los juegos modernos; el color avisa
+   antes de llegar, no despues. */
+.mon-cuenta {
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
+  transition: color .15s ease;
+}
+
+.mon-cuenta.cerca { color: var(--brillo); }
+.mon-cuenta.tope  { color: var(--peligro); }
 
 .mon-campo input,
 .mon-campo select {

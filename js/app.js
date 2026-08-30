@@ -1244,6 +1244,22 @@ function opcionesDeBall() {
     .join("");
 }
 
+/* Doce caracteres es el tope de apodo de los juegos modernos. Puede llegar
+   alguno mas largo desde la base, de cuando el limite eran veinticuatro: por
+   eso el contador tambien contempla pasarse. */
+const TOPE_APODO = 12;
+
+function pintarCuentaApodo() {
+  const campo = document.getElementById("monApodo");
+  const cuenta = document.getElementById("monApodoCuenta");
+  if (!campo || !cuenta) return;
+
+  const n = campo.value.length;
+  cuenta.textContent = n + "/" + TOPE_APODO;
+  cuenta.classList.toggle("tope", n >= TOPE_APODO);
+  cuenta.classList.toggle("cerca", n >= 10 && n < TOPE_APODO);
+}
+
 /* El buscador son 1025 <option> y siempre los mismos: montarlos de nuevo en
    cada apertura era lo que trababa el editor al abrirlo en el movil. Se hace
    una sola vez y a partir de ahi la ventana abre al momento. */
@@ -1270,6 +1286,7 @@ async function abrirEditor(seccion, indice) {
   /* Primero lo que no depende de PokeAPI, para que la ventana salga ya */
   document.getElementById("monEspecie").value = mon ? mon.species : "";
   document.getElementById("monApodo").value = mon ? mon.nickname || "" : "";
+  pintarCuentaApodo();
   document.getElementById("monBall").value = mon && mon.ball ? mon.ball : "poke-ball";
   document.getElementById("monShiny").checked = Boolean(mon && mon.shiny);
   document.querySelectorAll(".mon-genero").forEach((b) => {
@@ -1538,6 +1555,7 @@ function conectarEditor() {
     const op = opcionDeEspecie();
     pintarFormas(op ? op.dataset.slug : null, null);
   });
+  document.getElementById("monApodo").addEventListener("input", pintarCuentaApodo);
   document.getElementById("monBorrar").addEventListener("click", borrarDelEditor);
   document.getElementById("monCancelar").addEventListener("click", cerrarEditor);
 
