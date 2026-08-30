@@ -984,7 +984,11 @@ a { color: var(--accent); text-underline-offset: .2em; }
   .plate-figure { padding: .6rem; }
   .plate-name { font-size: .62rem; }
   .plate-index { font-size: .42rem; }
-  .type-chip { font-size: .42rem; padding: .32rem .4rem .26rem; }
+  /* El relleno va en rem y el tamaño de letra cambia en movil, asi que el
+     reparto de escritorio deja de valer y la tinta sube. Estos dos valores
+     estan medidos para que quede centrada; suman lo mismo que antes, o sea
+     que la altura del badge no cambia. */
+  .type-chip { font-size: .42rem; padding: .38rem .4rem .2rem; }
   .ball-mark { width: 24px; height: 24px; padding: 3px; }
   .index-row { justify-content: flex-start; }
 

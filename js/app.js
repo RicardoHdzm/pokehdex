@@ -69,8 +69,14 @@ const GENDER = {
 /* Formas regionales y otras variantes (clave = sufijo que usa PokeAPI) */
 const FORM_ES = {
   alola: "Alola", galar: "Galar", hisui: "Hisui", paldea: "Paldea",
-  mega: "Mega", "mega-x": "Mega X", "mega-y": "Mega Y", gmax: "Gigamax",
-  bloodmoon: "Luna Carmesi", amped: "Aguda", "low-key": "Grave"
+  mega: "Mega", "mega-x": "Mega X", "mega-y": "Mega Y", gmax: "Gigantamax",
+  bloodmoon: "Bloodmoon", amped: "Amped", "low-key": "Low Key"
+};
+
+/* En ingles la region no va detras sino delante, y como adjetivo:
+   "Alolan Marowak", no "Marowak de Alola". */
+const REGION_ADJ = {
+  alola: "Alolan", galar: "Galarian", hisui: "Hisuian", paldea: "Paldean"
 };
 
 /* Nombres de las Poke Balls, en ingles (clave = archivo del sprite) */
@@ -144,11 +150,11 @@ function formLabel(form) {
   return form.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 }
 
-/* Las formas regionales se dicen "Raichu de Alola"; el resto, "Charizard (Mega X)" */
+/* Las formas regionales se dicen "Alolan Raichu"; el resto, "Charizard (Mega X)" */
 function formName(mon) {
-  const label = formLabel(mon.form);
-  const esRegional = REGIONES.some((r) => mon.form.startsWith(r));
-  return esRegional ? mon.species + " de " + label : mon.species + " (" + label + ")";
+  const region = REGIONES.find((r) => mon.form.startsWith(r));
+  if (region) return REGION_ADJ[region] + " " + mon.species;
+  return mon.species + " (" + formLabel(mon.form) + ")";
 }
 
 /* Cache de tipos consultados a PokeAPI (para Pokemon sin "types" en teams.js) */
@@ -302,9 +308,9 @@ function partirSlug(slug, porNombre) {
 
 /* Las tres razas de Tauros de Paldea */
 const RAZA_ES = {
-  "combat-breed": "Raza Combatiente",
-  "blaze-breed": "Raza Ardiente",
-  "aqua-breed": "Raza Acuatica"
+  "combat-breed": "Combat Breed",
+  "blaze-breed": "Blaze Breed",
+  "aqua-breed": "Aqua Breed"
 };
 
 /* "raichu-alola"              -> { especie: "raichu", region: "alola", raza: "" }
@@ -380,13 +386,12 @@ function entradasDe(gen, especies, variantes) {
     const trozos = partirSlug(slug, porNombre);
     if (!trozos) return null;
 
-    const esRegional = REGIONES.some((r) => trozos.forma.startsWith(r));
-    const etiqueta = formLabel(trozos.forma);
+    const region = REGIONES.find((r) => trozos.forma.startsWith(r));
     const raza = trozos.forma.match(/-((?:combat|blaze|aqua)-breed)$/);
-    const nombre = nombreEspecie(trozos.especie) +
-      (esRegional
-        ? " de " + etiqueta + (raza ? " (" + RAZA_ES[raza[1]] + ")" : "")
-        : " (" + etiqueta + ")");
+    const nombre = region
+      ? REGION_ADJ[region] + " " + nombreEspecie(trozos.especie) +
+        (raza ? " (" + RAZA_ES[raza[1]] + ")" : "")
+      : nombreEspecie(trozos.especie) + " (" + formLabel(trozos.forma) + ")";
 
     return { id, slug, base: porNombre.get(trozos.especie), region: trozos.forma, nombre };
   };
@@ -1378,22 +1383,29 @@ async function borrarDelEditor() {
 
 /* ---------- Arrastrar para reordenar ---------- */
 
-let arrastre = null;      // { origen, desde, offsetX, offsetY }
+let arrastre = null;      // { origen, sitios, destino, inicioX, inicioY, ... }
 let huboArrastre = false;
 
 const laminasVisibles = () =>
   [...panelEl.querySelectorAll(".plate:not(.plate-empty)")];
 
-/* Sobre que lamina esta el puntero */
-function laminaBajo(x, y) {
-  return laminasVisibles().find((el) => {
-    const r = el.getBoundingClientRect();
-    return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
-  }) || null;
+/* Sobre que lamina esta el puntero. Se mira contra los rectangulos que se
+   midieron al empezar, no contra el DOM: durante el arrastre las demas
+   laminas no se mueven, asi que medirlas en cada evento solo servia para
+   forzar un recalculo de estilos por fotograma. Van en coordenadas de
+   pagina, para que un scroll a media faena no las invalide. */
+function laminaBajo(pageX, pageY) {
+  if (!arrastre) return null;
+  const sitio = arrastre.sitios.find((s) =>
+    pageX >= s.left && pageX <= s.right && pageY >= s.top && pageY <= s.bottom);
+  return sitio ? sitio.el : null;
 }
 
 function marcarDestino(el) {
-  laminasVisibles().forEach((p) => p.classList.toggle("destino", p === el));
+  if (!arrastre || arrastre.destino === el) return;   /* solo cuando cambia */
+  if (arrastre.destino) arrastre.destino.classList.remove("destino");
+  if (el) el.classList.add("destino");
+  arrastre.destino = el;
 }
 
 function empezarArrastre(e) {
@@ -1406,43 +1418,64 @@ function empezarArrastre(e) {
   e.preventDefault();
   asa.setPointerCapture(e.pointerId);
 
-  const r = origen.getBoundingClientRect();
+  /* Se miden todas las laminas una sola vez, en coordenadas de pagina */
+  const sitios = laminasVisibles()
+    .filter((el) => el !== origen)
+    .map((el) => {
+      const r = el.getBoundingClientRect();
+      return { el,
+        left: r.left + scrollX, right: r.right + scrollX,
+        top: r.top + scrollY,  bottom: r.bottom + scrollY };
+    });
+
   arrastre = {
-    origen, asa,
+    origen, asa, sitios, destino: null,
     desde: Number(asa.dataset.desde),
-    offsetX: e.clientX - r.left - r.width / 2,
-    offsetY: e.clientY - r.top - r.height / 2
+    /* El punto donde agarraste: la lamina va pegada al dedo, sin correcciones */
+    inicioX: e.clientX,
+    inicioY: e.clientY,
+    ultimo: null,
+    pendiente: 0
   };
   origen.classList.add("arrastrando");
+}
+
+/* Un solo repintado por fotograma: pointermove puede dispararse mas veces
+   que las que el navegador llega a dibujar, y hacerle caso a todas era
+   trabajo tirado que se notaba como tiron. */
+function pintarArrastre() {
+  arrastre.pendiente = 0;
+  if (!arrastre || !arrastre.ultimo) return;
+
+  const { x, y } = arrastre.ultimo;
+  arrastre.origen.style.transform =
+    "translate(" + (x - arrastre.inicioX) + "px, " + (y - arrastre.inicioY) + "px)";
+
+  const destino = laminaBajo(x + scrollX, y + scrollY);
+  marcarDestino(destino);
 }
 
 function moverArrastre(e) {
   if (!arrastre) return;
   huboArrastre = true;
 
-  const r = arrastre.origen.getBoundingClientRect();
-  const dx = e.clientX - (r.left + r.width / 2) - arrastre.offsetX;
-  const dy = e.clientY - (r.top + r.height / 2) - arrastre.offsetY;
-  arrastre.origen.style.transform = "translate(" + dx + "px, " + dy + "px)";
-
-  /* La lamina que se arrastra no puede taparse a si misma */
-  arrastre.origen.style.pointerEvents = "none";
-  const destino = laminaBajo(e.clientX, e.clientY);
-  arrastre.origen.style.pointerEvents = "";
-  marcarDestino(destino && destino !== arrastre.origen ? destino : null);
+  arrastre.ultimo = { x: e.clientX, y: e.clientY };
+  if (!arrastre.pendiente) {
+    arrastre.pendiente = requestAnimationFrame(pintarArrastre);
+  }
 }
 
 async function soltarArrastre(e) {
   if (!arrastre) return;
 
-  const { origen, desde } = arrastre;
-  origen.style.pointerEvents = "none";
-  const destino = laminaBajo(e.clientX, e.clientY);
-  origen.style.pointerEvents = "";
+  const { origen, desde, pendiente } = arrastre;
+  if (pendiente) cancelAnimationFrame(pendiente);
+
+  const destino = laminaBajo(e.clientX + scrollX, e.clientY + scrollY);
+  marcarDestino(null);
 
   origen.classList.remove("arrastrando");
   origen.style.transform = "";
-  marcarDestino(null);
   arrastre = null;
 
   if (!destino || destino === origen || !genEnPantalla) return;

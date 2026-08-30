@@ -661,6 +661,8 @@ body.con-sesion .dex-tile { cursor: pointer; }
   cursor: grabbing;
   transition: none;
   animation: none;
+  /* Su propia capa, para que moverla no obligue a repintar lo de debajo */
+  will-change: transform;
 }
 
 .plate.arrastrando .plate-asa { cursor: grabbing; color: var(--accent); border-color: var(--accent); }
