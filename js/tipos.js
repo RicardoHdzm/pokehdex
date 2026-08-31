@@ -55,10 +55,12 @@ async function fetchTipos() {
   }
 }
 
-/* De que generacion es una forma que la Pokedex no sigue. Se usa la de su
-   especie: Rotom Calor es de cuarta como Rotom, y Toxtricity Grave de
-   octava como Toxtricity. Las regionales no pasan por aqui, que esas si
-   estan en el catalogo y llevan la generacion que las estreno. */
+/* De que generacion es una forma que la Pokedex no sigue.
+
+   Manda la forma sobre la especie: el Darmanitan de Galar es de octava
+   aunque Darmanitan sea de quinta, y una Mega es de sexta aunque su
+   Pokemon sea de primera. Solo cuando la forma no dice nada —Rotom Calor,
+   Toxtricity Grave— se usa la generacion de la especie. */
 function generacionDeFormaSuelta(id) {
   if (!VARIANTES_MEM || !ESPECIES_MEM) return null;
 
@@ -68,6 +70,12 @@ function generacionDeFormaSuelta(id) {
   const porNombre = new Map(ESPECIES_MEM.map(([n, slug]) => [slug, n]));
   const trozos = partirSlug(fila[1], porNombre);
   if (!trozos) return null;
+
+  /* Region, Mega o Gigamax: la forma tiene generacion propia */
+  const marca = Object.keys(GEN_DE_FORMA).find((m) => trozos.forma.startsWith(m));
+  if (marca) return GEN_DE_FORMA[marca];
+  /* El gmax va detras del nombre de la forma: toxtricity-amped-gmax */
+  if (/-gmax$/.test(trozos.forma)) return GEN_DE_FORMA.gmax;
 
   const base = porNombre.get(trozos.especie);
   if (!base) return null;
