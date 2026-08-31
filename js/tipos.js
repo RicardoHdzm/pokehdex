@@ -10,7 +10,9 @@
    peticiones, una sola vez, y se guardan en el navegador.
    ============================================================ */
 
-const TIPOS_KEY = "pkmnteam:tipos";
+/* La v2 incluye las formas; la clave cambia para que el cache viejo,
+   que solo tenia especies, no se quede pegado */
+const TIPOS_KEY = "pkmnteam:tipos2";
 const GENERACIONES_REJILLA = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 const TIPOS_REJILLA = [
@@ -41,9 +43,7 @@ async function fetchTipos() {
     const pares = respuestas.map((d, i) => {
       const ids = d.pokemon
         .map((p) => Number(p.pokemon.url.split("/").filter(Boolean).pop()))
-        /* Solo especies: las formas alternas tienen ids de 10000 en adelante
-           y no son entradas propias de la Pokedex */
-        .filter((id) => id > 0 && id <= 1025);
+        .filter((id) => id > 0);
       return [TIPOS_REJILLA[i], [...new Set(ids)].sort((a, b) => a - b)];
     });
 
@@ -55,11 +55,22 @@ async function fetchTipos() {
   }
 }
 
-/* Los candidatos de una casilla: de ese tipo y de esa generacion */
+/* Los candidatos de una casilla: de ese tipo y de esa generacion.
+
+   La generacion se toma del catalogo y no del numero de Pokedex, para que
+   las formas caigan donde les toca: Ursaluna es de octava y su Luna Carmesi
+   de novena, y el Ninetales de Alola cuenta como Hielo de septima, no como
+   Fuego de primera.
+
+   Solo entran las formas que la Pokedex sigue —las regionales y las
+   declaradas a mano—, que son las mismas que ves en las cajas. */
 function candidatosDe(generacion, tipo) {
-  if (!TIPOS_MEM || !TIPOS_MEM[tipo]) return [];
-  const { desde, hasta } = rangoDex(generacion);
-  return TIPOS_MEM[tipo].filter((id) => id >= desde && id <= hasta);
+  if (!TIPOS_MEM || !TIPOS_MEM[tipo] || !CATALOGO_IDS) return [];
+
+  return TIPOS_MEM[tipo].filter((id) => {
+    const info = CATALOGO_IDS.get(id);
+    return info && info.generacion === generacion;
+  });
 }
 
 /* ---------- Guardado ---------- */
@@ -103,9 +114,12 @@ async function guardarFavoritoTipo(generacion, tipo, dexId) {
 
 /* ---------- Pintado ---------- */
 
-/* Nombre de una especie por su numero, si la lista ya esta cargada */
+/* Nombre por numero. El catalogo incluye las formas; la lista de especies
+   solo las 1025 base, asi que se mira primero alli. */
 function nombrePorDex(dex) {
-  if (!dex || !ESPECIES_MEM) return "";
+  if (!dex) return "";
+  if (CATALOGO_IDS && CATALOGO_IDS.has(dex)) return CATALOGO_IDS.get(dex).nombre;
+  if (!ESPECIES_MEM) return "";
   const fila = ESPECIES_MEM.find(([id]) => id === dex);
   return fila ? nombreEspecie(fila[1]) : "";
 }
@@ -121,7 +135,7 @@ function celdaDe(generacion, tipo) {
   return `
     <td class="rejilla-celda${dex ? " puesta" : ""}${mio ? " editable" : ""}"
         data-gen="${generacion}" data-tipo="${tipo}"
-        title="${dex ? dexNum(dex) + " " + nombrePorDex(dex) + " · " : ""}${TYPE_ES[tipo] || tipo} · ${ORDINAL[generacion] || generacion} generacion">
+        title="${dex ? dexNum(baseDe(dex)) + " " + nombrePorDex(dex) + " · " : ""}${TYPE_ES[tipo] || tipo} · ${ORDINAL[generacion] || generacion} generacion">
       ${dentro}
     </td>`;
 }
@@ -167,6 +181,12 @@ function rejillaHTML() {
 
 /* ---------- Elegir el de una casilla ---------- */
 
+/* Las formas comparten numero con su especie: el catalogo lo guarda en base */
+function baseDe(dex) {
+  const info = CATALOGO_IDS && CATALOGO_IDS.get(dex);
+  return info ? info.base : dex;
+}
+
 let celdaEnCurso = null;
 
 async function abrirSelectorTipo(celda) {
@@ -182,8 +202,7 @@ async function abrirSelectorTipo(celda) {
   const rejilla = document.getElementById("tipoOpciones");
   rejilla.innerHTML = '<p class="dex-vacio">Cargando...</p>';
 
-  const [especies] = await Promise.all([fetchSpecies(), fetchTipos()]);
-  const nombres = new Map(especies);
+  await Promise.all([fetchSpecies(), fetchTipos(), construirCatalogo()]);
   const puesto = FAVORITOS_TIPO.get(generacion + ":" + tipo);
   const candidatos = candidatosDe(generacion, tipo);
 
@@ -210,9 +229,9 @@ async function abrirSelectorTipo(celda) {
     return `
     <li class="tipo-opcion${id === puesto ? " puesta" : ""}${deEquipo ? " de-equipo" : tenido ? " tenido" : ""}"
         data-dex="${id}"
-        title="${dexNum(id)} ${nombreEspecie(nombres.get(id) || "")}${marca ? " · " + marca : ""}">
+        title="${dexNum(baseDe(id))} ${nombrePorDex(id)}${marca ? " · " + marca : ""}">
       <img src="${SPRITES}/${id}.png" alt="" loading="lazy">
-      <span>${nombreEspecie(nombres.get(id) || "")}</span>
+      <span>${nombrePorDex(id)}</span>
       ${marca ? '<b class="tipo-marca">' + marca + "</b>" : ""}
     </li>`;
   }).join("");
