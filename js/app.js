@@ -336,12 +336,19 @@ function coleccionesDe(generacion) {
     ...col,
     entradas: COSMETICAS_MEM
       .filter(([, slug]) => slug.startsWith(col.slug + "-"))
+      /* El Gigamax de Alcremie no es una crema mas: es otra forma, y ademas
+         sale por la via normal de las variantes. Aqui no pinta nada. */
+      .filter(([, slug]) => !slug.endsWith("-gmax"))
       .map(([id, slug]) => ({
         id: DESPLAZAMIENTO_COSMETICO + id,
         base: col.base,
         nombre: col.titulo + " " + nombreCosmetico(slug, col),
-        /* El sprite va por especie y sufijo, no por id */
-        sprite: col.base + "-" + slug.slice(col.slug.length + 1)
+        /* El sprite va por especie y sufijo. La forma base es la excepcion:
+           comparte id con la especie y su archivo va sin sufijo (201.png y
+           no 201-a.png, que no existe). */
+        sprite: id === col.base
+          ? String(col.base)
+          : col.base + "-" + slug.slice(col.slug.length + 1)
       }))
   })).filter((c) => c.entradas.length);
 }
