@@ -33,7 +33,7 @@ function filaDeUsuario(p) {
 
   return `
     <li class="usuario ${estado.clave}">
-      <span class="usuario-nombre">${nombre}</span>
+      <span class="usuario-nombre">${avatarHTML(p)}${nombre}</span>
       <span class="usuario-estado">${estado.texto}</span>
       <button type="button" class="boton usuario-agregar" data-id="${p.id}"
               aria-pressed="${agregado}">${agregado ? "Quitar" : "Agregar"}</button>
