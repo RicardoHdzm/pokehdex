@@ -115,6 +115,12 @@ function candidatosDe(generacion, tipo) {
        Se quedan Zacian y Zamazenta coronados y las formas de Zygarde. */
     if (/-mega|-primal|-gmax|-totem|-busted$|-hangry$|-ultra$|-eternamax$|-ash$|-origin$/
         .test(fila[1])) return false;
+
+    /* Las quince caras de Pikachu son gorras y disfraces, no formas. Los
+       Starter son los compañeros de Let's Go, iguales al normal. Y los
+       Power Construct de Zygarde son su 10% y su 50% con otra habilidad:
+       el mismo aspecto repetido. */
+    if (/^pikachu-|-starter$|-power-construct/.test(fila[1])) return false;
     return generacionDeFormaSuelta(id) === generacion;
   });
 }
@@ -294,22 +300,20 @@ async function abrirSelectorTipo(celda) {
   }
 
   /* Los que llevaste en algun equipo van primero: si Arcanine estuvo en tu
-     equipo de Kanto es el candidato obvio a favorito de Fuego. Despues los
-     que tienes capturados, y al final el resto. */
+     equipo de Kanto es el candidato obvio a favorito de Fuego. El resto va
+     por numero. */
   const enEquipos = new Set();
   TEAMS.forEach((sec) => sec.team.forEach((m) => { if (m && m.dex) enEquipos.add(m.dex); }));
-  const capturados = (typeof CAPTURAS !== "undefined" && perfilVisto) ? CAPTURAS.normal : new Set();
 
-  const peso = (id) => (enEquipos.has(id) ? 0 : capturados.has(id) ? 1 : 2);
-  const ordenados = [...candidatos].sort((a, b) => peso(a) - peso(b) || a - b);
+  const ordenados = [...candidatos]
+    .sort((a, b) => (enEquipos.has(b) ? 1 : 0) - (enEquipos.has(a) ? 1 : 0) || a - b);
 
   rejilla.innerHTML = ordenados.map((id) => {
     const deEquipo = enEquipos.has(id);
-    const tenido = capturados.has(id);
-    const marca = deEquipo ? "De tu equipo" : tenido ? "Lo tienes" : "";
+    const marca = deEquipo ? "De tu equipo" : "";
 
     return `
-    <li class="tipo-opcion${id === puesto ? " puesta" : ""}${deEquipo ? " de-equipo" : tenido ? " tenido" : ""}"
+    <li class="tipo-opcion${id === puesto ? " puesta" : ""}${deEquipo ? " de-equipo" : ""}"
         data-dex="${id}"
         title="${dexNum(baseDe(id))} ${nombrePorDex(id)}${marca ? " · " + marca : ""}">
       <img src="${SPRITES}/${id}.png" alt="" loading="lazy">

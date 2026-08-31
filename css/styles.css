@@ -560,7 +560,8 @@ a { color: var(--accent); text-underline-offset: .2em; }
 /* Separacion marcada entre el equipo campeon y la Pokedex: son dos
    bloques distintos y antes se leian como uno solo. Ademas de aire, una
    linea que cruza el ancho completo. */
-.plates + .dex-section {
+.plates + .dex-section,
+.plates + .rejilla-seccion {
   position: relative;
   margin-top: clamp(4rem, 8vw, 6.5rem);
   padding-top: clamp(3rem, 5vw, 4rem);
@@ -568,7 +569,8 @@ a { color: var(--accent); text-underline-offset: .2em; }
 }
 
 /* Un cuadrito del color de la region partiendo la linea */
-.plates + .dex-section::before {
+.plates + .dex-section::before,
+.plates + .rejilla-seccion::before {
   content: "";
   position: absolute;
   top: -9px;
@@ -760,7 +762,7 @@ a { color: var(--accent); text-underline-offset: .2em; }
 
 /* ===== Rejilla de favorito por tipo ===== */
 
-.rejilla-seccion { margin-top: clamp(2.5rem, 5vw, 4rem); }
+
 
 /* Dieciocho columnas no caben en un movil: se desplaza en horizontal y la
    columna de generaciones se queda fija, que si no te pierdes de que fila
@@ -895,10 +897,8 @@ a { color: var(--accent); text-underline-offset: .2em; }
 
 .tipo-opcion:hover { border-color: var(--accent); color: var(--ink); }
 
-/* Lo que ya es tuyo se distingue: primero los de tus equipos, luego los
-   capturados. Sin esto el selector no sabia nada del resto del sitio. */
-.tipo-opcion.tenido { border-color: color-mix(in srgb, var(--exito) 55%, var(--rule)); }
-
+/* Los de tus equipos se distinguen y van primero: son los candidatos
+   obvios y el selector no tendria por que ignorar lo que ya construiste. */
 .tipo-opcion.de-equipo {
   border-color: var(--accent);
   background: color-mix(in srgb, var(--accent) 10%, var(--panel));
@@ -914,7 +914,6 @@ a { color: var(--accent); text-underline-offset: .2em; }
 }
 
 .tipo-opcion.de-equipo .tipo-marca { color: var(--accent); }
-.tipo-opcion.tenido .tipo-marca { color: var(--exito); }
 
 .tipo-opcion.puesta {
   border-color: var(--accent);
