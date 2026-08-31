@@ -105,9 +105,14 @@ function candidatosDe(generacion, tipo) {
     if (id <= 1025) return false;
     const fila = VARIANTES_MEM && VARIANTES_MEM.find(([v]) => v === id);
     if (!fila) return false;
-    /* Fuera las Megas, las Primal y las Gigamax: no son formas del Pokemon
-       sino estados temporales de combate. Los totem son solo mas grandes. */
-    if (/-mega|-primal|-gmax|-totem/.test(fila[1])) return false;
+    /* Fuera lo que no es una forma sino un estado: Megas, Primal, Gigamax,
+       el disfraz roto de Mimikyu, el Morpeko hambriento, Ultra Necrozma,
+       Eternamax, el Greninja del anime y las Origin que dependen de un
+       objeto. Los totem son solo Pokemon mas grandes.
+
+       Se quedan Zacian y Zamazenta coronados y las formas de Zygarde. */
+    if (/-mega|-primal|-gmax|-totem|-busted$|-hangry$|-ultra$|-eternamax$|-ash$|-origin$/
+        .test(fila[1])) return false;
     return generacionDeFormaSuelta(id) === generacion;
   });
 }
