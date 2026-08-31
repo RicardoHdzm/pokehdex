@@ -242,3 +242,31 @@ create policy quitar_amigo on public.friends
 
 -- La Pokeball favorita de cada quien, que se usa como avatar.
 alter table public.profiles add column if not exists favourite_ball text;
+
+
+-- ============================================================
+--  Favorito por generacion y tipo
+--  ------------------------------------------------------------
+--  Una fila por casilla de la rejilla: "mi Fuego favorito de
+--  tercera generacion". Nueve generaciones por dieciocho tipos.
+-- ============================================================
+
+create table if not exists public.favourite_types (
+  user_id    uuid not null references public.profiles(id) on delete cascade,
+  generation smallint not null,
+  type       text not null,
+  dex_id     integer not null,
+  primary key (user_id, generation, type)
+);
+
+alter table public.favourite_types enable row level security;
+
+drop policy if exists leer_favoritos_tipo on public.favourite_types;
+create policy leer_favoritos_tipo on public.favourite_types
+  for select to authenticated using (true);
+
+drop policy if exists guardar_favoritos_tipo on public.favourite_types;
+create policy guardar_favoritos_tipo on public.favourite_types
+  for all to authenticated
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
