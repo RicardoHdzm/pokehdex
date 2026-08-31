@@ -1508,6 +1508,90 @@ async function pintarFormas(slugEspecie, formaActual) {
   campo.hidden = false;
 }
 
+/* ---------- Sugerencias del buscador de especies ----------
+   El <datalist> del navegador se comporta distinto en cada movil: en Safari
+   sale en una barra sobre el teclado, en algunos webviews no sale, y con mil
+   opciones va lento. Esta lista la dibujamos nosotros, asi que se ve igual
+   en todas partes y ademas cabe el sprite al lado del nombre. */
+
+const TOPE_SUGERENCIAS = 25;
+let sugerenciaActiva = -1;
+
+/* Primero los que empiezan por lo escrito, luego los que lo contienen: al
+   teclear "char" interesa antes Charmander que Wartortle */
+function buscarEspecies(texto) {
+  const q = texto.trim().toLowerCase();
+  if (!q || !ESPECIES_MEM) return [];
+
+  const empiezan = [];
+  const contienen = [];
+  for (const [id, slug] of ESPECIES_MEM) {
+    const nombre = nombreEspecie(slug);
+    const bajo = nombre.toLowerCase();
+    if (bajo.startsWith(q)) empiezan.push({ id, slug, nombre });
+    else if (bajo.includes(q)) contienen.push({ id, slug, nombre });
+    if (empiezan.length >= TOPE_SUGERENCIAS) break;
+  }
+  return empiezan.concat(contienen).slice(0, TOPE_SUGERENCIAS);
+}
+
+function cerrarSugerencias() {
+  const lista = document.getElementById("monSugerencias");
+  if (!lista) return;
+  lista.hidden = true;
+  lista.innerHTML = "";
+  sugerenciaActiva = -1;
+  document.getElementById("monEspecie").setAttribute("aria-expanded", "false");
+}
+
+function pintarSugerencias() {
+  const campo = document.getElementById("monEspecie");
+  const lista = document.getElementById("monSugerencias");
+  if (!campo || !lista) return;
+
+  const encontrados = buscarEspecies(campo.value);
+  /* Si lo escrito ya es exactamente uno, no hace falta sugerir nada */
+  const exacto = encontrados.length === 1 &&
+                 encontrados[0].nombre.toLowerCase() === campo.value.trim().toLowerCase();
+
+  if (!encontrados.length || exacto) return cerrarSugerencias();
+
+  lista.innerHTML = encontrados.map((e, i) => `
+    <li class="mon-sugerencia" role="option" aria-selected="false"
+        data-nombre="${e.nombre}" data-indice="${i}">
+      <img src="${SPRITES + "/" + e.id + ".png"}" alt="" aria-hidden="true" loading="lazy">
+      <span>${e.nombre}</span>
+      <b>${dexNum(e.id)}</b>
+    </li>`).join("");
+
+  lista.hidden = false;
+  sugerenciaActiva = -1;
+  campo.setAttribute("aria-expanded", "true");
+}
+
+function marcarSugerencia(indice) {
+  const items = [...document.querySelectorAll("#monSugerencias .mon-sugerencia")];
+  if (!items.length) return;
+
+  sugerenciaActiva = (indice + items.length) % items.length;
+  items.forEach((li, i) => {
+    const activa = i === sugerenciaActiva;
+    li.classList.toggle("activa", activa);
+    li.setAttribute("aria-selected", String(activa));
+    if (activa) li.scrollIntoView({ block: "nearest" });
+  });
+}
+
+/* Elegir una sugerencia deja el campo listo y repinta las formas */
+function elegirSugerencia(li) {
+  const campo = document.getElementById("monEspecie");
+  campo.value = li.dataset.nombre;
+  cerrarSugerencias();
+
+  const op = opcionDeEspecie();
+  pintarFormas(op ? op.dataset.slug : null, null);
+}
+
 /* Del nombre escrito a su entrada del buscador */
 function opcionDeEspecie() {
   const nombre = document.getElementById("monEspecie").value.trim().toLowerCase();
