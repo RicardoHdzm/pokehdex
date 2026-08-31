@@ -40,12 +40,12 @@ function filaDeUsuario(p) {
       <span class="usuario-nombre">${avatarHTML(p)}${nombre}</span>
       <span class="usuario-estado" role="img"
             title="${estado.texto}" aria-label="${estado.texto}"></span>
-      <button type="button" class="boton usuario-agregar" data-id="${p.id}"
-              aria-pressed="${agregado}">${agregado ? "Quitar" : "Agregar"}</button>
       <button type="button" class="boton primary usuario-ver" data-id="${p.id}"
               data-nombre="${nombre}"${esMutuo(p.id) ? "" : " disabled"}
               title="${esMutuo(p.id) ? "Ver su Pokedex" : "Solo cuando los dos se tengan agregados"}"
               >Ver Perfil</button>
+      <button type="button" class="boton usuario-agregar" data-id="${p.id}"
+              aria-pressed="${agregado}">${agregado ? "Quitar" : "Agregar"}</button>
     </li>`;
 }
 

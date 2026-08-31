@@ -347,6 +347,59 @@ body.con-sesion .dex-tile { cursor: pointer; }
 .mon-cuenta.cerca { color: var(--brillo); }
 .mon-cuenta.tope  { color: var(--peligro); }
 
+/* El campo con sugerencias: la lista flota debajo, sin empujar al resto */
+.mon-campo-buscador { position: relative; }
+
+.mon-sugerencias {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  max-height: 15rem;
+  overflow-y: auto;
+  margin: .3rem 0 0;
+  padding: 0;
+  list-style: none;
+  background: var(--bg);
+  border: 2px solid var(--accent);
+  box-shadow: 4px 4px 0 rgba(var(--sombra), .55);
+}
+
+.mon-sugerencias[hidden] { display: none; }
+
+.mon-sugerencia {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  padding: .4rem .6rem;
+  cursor: pointer;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+
+.mon-sugerencia img {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.mon-sugerencia span { flex: 1; min-width: 0; }
+
+.mon-sugerencia b {
+  font-family: var(--pixel);
+  font-size: .45rem;
+  font-weight: 400;
+  color: var(--ink-2);
+}
+
+.mon-sugerencia:hover,
+.mon-sugerencia.activa {
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
 .mon-campo input,
 .mon-campo select {
   padding: .55rem .6rem;

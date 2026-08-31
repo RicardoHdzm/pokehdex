@@ -584,9 +584,12 @@ function avatarDe(ball) {
   return ITEMS + "/" + ball + ".png";
 }
 
-/* El avatar de un perfil, o nada si no ha elegido ball */
+/* Quien no haya elegido ball lleva la normal: es mejor default que un
+   monigote generico, y ademas todos los perfiles ocupan lo mismo. */
+const BALL_POR_DEFECTO = "poke-ball";
+
 function avatarHTML(quien, clase) {
-  const ball = quien && quien.favourite_ball;
+  const ball = (quien && quien.favourite_ball) || BALL_POR_DEFECTO;
   const src = avatarDe(ball);
   if (!src) return "";
   return '<img class="avatar' + (clase ? " " + clase : "") + '" src="' + src +
@@ -1466,6 +1469,7 @@ async function abrirEditor(seccion, indice) {
 
   document.getElementById("monForma").innerHTML = "";
   document.getElementById("monFormaCampo").hidden = true;
+  cerrarSugerencias();
   document.getElementById("monBorrar").hidden = !mon;
   document.getElementById("monTitulo").textContent =
     (mon ? "Editar" : "Añadir") + " · hueco " + plateNum(indice + 1);
@@ -1600,6 +1604,7 @@ function opcionDeEspecie() {
 }
 
 function cerrarEditor() {
+  cerrarSugerencias();
   editando = null;
   document.getElementById("monEditor").hidden = true;
 }
@@ -1806,10 +1811,41 @@ function conectarEditor() {
 
   document.getElementById("monForm").addEventListener("submit", guardarDelEditor);
 
-  document.getElementById("monEspecie").addEventListener("input", () => {
+  const campoEspecie = document.getElementById("monEspecie");
+
+  campoEspecie.addEventListener("input", () => {
+    pintarSugerencias();
     const op = opcionDeEspecie();
     pintarFormas(op ? op.dataset.slug : null, null);
   });
+
+  /* Al volver al campo con algo escrito se vuelven a ofrecer */
+  campoEspecie.addEventListener("focus", pintarSugerencias);
+
+  campoEspecie.addEventListener("keydown", (e) => {
+    const items = document.querySelectorAll("#monSugerencias .mon-sugerencia");
+    if (!items.length) return;
+
+    if (e.key === "ArrowDown") { e.preventDefault(); marcarSugerencia(sugerenciaActiva + 1); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); marcarSugerencia(sugerenciaActiva - 1); }
+    else if (e.key === "Enter" && sugerenciaActiva >= 0) {
+      /* Sin esto el Enter enviaria el formulario con la sugerencia a medias */
+      e.preventDefault();
+      elegirSugerencia(items[sugerenciaActiva]);
+    }
+    else if (e.key === "Escape") cerrarSugerencias();
+  });
+
+  /* pointerdown y no click: el click llega despues de que el campo pierda el
+     foco, y para entonces la lista ya se habria cerrado */
+  document.getElementById("monSugerencias").addEventListener("pointerdown", (e) => {
+    const li = e.target.closest(".mon-sugerencia");
+    if (!li) return;
+    e.preventDefault();
+    elegirSugerencia(li);
+  });
+
+  campoEspecie.addEventListener("blur", () => setTimeout(cerrarSugerencias, 120));
   document.getElementById("monApodo").addEventListener("input", pintarCuentaApodo);
   document.getElementById("monBorrar").addEventListener("click", borrarDelEditor);
   document.getElementById("monCancelar").addEventListener("click", cerrarEditor);

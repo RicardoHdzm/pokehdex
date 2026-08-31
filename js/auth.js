@@ -194,9 +194,8 @@ function pintarSesion() {
       codigos.push('<span class="visita-codigo"><b>Champions</b> ' + perfil.champions_id + "</span>");
     }
 
-    /* Si has elegido favorito manda su icono; si no, el monigote de siempre */
-    const cara = (typeof avatarHTML === "function" && avatarHTML(perfil)) ||
-                 '<i class="fa-solid fa-user"></i>';
+    /* avatarHTML siempre devuelve una ball: la elegida o la normal */
+    const cara = (typeof avatarHTML === "function" && avatarHTML(perfil)) || "";
 
     /* Ficha y nombre van juntos en una fila: asi se leen como un solo
        objeto sin depender de las separaciones. Va en su propio hueco, antes

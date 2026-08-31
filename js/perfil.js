@@ -8,7 +8,7 @@
 /* Las 38 balls, con la opcion de no elegir ninguna */
 function prepararFavorito() {
   const campo = document.getElementById("perfilFavorito");
-  campo.innerHTML = '<option value="">Sin elegir</option>' + opcionesDeBall();
+  campo.innerHTML = '<option value="">Poke Ball (por defecto)</option>' + opcionesDeBall();
   campo.value = perfil.favourite_ball || "";
   pintarAvatarDelPerfil();
 }
@@ -16,11 +16,10 @@ function prepararFavorito() {
 /* La miniatura de al lado, que cambia al elegir */
 function pintarAvatarDelPerfil() {
   const hueco = document.getElementById("perfilAvatar");
-  const ball = document.getElementById("perfilFavorito").value;
-  hueco.innerHTML = ball
-    ? '<img src="' + avatarDe(ball) + '" alt="" aria-hidden="true">'
-    : "";
-  hueco.classList.toggle("vacio", !ball);
+  const ball = document.getElementById("perfilFavorito").value || BALL_POR_DEFECTO;
+  /* Siempre hay algo que enseñar: sin elegir, la que te va a tocar */
+  hueco.innerHTML = '<img src="' + avatarDe(ball) + '" alt="" aria-hidden="true">';
+  hueco.classList.remove("vacio");
 }
 
 function abrirPerfil() {
