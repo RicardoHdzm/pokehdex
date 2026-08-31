@@ -1134,7 +1134,6 @@ function nacionalHead(gen) {
     <header class="gen-head">
       <p class="eyebrow">Todas las regiones</p>
       <h2 class="gen-title">${gen.title || "Pokedex Nacional"}</h2>
-      <p class="gen-meta">Las diez generaciones juntas</p>
     </header>`;
 }
 
