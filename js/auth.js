@@ -144,11 +144,22 @@ async function guardarClave(e) {
 
 async function cargarPerfil() {
   if (!sb || !sesion) return null;
-  const { data, error } = await sb
+  let { data, error } = await sb
     .from("profiles")
     .select("id, handle, display_name, friend_code, champions_id, favourite_ball")
     .eq("id", sesion.user.id)
     .single();
+
+  /* Si la base todavia no tiene las columnas nuevas se piden las de siempre:
+     sin esto, no habria perfil y la pagina entera se quedaria a medias. */
+  if (error && error.code === "42703") {
+    console.warn("Faltan columnas en profiles, se piden las basicas:", error.message);
+    ({ data, error } = await sb
+      .from("profiles")
+      .select("id, handle, display_name")
+      .eq("id", sesion.user.id)
+      .single());
+  }
 
   if (error) {
     console.warn("No se pudo leer el perfil:", error.message);
@@ -185,8 +196,11 @@ function pintarSesion() {
     const cara = (typeof avatarHTML === "function" && avatarHTML(perfil)) ||
                  '<i class="fa-solid fa-user"></i>';
 
+    /* La cara va en su propia linea, encima del nombre. El contenedor ya
+       apila en columna, asi que basta con sacarla del span del nombre. */
     nombre.innerHTML =
-      '<span class="auth-quien">' + cara + " " + quien + "</span>" +
+      '<span class="auth-cara">' + cara + "</span>" +
+      '<span class="auth-quien">' + quien + "</span>" +
       (codigos.length ? '<span class="auth-codigos">' + codigos.join("") + "</span>" : "");
   }
 

@@ -451,7 +451,6 @@ body.con-sesion .dex-tile { cursor: pointer; }
   vertical-align: middle;
 }
 
-.auth-quien .avatar { margin-right: .1rem; }
 .usuario-nombre .avatar { margin-right: .35rem; }
 .visita-barra .avatar { margin: 0 .2rem; }
 
@@ -853,6 +852,17 @@ body.con-sesion .dex-tile { cursor: pointer; }
   font-size: 1.15rem;
   color: var(--ink-2);
 }
+
+/* Sola en su linea puede permitirse ser mas grande que cuando iba pegada
+   al nombre */
+.auth-cara {
+  display: block;
+  line-height: 1;
+}
+
+.auth-cara .avatar { width: 38px; height: 38px; }
+
+.auth-cara i { font-size: 1.1rem; color: var(--accent); }
 
 .auth-codigos {
   display: flex;

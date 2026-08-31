@@ -35,13 +35,24 @@ async function construirCatalogo() {
 
 /* ---------- Datos ---------- */
 
+/* Lo minimo para que la pagina funcione, y lo que se añadio despues */
+const COLUMNAS_PERFIL = "id, handle, display_name";
+const COLUMNAS_EXTRA = "friend_code, champions_id, favourite_ball";
+
 async function cargarPerfiles() {
   if (perfilesCache) return perfilesCache;
 
-  const { data, error } = await sb
+  let { data, error } = await sb
     .from("profiles")
-    .select("id, handle, display_name, friend_code, champions_id, favourite_ball")
+    .select(COLUMNAS_PERFIL + ", " + COLUMNAS_EXTRA)
     .order("handle");
+
+  /* 42703 es "esa columna no existe": la base va por detras del codigo.
+     Mejor enseñar los perfiles sin los extras que no enseñar ninguno. */
+  if (error && error.code === "42703") {
+    console.warn("Faltan columnas en profiles, se piden las basicas:", error.message);
+    ({ data, error } = await sb.from("profiles").select(COLUMNAS_PERFIL).order("handle"));
+  }
 
   if (error) { console.warn("perfiles:", error.message); return []; }
   perfilesCache = data.filter((p) => p.id !== sesion.user.id);
