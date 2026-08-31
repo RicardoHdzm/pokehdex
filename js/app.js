@@ -783,6 +783,41 @@ function cajasHTML(entradas, capturados, filtrando, salto) {
   return html;
 }
 
+/* De un id de coleccion a su especie: 910001 (Unown B) -> 201 (Unown) */
+function baseDeCosmetica(id) {
+  if (id < DESPLAZAMIENTO_COSMETICO || !COSMETICAS_MEM) return null;
+
+  const formaId = id - DESPLAZAMIENTO_COSMETICO;
+  const fila = COSMETICAS_MEM.find(([f]) => f === formaId);
+  if (!fila) return null;
+
+  const col = COLECCIONES.find((c) => fila[1].startsWith(c.slug + "-"));
+  return col ? col.base : null;
+}
+
+/* Tener un Unown B es tener a Unown. Al marcar una forma de coleccion se
+   marca tambien su especie en la Pokedex, que en su region esta unas cajas
+   mas arriba, en la misma pantalla.
+
+   Al desmarcar no se hace lo contrario, a proposito: puedes tener a Unown
+   sin llevar la cuenta de las letras, y quitartelo por soltar una letra
+   seria borrarte algo que si tienes. */
+async function marcarEspecieDeColeccion(id) {
+  const base = baseDeCosmetica(id);
+  if (!base) return;
+
+  const conjunto = modoShiny ? CAPTURAS.shiny : CAPTURAS.normal;
+  if (conjunto.has(base)) return;
+
+  const res = await alternarCaptura(base, modoShiny, true);
+  if (!res.ok) return;
+
+  apuntarEnLaFoto(base, true);
+  const casilla = panelEl.querySelector('#dexCajas .dex-tile[data-id="' + base + '"]');
+  if (casilla) casilla.classList.add("caught");
+  if (genEnPantalla) actualizarMarcadorDex(genEnPantalla);
+}
+
 /* Mantiene al dia la lista con la que trabaja el filtro. Sin esto, marcabas
    un shiny, pedias "los tengo" y no salia: la foto de capturados era la de
    cuando se pinto la Pokedex. */
@@ -2002,6 +2037,7 @@ function conectarMarcado() {
       return;
     }
     if (genEnPantalla) actualizarMarcadorDex(genEnPantalla);
+    if (tenerlo) await marcarEspecieDeColeccion(id);
   });
 }
 
@@ -2120,6 +2156,19 @@ async function soltarPincel() {
   });
 
   if (genEnPantalla) actualizarMarcadorDex(genEnPantalla);
+
+  /* Un arrastre puede tocar muchas casillas de la misma coleccion; su
+     especie se marca una sola vez */
+  if (res.ok && tener) {
+    const vistas = new Set();
+    for (const id of ids) {
+      const base = baseDeCosmetica(id);
+      if (!base || vistas.has(base)) continue;
+      vistas.add(base);
+      await marcarEspecieDeColeccion(id);
+    }
+  }
+
   actualizarEntradilla();
 }
 
