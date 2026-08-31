@@ -795,6 +795,29 @@ function baseDeCosmetica(id) {
   return col ? col.base : null;
 }
 
+/* Al reves que lo de abajo: mientras tengas alguna forma de una coleccion,
+   su especie no se puede soltar. Tener el Unown B y no tener a Unown seria
+   una contradiccion, y ademas la marca volveria sola al tocar otra letra. */
+function especieBloqueada(base) {
+  if (!COSMETICAS_MEM) return false;
+
+  const col = COLECCIONES.find((c) => c.base === base);
+  if (!col) return false;
+
+  const conjunto = modoShiny ? CAPTURAS.shiny : CAPTURAS.normal;
+  return COSMETICAS_MEM.some(([id, slug]) =>
+    slug.startsWith(col.slug + "-") && conjunto.has(DESPLAZAMIENTO_COSMETICO + id));
+}
+
+/* Cuantas formas tienes de esa coleccion, para poder explicarlo */
+function cuantasFormasDe(base) {
+  const col = COLECCIONES.find((c) => c.base === base);
+  if (!col || !COSMETICAS_MEM) return 0;
+  const conjunto = modoShiny ? CAPTURAS.shiny : CAPTURAS.normal;
+  return COSMETICAS_MEM.filter(([id, slug]) =>
+    slug.startsWith(col.slug + "-") && conjunto.has(DESPLAZAMIENTO_COSMETICO + id)).length;
+}
+
 /* Tener un Unown B es tener a Unown. Al marcar una forma de coleccion se
    marca tambien su especie en la Pokedex, que en su region esta unas cajas
    mas arriba, en la misma pantalla.
@@ -1993,7 +2016,9 @@ function conectarMarcadoMasivo() {
     }
 
     const ids = [...panelEl.querySelectorAll("#dexCajas .dex-tile[data-id]")]
-      .map((t) => Number(t.dataset.id));
+      .map((t) => Number(t.dataset.id))
+      /* Las sujetas por sus formas se quedan, tambien aqui */
+      .filter((id) => tener || !especieBloqueada(id));
     if (!ids.length) return;
 
     boton.disabled = true;
@@ -2021,6 +2046,16 @@ function conectarMarcado() {
 
     const id = Number(tile.dataset.id);
     const tenerlo = !tile.classList.contains("caught");
+
+    /* No se suelta una especie de la que tienes formas marcadas */
+    if (!tenerlo && especieBloqueada(id)) {
+      const n = cuantasFormasDe(id);
+      tile.title = "Tienes " + n + (n === 1 ? " forma suya" : " formas suyas") +
+                   ": quitalas primero para poder desmarcarlo";
+      tile.classList.add("bloqueada");
+      setTimeout(() => tile.classList.remove("bloqueada"), 1200);
+      return;
+    }
 
     tile.classList.toggle("caught", tenerlo);
     tile.classList.add("guardando");
@@ -2105,6 +2140,8 @@ function pintarCasilla(tile) {
   if (pincel.tocadas.has(id)) return;
   /* Las que ya estan como quieres dejarlas no se tocan */
   if (tile.classList.contains("caught") === pincel.tener) return;
+  /* Ni las que estan sujetas por sus formas */
+  if (!pincel.tener && especieBloqueada(id)) return;
 
   pincel.tocadas.set(id, tile);
   tile.classList.toggle("caught", pincel.tener);

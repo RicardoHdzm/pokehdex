@@ -210,6 +210,13 @@ body.con-sesion .dex-tile { cursor: pointer; }
   animation: sacudir .25s steps(3) 2;
 }
 
+/* Intento de soltar una especie que sujetan sus formas. Se sacude igual,
+   pero en ambar y no en rojo: no es un error, es que no procede. */
+.dex-tile.bloqueada {
+  border-color: var(--brillo);
+  animation: sacudir .25s steps(3) 2;
+}
+
 @keyframes sacudir {
   0%, 100% { transform: translateX(0); }
   50%      { transform: translateX(3px); }
