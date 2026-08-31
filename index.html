@@ -51,7 +51,7 @@
           No tengo contraseña, o la olvide
         </button>
       </p>
-      <p class="auth-pie">Solo entran los correos dados de alta.</p>
+      <p class="auth-pie">Solo entran los correos registrados.</p>
     </div>
 
     <!-- Segundo paso: se llega aqui desde el enlace del correo -->
@@ -107,8 +107,8 @@
     <div class="mon-caja ancha" role="dialog" aria-modal="true" aria-labelledby="usuariosTitulo">
       <p class="eyebrow" id="usuariosTitulo">Usuarios</p>
       <p class="usuarios-ayuda">
-        Agrega a quien quieras. Cuando os tengais agregados los dos,
-        podreis ver la Pokedex del otro.
+        Agrega a quien quieras. Cuando los dos se tengan agregados,
+        van a poder ver la Pokedex del otro.
       </p>
 
       <p class="mon-mensaje neutro" id="usuariosMensaje"></p>
@@ -120,19 +120,19 @@
     </div>
   </div>
 
-  <!-- Comparar: cruzar lo que os falta para cuadrar intercambios -->
+  <!-- Comparar: cruzar lo que les falta para cuadrar intercambios -->
   <div class="mon-editor" id="compPanel" hidden>
     <div class="mon-caja ancha comp-caja" role="dialog" aria-modal="true" aria-labelledby="compTitulo">
       <p class="eyebrow" id="compTitulo">Comparar</p>
 
       <!-- Quien de todos tiene mas de lo que te falta, de un vistazo -->
-      <details class="comp-ranking" id="compRanking" hidden>
-        <summary class="comp-ranking-titulo">
+      <section class="comp-ranking" id="compRanking" hidden>
+        <h3 class="comp-ranking-titulo">
           Quien tiene lo que te falta
           <span class="comp-ranking-pista" id="compRankingPista"></span>
-        </summary>
+        </h3>
         <ul class="comp-ranking-lista" id="compRankingLista"></ul>
-      </details>
+      </section>
 
       <div class="comp-controles">
         <select id="compQuien" aria-label="Con quien comparar"></select>

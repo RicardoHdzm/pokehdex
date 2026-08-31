@@ -1671,7 +1671,7 @@ function conectarEditor() {
       if (vaciar.dataset.confirmando !== "si") {
         vaciar.dataset.confirmando = "si";
         vaciar.classList.add("peligro");
-        vaciar.textContent = "¿Seguro? Pulsa otra vez";
+        vaciar.textContent = "¿Seguro? Presiona otra vez";
         setTimeout(() => {
           if (!vaciar.isConnected) return;
           vaciar.dataset.confirmando = "";
@@ -1742,7 +1742,7 @@ function conectarMarcadoMasivo() {
          y la alarma la da el paso que de verdad va a borrar algo. */
       boton.dataset.confirmando = "si";
       boton.classList.add("peligro");
-      boton.textContent = "¿Seguro? Pulsa otra vez";
+      boton.textContent = "¿Seguro? Presiona otra vez";
       setTimeout(() => {
         if (!boton.isConnected) return;
         boton.dataset.confirmando = "";

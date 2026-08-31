@@ -5,7 +5,7 @@
 
    La amistad se guarda en una direccion por fila: "yo te agrego".
    Solo cuando existen las dos filas es mutua, y solo entonces se
-   habilita ver la Pokedex del otro. Comparar lo que os falta no
+   habilita ver la Pokedex del otro. Comparar lo que les falta no
    depende de esto: eso lo hace el panel de Comparar con quien sea.
    ============================================================ */
 
@@ -39,7 +39,7 @@ function filaDeUsuario(p) {
               aria-pressed="${agregado}">${agregado ? "Quitar" : "Agregar"}</button>
       <button type="button" class="boton primary usuario-ver" data-id="${p.id}"
               data-nombre="${nombre}"${esMutuo(p.id) ? "" : " disabled"}
-              title="${esMutuo(p.id) ? "Ver su Pokedex" : "Solo cuando os tengais agregados los dos"}"
+              title="${esMutuo(p.id) ? "Ver su Pokedex" : "Solo cuando los dos se tengan agregados"}"
               >Ver Perfil</button>
     </li>`;
 }

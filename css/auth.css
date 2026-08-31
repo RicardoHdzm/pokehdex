@@ -507,43 +507,16 @@ body.con-sesion .dex-tile { cursor: pointer; }
 
 .comp-ranking[hidden] { display: none; }
 
-/* Va cerrado: se abre solo si te interesa el desglose */
-/* En flujo normal y no en flex: asi el triangulo va siempre pegado a la
-   primera palabra, en vez de quedarse solo en su linea cuando el titulo no
-   cabe de una vez. */
 .comp-ranking-titulo {
+  margin: 0;
   padding: .7rem .8rem .6rem;
-  list-style: none;
-  cursor: pointer;
   font-family: var(--pixel);
   font-size: .55rem;
+  font-weight: 400;
   line-height: 1.6;
   text-transform: uppercase;
   color: var(--ink-2);
-  transition: color .15s ease;
 }
-
-/* Safari pinta su propio triangulo si no se le quita asi */
-.comp-ranking-titulo::-webkit-details-marker { display: none; }
-
-.comp-ranking-titulo::before {
-  content: "";
-  display: inline-block;
-  margin-right: .6rem;
-  vertical-align: middle;
-  border-top: 4px solid transparent;
-  border-bottom: 4px solid transparent;
-  border-left: 5px solid var(--accent);
-}
-
-.comp-ranking[open] .comp-ranking-titulo::before {
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 5px solid var(--accent);
-  border-bottom: 0;
-}
-
-.comp-ranking-titulo:hover { color: var(--ink); }
 
 /* Cabe en la misma linea en escritorio y baja sola cuando no cabe */
 .comp-ranking-pista {

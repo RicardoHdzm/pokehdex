@@ -1,8 +1,8 @@
 /* ============================================================
    ACCESO POR ENLACE DE CORREO
    ------------------------------------------------------------
-   El alta esta cerrada en Supabase: solo entran los correos que
-   Ricardo haya dado de alta en Authentication > Users.
+   El registro esta cerrado en Supabase: solo entran los correos que
+   Ricardo haya registrado en Authentication > Users.
    ============================================================ */
 
 const sb = (typeof supabase !== "undefined" && HAY_SUPABASE)
@@ -41,13 +41,13 @@ function explicar(error) {
     return "Ese correo esta sin confirmar. Pideselo a Ricardo.";
   }
   if (t.includes("signups not allowed") || t.includes("signup is disabled")) {
-    return "Ese correo no esta dado de alta. Pideselo a Ricardo.";
+    return "Ese correo no esta registrado. Pideselo a Ricardo.";
   }
   if (t.includes("rate limit") || t.includes("too many")) {
-    return "Demasiados intentos seguidos. Espera un minuto y vuelve a probar.";
+    return "Demasiados intentos seguidos. Espera un minuto y vuelve a intentar.";
   }
   if (t.includes("invalid") && t.includes("email")) {
-    return "Ese correo no tiene buena pinta, revisalo.";
+    return "Ese correo no se ve bien, revisalo.";
   }
   return "No se pudo enviar el enlace: " + (error && error.message ? error.message : "error desconocido");
 }
@@ -95,7 +95,7 @@ async function pedirEnlace() {
   boton.disabled = false;
 
   if (error) return pintarAcceso(explicar(error), "error");
-  pintarAcceso("Si " + correo + " esta dado de alta, le llega un enlace para poner la contraseña.", "ok");
+  pintarAcceso("Si " + correo + " esta registrado, le llega un enlace para poner la contraseña.", "ok");
 }
 
 /* ---------- Poner la contraseña al volver del correo ---------- */

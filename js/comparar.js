@@ -7,6 +7,7 @@
    ============================================================ */
 
 let perfilesCache = null;
+let amigosCache = null;      // los mutuos, que son con los que se compara
 let cruceActual = null;      // { el_me_da: [], yo_le_doy: [] }
 let crucesCache = null;      // Map<idPerfil, cruce>, uno por amigo
 let compShiny = false;
@@ -66,8 +67,7 @@ async function cruzarCon(otroId) {
    y de paso deja cada cruce guardado: al elegir a alguien del desplegable ya
    no hay que volver a preguntarle a la base. */
 async function cruzarConTodos(perfiles) {
-  if (crucesCache) return crucesCache;
-
+  /* Se rehace en cada apertura: entre una y otra puedes haber agregado gente */
   const cruces = await Promise.all(perfiles.map((p) => cruzarCon(p.id)));
 
   crucesCache = new Map();
@@ -84,9 +84,9 @@ async function cruzarConTodos(perfiles) {
 function pintarRanking() {
   const seccion = document.getElementById("compRanking");
   const lista = document.getElementById("compRankingLista");
-  if (!seccion || !crucesCache || !perfilesCache) return;
+  if (!seccion || !crucesCache || !amigosCache) return;
 
-  const filas = perfilesCache
+  const filas = amigosCache
     .map((p) => {
       const cruce = crucesCache.get(p.id);
       if (!cruce) return null;
@@ -242,25 +242,38 @@ async function abrirComparar() {
   await construirCatalogo();
   pintarFiltroGeneraciones();
 
-  const perfiles = await cargarPerfiles();
-  const sel = document.getElementById("compQuien");
+  /* Solo se compara con amigos: hace falta que os tengais agregados los dos */
+  const [perfiles, amistades] = await Promise.all([cargarPerfiles(), cargarAmistades()]);
+  AMISTADES = amistades;
+  amigosCache = perfiles.filter((p) => esMutuo(p.id));
 
-  if (!perfiles.length) {
-    aviso.textContent = "Todavia no hay nadie mas con perfil.";
+  const sel = document.getElementById("compQuien");
+  const res = document.getElementById("compResultado");
+
+  if (!amigosCache.length) {
+    aviso.textContent = perfiles.length
+      ? "Todavia no tienes amigos. Agrega a alguien en Usuarios; cuando los dos se tengan agregados, apareceran aqui."
+      : "Todavia no hay nadie mas con perfil.";
     sel.innerHTML = "";
-    document.getElementById("compResultado").hidden = true;
+    res.hidden = true;
+    /* Se vacia ademas de esconderse: si no, al volver a abrir con amigos
+       nuevos se verian un instante los del cruce anterior */
+    document.getElementById("compRankingLista").innerHTML = "";
+    document.getElementById("compRanking").hidden = true;
+    amigosCache = null;
+    crucesCache = null;
     return;
   }
 
   sel.innerHTML = '<option value="">Elige a alguien...</option>' +
-    perfiles.map((p) =>
+    amigosCache.map((p) =>
       '<option value="' + p.id + '">' + (p.display_name || p.handle) + "</option>"
     ).join("");
 
-  document.getElementById("compResultado").hidden = true;
+  res.hidden = true;
 
   aviso.textContent = "Viendo quien tiene lo que te falta...";
-  await cruzarConTodos(perfiles);
+  await cruzarConTodos(amigosCache);
   aviso.textContent = "";
   pintarRanking();
 }
