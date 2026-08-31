@@ -359,3 +359,50 @@ async function importarDesdeArchivo(alProgresar) {
   await cargarPerfilCompleto(yo);
   return { ok: true, capturas: capturas.length, equipos: equipos.length, favoritos: favoritos.length };
 }
+
+/* ============================================================
+   AMISTADES
+   ------------------------------------------------------------
+   Cada fila es "yo te tengo agregado". No es simetrica: hace
+   falta que existan las dos para que sea mutua, y solo entonces
+   se puede ver la Pokedex del otro.
+   ============================================================ */
+
+/* Se cargan las dos direcciones de golpe: a quien agrego yo y quien me
+   agrega a mi. Con eso se sabe el estado de cada persona sin mas consultas. */
+async function cargarAmistades() {
+  const mias = new Set();
+  const suyas = new Set();
+  if (!sb || !sesion) return { mias, suyas };
+
+  const yo = sesion.user.id;
+  const { data, error } = await sb
+    .from("friends")
+    .select("user_id, friend_id")
+    .or("user_id.eq." + yo + ",friend_id.eq." + yo);
+
+  if (error) { console.warn("amistades:", error.message); return { mias, suyas }; }
+
+  data.forEach((f) => {
+    if (f.user_id === yo) mias.add(f.friend_id);
+    if (f.friend_id === yo) suyas.add(f.user_id);
+  });
+  return { mias, suyas };
+}
+
+async function agregarAmigo(id) {
+  if (!sb || !sesion) return { ok: false, error: "sin sesion" };
+  const { error } = await sb
+    .from("friends")
+    .upsert({ user_id: sesion.user.id, friend_id: id }, { onConflict: "user_id,friend_id" });
+  return error ? { ok: false, error: error.message } : { ok: true };
+}
+
+async function quitarAmigo(id) {
+  if (!sb || !sesion) return { ok: false, error: "sin sesion" };
+  const { error } = await sb
+    .from("friends")
+    .delete()
+    .match({ user_id: sesion.user.id, friend_id: id });
+  return error ? { ok: false, error: error.message } : { ok: true };
+}

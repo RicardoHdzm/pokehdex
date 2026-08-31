@@ -202,3 +202,40 @@ as $$
       where s.user_id = otro and s.dex_id = c.dex_id and s.shiny = c.shiny
     );
 $$;
+
+
+-- ============================================================
+--  Amistades
+--  ------------------------------------------------------------
+--  Una fila por cada "yo te tengo como amigo". No es simetrica a
+--  proposito: la amistad es mutua solo cuando existen las dos
+--  filas, y eso es lo que habilita ver la Pokedex del otro.
+--
+--  La lectura es abierta para todos los que han entrado, porque
+--  para saber si alguien te tiene agregado hay que poder leer su
+--  fila. Escribir, solo lo tuyo.
+-- ============================================================
+
+create table if not exists public.friends (
+  user_id    uuid not null references public.profiles(id) on delete cascade,
+  friend_id  uuid not null references public.profiles(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (user_id, friend_id),
+  constraint amigo_distinto check (user_id <> friend_id)
+);
+
+create index if not exists friends_por_amigo on public.friends (friend_id);
+
+alter table public.friends enable row level security;
+
+drop policy if exists leer_amistades on public.friends;
+create policy leer_amistades on public.friends
+  for select to authenticated using (true);
+
+drop policy if exists agregar_amigo on public.friends;
+create policy agregar_amigo on public.friends
+  for insert to authenticated with check (auth.uid() = user_id);
+
+drop policy if exists quitar_amigo on public.friends;
+create policy quitar_amigo on public.friends
+  for delete to authenticated using (auth.uid() = user_id);

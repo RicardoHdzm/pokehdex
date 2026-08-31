@@ -440,6 +440,64 @@ body.con-sesion .dex-tile { cursor: pointer; }
 
 .comp-caja { width: min(56rem, 100%); }
 
+/* ===== Usuarios ===== */
+
+.usuarios-ayuda {
+  margin: .6rem 0 1.2rem;
+  color: var(--ink-2);
+  font-size: 1rem;
+}
+
+.usuarios-lista {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+  margin: 0 0 1.2rem;
+  padding: 0;
+  list-style: none;
+}
+
+.usuario {
+  display: grid;
+  grid-template-columns: minmax(6rem, 1fr) auto auto auto;
+  align-items: center;
+  gap: .6rem;
+  padding: .55rem .7rem;
+  background: var(--panel);
+  border: 2px solid var(--rule);
+}
+
+/* Cuando la amistad es mutua se marca el borde: es lo que habilita el perfil */
+.usuario.mutuo { border-color: color-mix(in srgb, var(--accent) 55%, var(--rule)); }
+
+.usuario-nombre {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 1.05rem;
+}
+
+.usuario-estado {
+  font-size: .85rem;
+  color: var(--ink-2);
+  text-align: right;
+}
+
+.usuario.mutuo .usuario-estado { color: var(--accent); }
+
+/* El que esta esperando respuesta se distingue del que ya te agrego */
+.usuario.recibida .usuario-estado { color: var(--brillo); }
+
+.usuario .boton { padding: .4rem .55rem .32rem; font-size: .45rem; }
+
+.usuario .boton:disabled { opacity: .4; cursor: not-allowed; }
+
+@media (max-width: 640px) {
+  /* En movil no caben las cuatro columnas: el estado baja a su propia linea */
+  .usuario { grid-template-columns: 1fr auto auto; }
+  .usuario-estado { grid-column: 1 / -1; grid-row: 2; text-align: left; }
+}
+
 /* ===== Quien tiene lo que te falta ===== */
 
 .comp-ranking {

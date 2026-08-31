@@ -102,10 +102,28 @@
     </section>
   </main>
 
-  <!-- Usuarios: ver su Pokedex y cruzar lo que os falta -->
+  <!-- Usuarios: el directorio y a quien tienes agregado -->
+  <div class="mon-editor" id="usuariosPanel" hidden>
+    <div class="mon-caja ancha" role="dialog" aria-modal="true" aria-labelledby="usuariosTitulo">
+      <p class="eyebrow" id="usuariosTitulo">Usuarios</p>
+      <p class="usuarios-ayuda">
+        Agrega a quien quieras. Cuando os tengais agregados los dos,
+        podreis ver la Pokedex del otro.
+      </p>
+
+      <p class="mon-mensaje neutro" id="usuariosMensaje"></p>
+      <ul class="usuarios-lista" id="usuariosLista"></ul>
+
+      <div class="mon-botones">
+        <button type="button" class="boton" id="usuariosCerrar">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comparar: cruzar lo que os falta para cuadrar intercambios -->
   <div class="mon-editor" id="compPanel" hidden>
     <div class="mon-caja ancha comp-caja" role="dialog" aria-modal="true" aria-labelledby="compTitulo">
-      <p class="eyebrow" id="compTitulo">Usuarios</p>
+      <p class="eyebrow" id="compTitulo">Comparar</p>
 
       <!-- Quien de todos tiene mas de lo que te falta, de un vistazo -->
       <details class="comp-ranking" id="compRanking" hidden>
@@ -118,7 +136,6 @@
 
       <div class="comp-controles">
         <select id="compQuien" aria-label="Con quien comparar"></select>
-        <button type="button" class="boton primary" id="compVer" hidden>Ver Perfil</button>
         <select id="compGen" class="juego-select" aria-label="Generacion"></select>
         <div class="dex-modos" id="compModos" role="tablist" aria-label="Tipo">
           <button class="dex-modo" type="button" role="tab" data-modo="normal" aria-selected="true">Normal</button>
@@ -260,6 +277,7 @@
   <script src="js/app.js"></script>
   <script src="js/datos.js"></script>
   <script src="js/perfil.js"></script>
+  <script src="js/usuarios.js"></script>
   <script src="js/comparar.js"></script>
 </body>
 </html>

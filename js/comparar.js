@@ -273,9 +273,6 @@ async function elegirPerfil(e) {
   const id = e.target.value;
   const aviso = document.getElementById("compMensaje");
   const res = document.getElementById("compResultado");
-  const verBtn = document.getElementById("compVer");
-
-  verBtn.hidden = !id;
   if (!id) { res.hidden = true; return; }
 
   aviso.textContent = "Cruzando las dos Pokedex...";
@@ -313,12 +310,6 @@ function conectarComparar() {
     sel.dispatchEvent(new Event("change", { bubbles: true }));
   });
   document.getElementById("compCerrar").addEventListener("click", cerrarComparar);
-
-  document.getElementById("compVer").addEventListener("click", () => {
-    const sel = document.getElementById("compQuien");
-    if (!sel.value) return;
-    verPokedexDe(sel.value, sel.options[sel.selectedIndex].textContent);
-  });
 
   document.getElementById("compModos").addEventListener("click", (e) => {
     const b = e.target.closest(".dex-modo");
