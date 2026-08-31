@@ -103,6 +103,13 @@ async function guardarFavoritoTipo(generacion, tipo, dexId) {
 
 /* ---------- Pintado ---------- */
 
+/* Nombre de una especie por su numero, si la lista ya esta cargada */
+function nombrePorDex(dex) {
+  if (!dex || !ESPECIES_MEM) return "";
+  const fila = ESPECIES_MEM.find(([id]) => id === dex);
+  return fila ? nombreEspecie(fila[1]) : "";
+}
+
 function celdaDe(generacion, tipo) {
   const dex = FAVORITOS_TIPO.get(generacion + ":" + tipo);
   const mio = typeof esMiPerfil === "function" && esMiPerfil();
@@ -114,7 +121,7 @@ function celdaDe(generacion, tipo) {
   return `
     <td class="rejilla-celda${dex ? " puesta" : ""}${mio ? " editable" : ""}"
         data-gen="${generacion}" data-tipo="${tipo}"
-        title="${TYPE_ES[tipo] || tipo} · ${ORDINAL[generacion] || generacion} generacion">
+        title="${dex ? dexNum(dex) + " " + nombrePorDex(dex) + " · " : ""}${TYPE_ES[tipo] || tipo} · ${ORDINAL[generacion] || generacion} generacion">
       ${dentro}
     </td>`;
 }
