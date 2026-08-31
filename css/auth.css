@@ -469,12 +469,21 @@ body.con-sesion .dex-tile { cursor: pointer; }
 .comp-ranking-titulo::-webkit-details-marker { display: none; }
 
 .comp-ranking-titulo::before {
-  content: "\25B8";
+  content: "";
+  display: inline-block;
   margin-right: .6rem;
-  color: var(--accent);
+  vertical-align: middle;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 5px solid var(--accent);
 }
 
-.comp-ranking[open] .comp-ranking-titulo::before { content: "\25BE"; }
+.comp-ranking[open] .comp-ranking-titulo::before {
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid var(--accent);
+  border-bottom: 0;
+}
 
 .comp-ranking-titulo:hover { color: var(--ink); }
 
@@ -718,9 +727,22 @@ body.con-sesion .dex-tile { cursor: pointer; }
 
 .dex-masivo-abrir::-webkit-details-marker { display: none; }
 
+/* Triangulo dibujado con bordes y no con un caracter: ese glifo no esta en
+   Press Start 2P, caia a la fuente del sistema y salia de 3px, o sea un punto.
+   Asi mide lo que se le diga y se ve igual en todas partes. */
 .dex-masivo-abrir::after {
-  content: "\25BE";
+  content: "";
+  display: inline-block;
   margin-left: .5rem;
+  vertical-align: middle;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid currentColor;
+}
+
+.dex-masivo[open] .dex-masivo-abrir::after {
+  border-top: 0;
+  border-bottom: 5px solid currentColor;
 }
 
 .dex-masivo-abrir:hover { color: var(--ink); border-color: var(--accent); }
