@@ -322,9 +322,12 @@ function nombreCosmetico(slug, coleccion) {
 
   if (coleccion.slug === "unown") return sufijo.length === 1 ? sufijo.toUpperCase() : bonito(sufijo);
 
-  /* Alcremie combina crema y dulce: se separan para que se lea */
-  const dulce = sufijo.match(/^(.*)-([a-z]+-sweet)$/);
-  if (dulce) return bonito(dulce[1]) + " (" + bonito(dulce[2]) + ")";
+  /* Alcremie combina crema y dulce. En las 63 casillas las palabras "Cream"
+     y "Sweet" se repiten identicas y no distinguen nada, asi que sobran: la
+     cabecera ya dice que son cremas y dulces. "Swirl" si se queda, porque
+     hay Ruby Cream y Ruby Swirl y sin esa palabra serian el mismo nombre. */
+  const dulce = sufijo.match(/^(.*)-([a-z]+)-sweet$/);
+  if (dulce) return bonito(dulce[1].replace(/-cream$/, "")) + " · " + bonito(dulce[2]);
   return bonito(sufijo);
 }
 
