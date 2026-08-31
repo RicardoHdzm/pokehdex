@@ -40,7 +40,7 @@ async function cargarPerfiles() {
 
   const { data, error } = await sb
     .from("profiles")
-    .select("id, handle, display_name, friend_code, champions_id, favourite_dex")
+    .select("id, handle, display_name, friend_code, champions_id, favourite_ball")
     .order("handle");
 
   if (error) { console.warn("perfiles:", error.message); return []; }

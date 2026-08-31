@@ -240,5 +240,5 @@ drop policy if exists quitar_amigo on public.friends;
 create policy quitar_amigo on public.friends
   for delete to authenticated using (auth.uid() = user_id);
 
--- El Pokemon favorito de cada quien, que se usa como avatar.
-alter table public.profiles add column if not exists favourite_dex integer;
+-- La Pokeball favorita de cada quien, que se usa como avatar.
+alter table public.profiles add column if not exists favourite_ball text;

@@ -146,7 +146,7 @@ async function cargarPerfil() {
   if (!sb || !sesion) return null;
   const { data, error } = await sb
     .from("profiles")
-    .select("id, handle, display_name, friend_code, champions_id, favourite_dex")
+    .select("id, handle, display_name, friend_code, champions_id, favourite_ball")
     .eq("id", sesion.user.id)
     .single();
 

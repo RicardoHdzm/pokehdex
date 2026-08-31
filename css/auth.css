@@ -442,19 +442,14 @@ body.con-sesion .dex-tile { cursor: pointer; }
 
 /* ===== Avatar ===== */
 
-/* Los iconos de caja son de 68x56 y con mucho aire alrededor: se recortan
-   a una caja cuadrada para que todos ocupen lo mismo */
+/* Los sprites de objeto son de 30x30 y cuadrados: se dejan a su tamaño */
 .avatar {
-  width: 34px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   object-fit: contain;
   image-rendering: pixelated;
   vertical-align: middle;
 }
-
-/* Del 899 en adelante no hay icono de caja y cae el sprite normal, que es
-   cuadrado y mas grande: se le baja para que no descuadre la fila */
-.avatar[src*="/pokemon/"]:not([src*="icons"]) { width: 30px; height: 30px; }
 
 .auth-quien .avatar { margin-right: .1rem; }
 .usuario-nombre .avatar { margin-right: .35rem; }
@@ -482,8 +477,8 @@ body.con-sesion .dex-tile { cursor: pointer; }
 .perfil-avatar-hueco.vacio { border-style: dashed; }
 
 .perfil-avatar-hueco img {
-  width: 40px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   object-fit: contain;
   image-rendering: pixelated;
 }
