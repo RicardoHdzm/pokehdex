@@ -52,7 +52,11 @@ function filaDeUsuario(p) {
 function pintarUsuarios(perfiles) {
   const lista = document.getElementById("usuariosLista");
   if (!lista) return;
-  lista.innerHTML = perfiles.map(filaDeUsuario).join("");
+
+  /* Los amigos arriba. El resto conserva el orden alfabetico con el que
+     llegan de la base: sort es estable, asi que basta con separar. */
+  const ordenados = [...perfiles].sort((a, b) => Number(esMutuo(b.id)) - Number(esMutuo(a.id)));
+  lista.innerHTML = ordenados.map(filaDeUsuario).join("");
 }
 
 async function abrirUsuarios() {
