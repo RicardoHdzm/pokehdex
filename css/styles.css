@@ -736,6 +736,44 @@ a { color: var(--accent); text-underline-offset: .2em; }
   .resumen-region, .resumen-cuenta { display: none; }
 }
 
+/* ===== Colecciones cosmeticas ===== */
+
+/* Van debajo de la Pokedex y con su propio aire, para que se lean como algo
+   aparte y no como una caja mas del PC */
+#dexColecciones:not(:empty) { margin-top: clamp(2rem, 4vw, 3rem); }
+
+.dex-caja.coleccion {
+  padding-top: clamp(1.5rem, 3vw, 2.25rem);
+  border-top: 2px solid var(--rule);
+}
+
+.dex-caja.coleccion + .dex-caja.coleccion { margin-top: 0; }
+
+.coleccion-nota {
+  margin-left: .6rem;
+  font-family: var(--term);
+  font-size: .95rem;
+  font-weight: 400;
+  text-transform: none;
+  color: var(--ink-2);
+}
+
+/* En las colecciones el hueco del numero lleva el nombre de la forma, que es
+   mas largo: se deja mas estrecho y que parta si hace falta */
+.coleccion .dex-num {
+  font-size: .42rem;
+  line-height: 1.5;
+  text-align: center;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+}
+
+.coleccion .dex-tile.caught .dex-num { color: var(--accent); }
+
+@media (max-width: 640px) {
+  .coleccion .dex-num { font-size: .34rem; }
+}
+
 /* ===== Buscador y filtro de la Pokedex ===== */
 
 .dex-buscador {
@@ -984,10 +1022,15 @@ a { color: var(--accent); text-underline-offset: .2em; }
 :root[data-tema="claro"] .form-mark,
 :root[data-tema="claro"] .masthead .eyebrow,
 :root[data-tema="claro"] .gen-title,
-:root[data-tema="claro"] .plate-index .num,
-:root[data-tema="claro"] .masthead-title em { text-shadow: none; }
+:root[data-tema="claro"] .plate-index .num { text-shadow: none; }
 
-:root[data-tema="claro"] .masthead-title { text-shadow: 3px 3px 0 rgba(var(--sombra), .18); }
+/* El titulo conserva su sombra dura, mas suave que sobre negro. El HDEX
+   llevaba ademas un resplandor de neon que en claro solo emborrona: se le
+   quita ese, pero la sombra se queda o quedaria plano al lado del POKE. */
+:root[data-tema="claro"] .masthead-title,
+:root[data-tema="claro"] .masthead-title em {
+  text-shadow: 3px 3px 0 rgba(var(--sombra), .18);
+}
 
 /* ===== Responsive ===== */
 

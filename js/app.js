@@ -260,6 +260,92 @@ async function fetchSpecies() {
   }
 }
 
+/* ---------- Colecciones cosmeticas ---------- */
+
+/* Unown, Vivillon y Alcremie no tienen una entrada por forma en el listado de
+   Pokemon: para PokeAPI son una sola especie con muchas caras. Sus variantes
+   viven en otro endpoint, "pokemon-form", y de ahi salen estas.
+
+   Dos avisos que condicionan todo lo de abajo:
+
+   1. Los ids de pokemon-form son OTRA numeracion, y pisa la de pokemon: el
+      10001 es "unown-b" aqui y "deoxys-attack" alli. Guardarlos tal cual
+      mezclaria capturas de cosas distintas, asi que se les suma un
+      desplazamiento y se quedan en un rango que no usa nadie mas.
+   2. Sus sprites no se llaman por id sino por especie y sufijo:
+      201-b.png, 666-icy-snow.png, 869-ruby-cream-strawberry-sweet.png */
+
+const FORMAS_COSMETICAS_URL = "https://pokeapi.co/api/v2/pokemon-form?limit=100000";
+const COSMETICAS_KEY = "pkmnteam:cosmeticas";
+const DESPLAZAMIENTO_COSMETICO = 900000;
+
+const COLECCIONES = [
+  { slug: "unown",    base: 201, generacion: 2, titulo: "Unown",    nota: "Las 28 letras" },
+  { slug: "vivillon", base: 666, generacion: 6, titulo: "Vivillon", nota: "Los 20 patrones" },
+  { slug: "alcremie", base: 869, generacion: 8, titulo: "Alcremie", nota: "Cremas y dulces" }
+];
+
+let COSMETICAS_MEM = null;
+
+/* Solo se guardan las tres especies que interesan: el listado entero son mil
+   y pico formas y la mayoria ya salen por la via normal. */
+async function fetchCosmeticas() {
+  if (COSMETICAS_MEM) return COSMETICAS_MEM;
+
+  const guardado = leerLista(COSMETICAS_KEY);
+  if (guardado && guardado.length > 100) return (COSMETICAS_MEM = guardado);
+
+  try {
+    const res = await fetch(FORMAS_COSMETICAS_URL);
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+
+    const prefijos = COLECCIONES.map((c) => c.slug + "-");
+    const lista = data.results
+      .map((r) => [Number(r.url.split("/").filter(Boolean).pop()), r.name])
+      .filter(([, nombre]) => prefijos.some((p) => nombre.startsWith(p)))
+      .sort((a, b) => a[0] - b[0]);
+
+    guardarLista(COSMETICAS_KEY, lista);
+    return (COSMETICAS_MEM = lista);
+  } catch {
+    return [];
+  }
+}
+
+/* "unown-b" -> "B" · "vivillon-icy-snow" -> "Icy Snow"
+   "alcremie-ruby-cream-strawberry-sweet" -> "Ruby Cream (Strawberry Sweet)" */
+function nombreCosmetico(slug, coleccion) {
+  const sufijo = slug.slice(coleccion.slug.length + 1);
+  const bonito = (txt) => txt.split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+
+  if (coleccion.slug === "unown") return sufijo.length === 1 ? sufijo.toUpperCase() : bonito(sufijo);
+
+  /* Alcremie combina crema y dulce: se separan para que se lea */
+  const dulce = sufijo.match(/^(.*)-([a-z]+-sweet)$/);
+  if (dulce) return bonito(dulce[1]) + " (" + bonito(dulce[2]) + ")";
+  return bonito(sufijo);
+}
+
+/* Las entradas de las colecciones que estrena una generacion */
+function coleccionesDe(generacion) {
+  if (!COSMETICAS_MEM) return [];
+
+  return COLECCIONES.filter((c) => c.generacion === generacion).map((col) => ({
+    ...col,
+    entradas: COSMETICAS_MEM
+      .filter(([, slug]) => slug.startsWith(col.slug + "-"))
+      .map(([id, slug]) => ({
+        id: DESPLAZAMIENTO_COSMETICO + id,
+        base: col.base,
+        nombre: col.titulo + " " + nombreCosmetico(slug, col),
+        /* El sprite va por especie y sufijo, no por id */
+        sprite: col.base + "-" + slug.slice(col.slug.length + 1)
+      }))
+  })).filter((c) => c.entradas.length);
+}
+
 /* ---------- Formas regionales ---------- */
 
 /* Que regiones estreno cada generacion. Hisui es de la octava (Leyendas Arceus). */
@@ -492,19 +578,32 @@ function spriteDex(id) {
   return SPRITES + (modoShiny ? "/shiny/" : "/") + id + ".png";
 }
 
+/* Las cosmeticas traen su propio nombre de archivo; el resto va por id */
+function spriteDeEntrada(entrada) {
+  if (entrada.sprite) return SPRITES + (modoShiny ? "/shiny/" : "/") + entrada.sprite + ".png";
+  return spriteDex(entrada.id);
+}
+
 function dexTile(entrada, capturados) {
   const tengo = capturados.has(entrada.id);
-  const etiqueta = dexNum(entrada.base || entrada.id);
+  /* Las 28 letras de Unown comparten el 0201: repetirlo 28 veces no dice
+     nada, asi que en las colecciones el hueco del numero lleva la forma, y
+     el nombre completo se queda solo en el tooltip. De quien son ya lo dice
+     la cabecera de la seccion. */
+  const etiqueta = entrada.sprite
+    ? entrada.nombre.split(" ").slice(1).join(" ")
+    : dexNum(entrada.base || entrada.id);
   const estado = tengo
     ? (modoShiny ? " - lo tienes shiny" : " - capturado")
     : (modoShiny ? " - sin shiny" : " - te falta");
   return `
     <li class="dex-tile${tengo ? " caught" : ""}${entrada.region ? " variante" : ""}"
-        data-id="${entrada.id}" title="${etiqueta} ${entrada.nombre}${estado}">
+        data-id="${entrada.id}"
+        title="${entrada.sprite ? entrada.nombre : etiqueta + " " + entrada.nombre}${estado}">
       <img class="dex-sprite" loading="lazy" decoding="async" alt="" aria-hidden="true"
-           src="${spriteDex(entrada.id)}">
+           src="${spriteDeEntrada(entrada)}">
       <span class="dex-num">${etiqueta}</span>
-      <span class="dex-name">${entrada.nombre}</span>
+      ${entrada.sprite ? "" : `<span class="dex-name">${entrada.nombre}</span>`}
     </li>`;
 }
 
@@ -620,6 +719,32 @@ function apuntarEnLaFoto(id, tener) {
   else dexUltima.capturados.delete(id);
 }
 
+/* Las cosmeticas solo viven en la base: no hay listas de "missing" para
+   ellas en teams.js, asi que sin sesion salen todas sin marcar. */
+function capturadosDeColeccion(cols) {
+  const set = new Set();
+  if (typeof CAPTURAS === "undefined" || !perfilVisto) return set;
+  const fuente = modoShiny ? CAPTURAS.shiny : CAPTURAS.normal;
+  cols.forEach((col) => col.entradas.forEach((e) => { if (fuente.has(e.id)) set.add(e.id); }));
+  return set;
+}
+
+/* Las colecciones van en su propia rejilla, debajo de la Pokedex: no son
+   entradas del dex de la region, son las caras de un mismo Pokemon. */
+function coleccionesHTML(cols, capturados) {
+  return cols.map((col) => {
+    const tengo = col.entradas.filter((e) => capturados.has(e.id)).length;
+    return `
+      <section class="dex-caja coleccion" style="--filas:${Math.ceil(col.entradas.length / 6)}">
+        <h4 class="dex-caja-titulo">
+          <span>${col.titulo} <b class="coleccion-nota">${col.nota}</b></span>
+          <span class="dex-caja-cuenta">${tengo}/${col.entradas.length}</span>
+        </h4>
+        <ul class="dex-grid">${col.entradas.map((e) => dexTile(e, capturados)).join("")}</ul>
+      </section>`;
+  }).join("");
+}
+
 /* Repinta solo las cajas, sin recalcular nada: es lo que corre al escribir */
 function repintarCajas() {
   if (!dexUltima) return;
@@ -691,6 +816,12 @@ async function renderDex(gen, token) {
   const [especies, variantes] = await Promise.all([fetchSpecies(), fetchVariantes()]);
   if (token !== renderToken) return;
 
+  /* Solo se piden si esta generacion tiene alguna coleccion que enseñar */
+  if (COLECCIONES.some((c) => c.generacion === gen.generation)) {
+    await fetchCosmeticas();
+    if (token !== renderToken) return;
+  }
+
   if (!especies.length) {
     grid.outerHTML = `<p class="dex-error">No se pudo cargar la lista de especies.
       Hace falta conexion la primera vez; despues queda guardada en el navegador.</p>`;
@@ -716,6 +847,13 @@ async function renderDex(gen, token) {
   /* La Nacional lleva ademas el desglose por region, encima de las cajas */
   const hueco = panelEl.querySelector("#dexResumen");
   if (hueco) hueco.innerHTML = gen.nacional ? resumenHTML(resumenPorRegion(especies, variantes)) : "";
+
+  /* Y las colecciones de la region, debajo */
+  const cajon = panelEl.querySelector("#dexColecciones");
+  if (cajon) {
+    const cols = coleccionesDe(gen.generation);
+    cajon.innerHTML = cols.length ? coleccionesHTML(cols, capturadosDeColeccion(cols)) : "";
+  }
 
   repintarCajas();
 
@@ -1083,6 +1221,7 @@ function renderGeneration(gen) {
       </div>
       ${puedeEditar && !ayudaAprendida() ? '<p class="dex-ayuda">Arrastra por encima para marcar varias de una vez.</p>' : ""}
       <div class="dex-cajas" id="dexCajas"></div>
+      <div class="dex-cajas" id="dexColecciones"></div>
     </section>`;
 
   panelEl.innerHTML = (gen.hall ? hallHead(gen)
@@ -1611,7 +1750,7 @@ function conectarMarcadoMasivo() {
       return;
     }
 
-    const ids = [...panelEl.querySelectorAll(".dex-tile[data-id]")]
+    const ids = [...panelEl.querySelectorAll("#dexCajas .dex-tile[data-id]")]
       .map((t) => Number(t.dataset.id));
     if (!ids.length) return;
 
@@ -1819,8 +1958,8 @@ function conectarPincel() {
 
 /* Recalcula contador, porcentaje y barra sin repintar toda la rejilla */
 function actualizarMarcadorDex(gen) {
-  const total = panelEl.querySelectorAll(".dex-tile").length;
-  const tengo = panelEl.querySelectorAll(".dex-tile.caught").length;
+  const total = panelEl.querySelectorAll("#dexCajas .dex-tile").length;
+  const tengo = panelEl.querySelectorAll("#dexCajas .dex-tile.caught").length;
   const pct = total ? Math.round((tengo / total) * 100) : 0;
 
   document.title = tituloDe(gen, tengo, total);
@@ -1832,6 +1971,20 @@ function actualizarMarcadorDex(gen) {
   if (c) c.textContent = tengo + " / " + total;
   if (p) p.textContent = pct + "%";
   if (b) b.style.width = pct + "%";
+
+  actualizarCuentasDeCaja();
+}
+
+/* Cada caja lleva su propio "12/30" en la cabecera. Se recalculan contando
+   sus casillas, que es lo unico que puede haber cambiado al marcar. */
+function actualizarCuentasDeCaja() {
+  panelEl.querySelectorAll(".dex-caja").forEach((caja) => {
+    const marcador = caja.querySelector(".dex-caja-cuenta");
+    if (!marcador) return;
+    const casillas = caja.querySelectorAll(".dex-tile");
+    const marcadas = caja.querySelectorAll(".dex-tile.caught");
+    marcador.textContent = marcadas.length + "/" + casillas.length;
+  });
 }
 
 /* Repinta la generacion en pantalla, para cuando llegan los datos del perfil */
