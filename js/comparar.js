@@ -40,7 +40,7 @@ async function cargarPerfiles() {
 
   const { data, error } = await sb
     .from("profiles")
-    .select("id, handle, display_name, friend_code, champions_id")
+    .select("id, handle, display_name, friend_code, champions_id, favourite_dex")
     .order("handle");
 
   if (error) { console.warn("perfiles:", error.message); return []; }
@@ -221,7 +221,8 @@ function pintarVisita(quien) {
   }
 
   barra.innerHTML = `
-    <span><i class="fa-solid fa-eye"></i> Estas viendo la Pokedex de <b>${nombre}</b></span>
+    <span><i class="fa-solid fa-eye"></i> Estas viendo la Pokedex de
+          ${avatarHTML(quien)}<b>${nombre}</b></span>
     ${codigos.length ? '<span class="visita-codigos">' + codigos.join("") + "</span>" : ""}
     <button type="button" class="boton" id="visitaVolver">Volver a mi Perfil</button>`;
   barra.hidden = false;

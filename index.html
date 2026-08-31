@@ -169,6 +169,15 @@
 
       <form class="mon-form" id="perfilForm">
         <label class="mon-campo">
+          <span>Pokemon favorito</span>
+          <div class="perfil-avatar">
+            <span class="perfil-avatar-hueco" id="perfilAvatar"></span>
+            <input id="perfilFavorito" list="monLista" autocomplete="off"
+                   placeholder="Elige uno y sera tu avatar">
+          </div>
+        </label>
+
+        <label class="mon-campo">
           <span>Nombre a mostrar</span>
           <input id="perfilNombre" maxlength="32" required autocomplete="off">
         </label>

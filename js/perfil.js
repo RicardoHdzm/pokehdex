@@ -5,6 +5,37 @@
    define el color de acento de esa pestaña.
    ============================================================ */
 
+/* El buscador de especies es el mismo que usa el editor de equipo: son los
+   mismos 1025 y ya esta montado, asi que no hace falta una segunda lista. */
+async function prepararFavorito() {
+  if (typeof montarListaEspecies === "function") await montarListaEspecies();
+
+  const campo = document.getElementById("perfilFavorito");
+  const especies = typeof fetchSpecies === "function" ? await fetchSpecies() : [];
+  const suyo = especies.find(([id]) => id === Number(perfil.favourite_dex));
+  campo.value = suyo ? nombreEspecie(suyo[1]) : "";
+  pintarAvatarDelPerfil();
+}
+
+/* La miniatura de al lado, que cambia mientras escribes */
+function pintarAvatarDelPerfil() {
+  const hueco = document.getElementById("perfilAvatar");
+  const dex = dexDelFavorito();
+  hueco.innerHTML = dex
+    ? '<img src="' + avatarDe(dex) + '" alt="" aria-hidden="true">'
+    : "";
+  hueco.classList.toggle("vacio", !dex);
+}
+
+/* Del nombre escrito a su numero, usando la lista del buscador */
+function dexDelFavorito() {
+  const escrito = document.getElementById("perfilFavorito").value.trim().toLowerCase();
+  if (!escrito) return null;
+  const op = [...document.getElementById("monLista").options]
+    .find((o) => o.value.toLowerCase() === escrito);
+  return op ? Number(op.dataset.dex) : null;
+}
+
 function abrirPerfil() {
   if (!sesion || !perfil) return;
 
@@ -17,6 +48,7 @@ function abrirPerfil() {
 
   pintarJuegosDelPerfil();
   document.getElementById("perfilPanel").hidden = false;
+  prepararFavorito();
 }
 
 function cerrarPerfil() {
@@ -69,6 +101,14 @@ async function guardarNombre(e) {
   const fc = campoFc.value.trim() ? normalizarFriendCode(campoFc.value) : null;
   const ch = campoCh.value.trim() || null;
 
+  /* Si has escrito algo que no esta en la lista, no se guarda a medias */
+  const favorito = dexDelFavorito();
+  if (document.getElementById("perfilFavorito").value.trim() && !favorito) {
+    aviso.textContent = "Ese Pokemon no esta en la lista. Elige uno de las sugerencias.";
+    aviso.className = "mon-mensaje";
+    return;
+  }
+
   if (fc && !/^SW-[0-9]{4}-[0-9]{4}-[0-9]{4}$/.test(fc)) {
     aviso.textContent = "El codigo de amigo son doce digitos: SW-0000-0000-0000.";
     aviso.className = "mon-mensaje";
@@ -80,7 +120,7 @@ async function guardarNombre(e) {
 
   const { error } = await sb
     .from("profiles")
-    .update({ display_name: nombre, friend_code: fc, champions_id: ch })
+    .update({ display_name: nombre, friend_code: fc, champions_id: ch, favourite_dex: favorito })
     .eq("id", sesion.user.id);
 
   if (error) {
@@ -92,6 +132,7 @@ async function guardarNombre(e) {
   perfil.display_name = nombre;
   perfil.friend_code = fc;
   perfil.champions_id = ch;
+  perfil.favourite_dex = favorito;
   campoFc.value = fc || "";
   pintarSesion();
   aviso.textContent = "Guardado.";
@@ -126,6 +167,7 @@ function conectarPerfil() {
   document.getElementById("perfilForm").addEventListener("submit", guardarNombre);
   document.getElementById("perfilCerrar").addEventListener("click", cerrarPerfil);
   document.getElementById("perfilJuegos").addEventListener("change", cambiarJuegoDelPerfil);
+  document.getElementById("perfilFavorito").addEventListener("input", pintarAvatarDelPerfil);
 
   panel.addEventListener("click", (e) => { if (e.target === panel) cerrarPerfil(); });
   document.addEventListener("keydown", (e) => {

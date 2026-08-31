@@ -577,6 +577,26 @@ function rangoDex(generacion) {
   return { desde, hasta: hasta === undefined ? Infinity : hasta };
 }
 
+/* Los iconos de caja de los juegos, que es lo que se usa de avatar. El
+   repositorio solo los tiene hasta el 898: de Hisui y Paldea en adelante no
+   existen en ningun set, asi que esos caen al sprite normal. */
+const ICONOS_CAJA = SPRITES + "/versions/generation-viii/icons";
+const ULTIMO_ICONO = 898;
+
+function avatarDe(dex) {
+  const n = Number(dex);
+  if (!n) return "";
+  return n <= ULTIMO_ICONO ? ICONOS_CAJA + "/" + n + ".png" : SPRITES + "/" + n + ".png";
+}
+
+/* El avatar de un perfil, o nada si no ha elegido favorito */
+function avatarHTML(quien, clase) {
+  const src = quien && avatarDe(quien.favourite_dex);
+  if (!src) return "";
+  return '<img class="avatar' + (clase ? " " + clase : "") + '" src="' + src +
+         '" alt="" aria-hidden="true" loading="lazy">';
+}
+
 function spriteDex(id) {
   return SPRITES + (modoShiny ? "/shiny/" : "/") + id + ".png";
 }

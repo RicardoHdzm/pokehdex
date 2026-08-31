@@ -146,7 +146,7 @@ async function cargarPerfil() {
   if (!sb || !sesion) return null;
   const { data, error } = await sb
     .from("profiles")
-    .select("id, handle, display_name, friend_code, champions_id")
+    .select("id, handle, display_name, friend_code, champions_id, favourite_dex")
     .eq("id", sesion.user.id)
     .single();
 
@@ -181,8 +181,12 @@ function pintarSesion() {
       codigos.push('<span class="visita-codigo"><b>Champions</b> ' + perfil.champions_id + "</span>");
     }
 
+    /* Si has elegido favorito manda su icono; si no, el monigote de siempre */
+    const cara = (typeof avatarHTML === "function" && avatarHTML(perfil)) ||
+                 '<i class="fa-solid fa-user"></i>';
+
     nombre.innerHTML =
-      '<span class="auth-quien"><i class="fa-solid fa-user"></i> ' + quien + "</span>" +
+      '<span class="auth-quien">' + cara + " " + quien + "</span>" +
       (codigos.length ? '<span class="auth-codigos">' + codigos.join("") + "</span>" : "");
   }
 
