@@ -676,6 +676,40 @@ const POR_CAJA = 30;
 let dexBusqueda = "";
 let dexFiltro = "todos";   // todos | faltan | tengo
 
+/* Solo en la Nacional: sacar las formas regionales a sus propias cajas.
+   Se recuerda entre visitas, como el tema. */
+const FORMAS_APARTE_CLAVE = "pkmnteam:formasAparte";
+let dexFormasAparte = (() => {
+  try { return localStorage.getItem(FORMAS_APARTE_CLAVE) === "si"; } catch { return false; }
+})();
+
+/* Por orden de aparicion en los juegos. Hisui va entre Galar y Paldea:
+   Leyendas Arceus salio despues de Espada y Escudo y antes de Escarlata. */
+const ORDEN_REGIONES = ["alola", "galar", "hisui", "paldea"];
+
+/* Reparte las entradas en grupos: el dex de siempre y, si toca, una tanda
+   por region. Las formas que no son regionales (Mega, Gigamax, Luna
+   Carmesi...) se quedan junto a su especie: no son de ninguna region. */
+function gruposDeEntradas(entradas, gen) {
+  if (!gen || !gen.nacional || !dexFormasAparte) return [{ entradas }];
+
+  const porRegion = new Map(ORDEN_REGIONES.map((r) => [r, []]));
+  const resto = [];
+
+  entradas.forEach((e) => {
+    const region = e.region && ORDEN_REGIONES.find((r) => e.region.startsWith(r));
+    if (region) porRegion.get(region).push(e);
+    else resto.push(e);
+  });
+
+  const grupos = [{ entradas: resto }];
+  ORDEN_REGIONES.forEach((r) => {
+    const lista = porRegion.get(r);
+    if (lista.length) grupos.push({ titulo: FORM_ES[r], entradas: lista });
+  });
+  return grupos;
+}
+
 /* La ultima Pokedex pintada, para poder filtrar sin volver a calcularla */
 let dexUltima = null;      // { gen, entradas, capturados }
 
@@ -715,20 +749,32 @@ function cajasHTML(entradas, capturados, filtrando, salto) {
   }
 
   /* Se parte en cajas de 30, como en el juego. La ultima queda incompleta
-     igual que alli cuando la generacion no es multiplo de treinta. */
+     igual que alli cuando la generacion no es multiplo de treinta.
+     Las cajas de region llevan su nombre en vez del numero: no continuan la
+     cuenta del PC, son un apartado. */
   let html = "";
-  for (let i = 0; i < entradas.length; i += POR_CAJA) {
-    const tanda = entradas.slice(i, i + POR_CAJA);
-    const tengoEnCaja = tanda.filter((e) => capturados.has(e.id)).length;
-    html += `
-      <section class="dex-caja" style="--filas:${Math.ceil(tanda.length / 6)}">
-        <h4 class="dex-caja-titulo">
-          <span>Box ${(salto || 0) + Math.floor(i / POR_CAJA) + 1}</span>
-          <span class="dex-caja-cuenta">${tengoEnCaja}/${tanda.length}</span>
-        </h4>
-        <ul class="dex-grid">${tanda.map((e) => dexTile(e, capturados)).join("")}</ul>
-      </section>`;
-  }
+  let numero = (salto || 0) + 1;
+
+  gruposDeEntradas(entradas, dexUltima && dexUltima.gen).forEach((grupo) => {
+    for (let i = 0; i < grupo.entradas.length; i += POR_CAJA) {
+      const tanda = grupo.entradas.slice(i, i + POR_CAJA);
+      const tengoEnCaja = tanda.filter((e) => capturados.has(e.id)).length;
+      const cuantas = Math.ceil(grupo.entradas.length / POR_CAJA);
+      const etiqueta = grupo.titulo
+        ? grupo.titulo + (cuantas > 1 ? " " + (Math.floor(i / POR_CAJA) + 1) : "")
+        : "Box " + numero++;
+
+      html += `
+        <section class="dex-caja${grupo.titulo ? " region" : ""}"
+                 style="--filas:${Math.ceil(tanda.length / 6)}">
+          <h4 class="dex-caja-titulo">
+            <span>${etiqueta}</span>
+            <span class="dex-caja-cuenta">${tengoEnCaja}/${tanda.length}</span>
+          </h4>
+          <ul class="dex-grid">${tanda.map((e) => dexTile(e, capturados)).join("")}</ul>
+        </section>`;
+    }
+  });
   return html;
 }
 
@@ -1236,6 +1282,11 @@ function renderGeneration(gen) {
         <input type="search" id="dexBuscar" class="dex-buscar" autocomplete="off"
                placeholder="Buscar por nombre o numero..." aria-label="Buscar en la Pokedex"
                value="${dexBusqueda.replace(/"/g, "&quot;")}">
+        ${gen.nacional ? `
+          <label class="dex-aparte">
+            <input type="checkbox" id="dexFormasAparte" ${dexFormasAparte ? "checked" : ""}>
+            <span>Formas regionales aparte</span>
+          </label>` : ""}
         <div class="dex-filtros" role="tablist" aria-label="Que Pokemon mostrar">
           <button class="dex-filtro" type="button" role="tab" data-filtro="todos"
                   aria-selected="${dexFiltro === "todos"}">Todos</button>
@@ -1370,6 +1421,14 @@ function conectarBuscador() {
     dexBusqueda = campo.value;
     clearTimeout(temporizador);
     temporizador = setTimeout(repintarCajas, 150);
+  });
+
+  panelEl.addEventListener("change", (e) => {
+    if (!e.target.closest("#dexFormasAparte")) return;
+    dexFormasAparte = e.target.checked;
+    try { localStorage.setItem(FORMAS_APARTE_CLAVE, dexFormasAparte ? "si" : "no"); }
+    catch { /* modo privado */ }
+    repintarCajas();
   });
 
   panelEl.addEventListener("click", (e) => {

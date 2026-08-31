@@ -737,6 +737,27 @@ a { color: var(--accent); text-underline-offset: .2em; }
   .resumen-region, .resumen-cuenta { display: none; }
 }
 
+/* La casilla de la Nacional, junto a los filtros */
+.dex-aparte {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  cursor: pointer;
+  font-family: var(--pixel);
+  font-size: .5rem;
+  line-height: 1.5;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  transition: color .15s ease;
+}
+
+.dex-aparte:hover { color: var(--ink); }
+
+.dex-aparte input { accent-color: var(--accent); }
+
+/* Las cajas de region se distinguen de las del PC */
+.dex-caja.region .dex-caja-titulo span:first-child { color: var(--accent); }
+
 /* ===== Colecciones cosmeticas ===== */
 
 /* Van debajo de la Pokedex y con su propio aire, para que se lean como algo
