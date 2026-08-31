@@ -856,11 +856,18 @@ body.con-sesion .dex-tile { cursor: pointer; }
   color: var(--ink-2);
 }
 
-/* 2. El nombre es lo segundo mas visible de la columna, despues del titulo.
+/* Ficha: la ball y el nombre, en fila. Puestos asi son una sola cosa por
+   estructura, sin tener que sostenerlo con las separaciones. */
+.auth-ficha {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+}
+
+/* El nombre es lo segundo mas visible de la columna, despues del titulo.
    Antes se veia igual que un codigo de intercambio: misma fuente, mismo
    color y dos pixeles de diferencia. */
 .auth-quien {
-  margin-top: .55rem;
   font-size: 1.6rem;
   line-height: 1.2;
   color: var(--ink);

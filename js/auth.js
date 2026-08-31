@@ -196,11 +196,13 @@ function pintarSesion() {
     const cara = (typeof avatarHTML === "function" && avatarHTML(perfil)) ||
                  '<i class="fa-solid fa-user"></i>';
 
-    /* La cara va en su propia linea, encima del nombre. El contenedor ya
-       apila en columna, asi que basta con sacarla del span del nombre. */
+    /* Ficha y nombre van juntos en una fila: asi se leen como un solo
+       objeto sin depender de las separaciones, y la cabecera es mas baja. */
     nombre.innerHTML =
-      '<span class="auth-cara">' + cara + "</span>" +
-      '<span class="auth-quien">' + quien + "</span>" +
+      '<span class="auth-ficha">' +
+        '<span class="auth-cara">' + cara + "</span>" +
+        '<span class="auth-quien">' + quien + "</span>" +
+      "</span>" +
       (codigos.length ? '<span class="auth-codigos">' + codigos.join("") + "</span>" : "");
   }
 
