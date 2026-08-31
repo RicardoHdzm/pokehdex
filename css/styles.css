@@ -779,33 +779,39 @@ a { color: var(--accent); text-underline-offset: .2em; }
 .rejilla th,
 .rejilla td { border: 1px solid var(--rule); }
 
-.rejilla-esquina,
 .rejilla-gen {
-  position: sticky;
-  left: 0;
-  z-index: 2;
-  width: 3rem;
+  padding: .5rem .35rem .42rem;
   background: var(--panel-2);
   font-family: var(--pixel);
   font-size: .55rem;
+  font-weight: 400;
   color: var(--ink-2);
 }
 
+/* La columna de tipos se queda fija al desplazar, que es la que dice que
+   estas mirando */
+.rejilla-esquina,
 .rejilla-tipo {
-  padding: .5rem .35rem .42rem;
-  background: color-mix(in srgb, var(--t) 28%, var(--panel));
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  padding: .5rem .6rem .42rem;
+  background: color-mix(in srgb, var(--t, var(--panel-2)) 28%, var(--panel));
   font-family: var(--pixel);
-  font-size: .4rem;
+  font-size: .45rem;
   line-height: 1.4;
   font-weight: 400;
   text-transform: uppercase;
+  text-align: left;
   color: var(--ink);
   white-space: nowrap;
 }
 
+.rejilla-esquina { background: var(--panel-2); }
+
 .rejilla-celda {
-  width: 3.4rem;
-  height: 3.4rem;
+  width: 6.2rem;
+  height: 5rem;
   padding: 0;
   text-align: center;
   vertical-align: middle;
@@ -813,8 +819,8 @@ a { color: var(--accent); text-underline-offset: .2em; }
 }
 
 .rejilla-celda img {
-  width: 46px;
-  height: 46px;
+  width: 72px;
+  height: 72px;
   object-fit: contain;
   image-rendering: pixelated;
 }
@@ -905,9 +911,9 @@ a { color: var(--accent); text-underline-offset: .2em; }
 }
 
 @media (max-width: 640px) {
-  .rejilla-celda { width: 2.8rem; height: 2.8rem; }
-  .rejilla-celda img { width: 36px; height: 36px; }
-  .rejilla-tipo { font-size: .34rem; }
+  .rejilla-celda { width: 4.2rem; height: 3.8rem; }
+  .rejilla-celda img { width: 54px; height: 54px; }
+  .rejilla-tipo { font-size: .38rem; padding: .4rem .45rem .32rem; }
 }
 
 /* ===== Colecciones cosmeticas ===== */

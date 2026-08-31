@@ -194,23 +194,27 @@ function celdaDe(generacion, tipo) {
     </td>`;
 }
 
+/* Los tipos van en filas y las generaciones en columnas. Al reves —que es
+   como lo hace el picker original— son 18 columnas, la tabla se pasa de
+   ancho hasta en escritorio y las casillas quedan en 54px. Asi son 9
+   columnas, el doble de sitio para cada sprite y sin desplazar. */
 function rejillaHTML() {
-  const cabecera = TIPOS_REJILLA
-    .map((t) => `<th class="rejilla-tipo t-${t}"><span>${TYPE_ES[t] || t}</span></th>`)
+  const cabecera = GENERACIONES_REJILLA
+    .map((g) => `<th class="rejilla-gen" scope="col">${roman(g)}</th>`)
     .join("");
 
-  /* Cuantas lleva cada generacion: 162 casillas vacias abruman, y por filas
-     se convierte en nueve tareas pequeñas en vez de una enorme */
-  const filas = GENERACIONES_REJILLA.map((g) => {
-    const puestas = TIPOS_REJILLA.filter((t) => FAVORITOS_TIPO.has(g + ":" + t)).length;
-    return `
+  const filas = TIPOS_REJILLA.map((t) => `
     <tr>
-      <th class="rejilla-gen" scope="row">${roman(g)}</th>
-      ${TIPOS_REJILLA.map((t) => celdaDe(g, t)).join("")}
-      <td class="rejilla-cuenta${puestas === TIPOS_REJILLA.length ? " completa" : ""}">
-        ${puestas}/${TIPOS_REJILLA.length}
-      </td>
-    </tr>`;
+      <th class="rejilla-tipo t-${t}" scope="row"><span>${TYPE_ES[t] || t}</span></th>
+      ${GENERACIONES_REJILLA.map((g) => celdaDe(g, t)).join("")}
+    </tr>`).join("");
+
+  /* Los totales de cada generacion, ahora al pie de su columna. Sirven para
+     lo mismo: convertir 162 casillas en nueve metas de 18. */
+  const totales = GENERACIONES_REJILLA.map((g) => {
+    const n = TIPOS_REJILLA.filter((t) => FAVORITOS_TIPO.has(g + ":" + t)).length;
+    return `<td class="rejilla-cuenta${n === TIPOS_REJILLA.length ? " completa" : ""}">
+      ${n}/${TIPOS_REJILLA.length}</td>`;
   }).join("");
 
   const puestas = FAVORITOS_TIPO.size;
@@ -226,8 +230,9 @@ function rejillaHTML() {
       </div>
       <div class="rejilla-marco">
         <table class="rejilla">
-          <thead><tr><th class="rejilla-esquina"></th>${cabecera}<th class="rejilla-esquina"></th></tr></thead>
+          <thead><tr><th class="rejilla-esquina"></th>${cabecera}</tr></thead>
           <tbody>${filas}</tbody>
+          <tfoot><tr><th class="rejilla-esquina"></th>${totales}</tr></tfoot>
         </table>
       </div>
     </section>`;
