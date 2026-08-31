@@ -176,12 +176,8 @@ a { color: var(--accent); text-underline-offset: .2em; }
    la pantalla, para que quede alineado con el titulo */
 .masthead .wrap { position: relative; }
 
-/* Interruptor de tema: va en la esquina de la cabecera, fuera del flujo
-   para no mover el titulo ni el nombre de usuario */
+/* Ahora vive dentro del perfil, en su fila, asi que ya no se posiciona */
 .tema-boton {
-  position: absolute;
-  top: 1.1rem;
-  right: 0;
   display: grid;
   place-items: center;
   width: 2.4rem;
@@ -205,16 +201,19 @@ a { color: var(--accent); text-underline-offset: .2em; }
 
 .tema-boton:hover i { color: var(--accent); }
 
-@media (max-width: 640px) {
-  /* En movil no cabe en la esquina sin pisar el titulo: baja al flujo,
-     centrado bajo los botones de Perfil / Usuarios / Salir. */
-  .tema-boton {
-    position: static;
-    width: 2.3rem;
-    height: 2.3rem;
-    margin: 1.1rem auto 0;
-  }
+/* La fila del perfil: que modo esta puesto y el boton para cambiarlo */
+.perfil-tema {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: .7rem;
+  padding: .6rem .7rem;
+  background: var(--panel);
+  border: 2px solid var(--rule);
 }
+
+.perfil-tema-texto { font-size: 1.05rem; color: var(--ink); }
 
 /* ===== Indice de generaciones ===== */
 

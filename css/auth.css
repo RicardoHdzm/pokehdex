@@ -136,6 +136,16 @@
 
 .auth-barra:not(:empty) { margin-top: 1.1rem; }
 
+@media (max-width: 640px) {
+  /* Con cuatro botones ya no caben en una linea y el ultimo bajaba solo.
+     Dos y dos queda mas ordenado que tres y uno. */
+  .auth-barra {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    justify-content: center;
+  }
+}
+
 .auth-quien i { margin-right: .35rem; color: var(--accent); }
 
 .auth-salir {
@@ -857,11 +867,26 @@ body.con-sesion .dex-tile { cursor: pointer; }
 }
 
 /* Ficha: la ball y el nombre, en fila. Puestos asi son una sola cosa por
-   estructura, sin tener que sostenerlo con las separaciones. */
+   estructura, sin tener que sostenerlo con las separaciones.
+
+   Va anclada a la esquina superior derecha del contenido, fuera del flujo:
+   no empuja al titulo y deja la columna central para los codigos. */
 .auth-ficha {
+  position: absolute;
+  top: 0;
+  right: 0;
   display: flex;
   align-items: center;
   gap: .8rem;
+}
+
+@media (max-width: 640px) {
+  /* En la esquina pisaria el rotulo de capturados: vuelve al flujo,
+     centrada encima de los codigos. */
+  .auth-ficha {
+    position: static;
+    justify-content: center;
+  }
 }
 
 /* El nombre es lo segundo mas visible de la columna, despues del titulo.
@@ -902,6 +927,9 @@ body.con-sesion .dex-tile { cursor: pointer; }
 }
 
 .auth-nombre:not(:empty) { margin-top: 1.1rem; }
+
+/* Con la ficha fuera del flujo, el bloque lo abren los codigos */
+.auth-codigos:first-child { margin-top: 0; }
 
 /* ---------- Visitando el perfil de otro ---------- */
 

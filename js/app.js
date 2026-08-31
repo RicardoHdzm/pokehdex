@@ -1097,6 +1097,11 @@ function aplicarTema(tema) {
 
     const icono = document.getElementById("temaIcono");
     if (icono) icono.className = "fa-solid " + (claro ? "fa-moon" : "fa-bolt");
+
+    /* Dentro del perfil el boton va acompañado de texto: solo, no se
+       entenderia que hace ni en que modo estas */
+    const texto = document.getElementById("temaTexto");
+    if (texto) texto.textContent = claro ? "Modo claro" : "Modo oscuro";
   }
 
   /* El acento se recalcula: es el unico color que depende del tema por JS */

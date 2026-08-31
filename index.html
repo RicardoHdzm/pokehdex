@@ -79,10 +79,6 @@
       <h1 class="masthead-title">POKE<em>HDEX</em></h1>
       <div class="auth-nombre" id="authNombre"></div>
       <div class="auth-barra" id="authBarra"></div>
-      <button class="tema-boton" id="temaBoton" type="button" aria-pressed="false"
-              title="Cambiar a modo claro" aria-label="Cambiar a modo claro">
-        <i class="fa-solid fa-bolt" id="temaIcono" aria-hidden="true"></i>
-      </button>
     </div>
   </header>
 
@@ -197,10 +193,19 @@
         </p>
         <p class="mon-mensaje" id="perfilMensaje"></p>
         <div class="mon-botones">
-          <button type="submit" class="boton primary">Guardar nombre</button>
+          <button type="submit" class="boton primary">Guardar Cambios</button>
           <button type="button" class="boton" id="perfilCerrar">Cerrar</button>
         </div>
       </form>
+
+      <p class="eyebrow perfil-sub">Aspecto</p>
+      <div class="perfil-tema">
+        <span class="perfil-tema-texto" id="temaTexto">Modo oscuro</span>
+        <button class="tema-boton" id="temaBoton" type="button" aria-pressed="false"
+                title="Cambiar a modo claro" aria-label="Cambiar a modo claro">
+          <i class="fa-solid fa-bolt" id="temaIcono" aria-hidden="true"></i>
+        </button>
+      </div>
 
       <p class="eyebrow perfil-sub">Juego de cada region</p>
       <p class="perfil-nota">Define el color de esa pestaña.</p>
