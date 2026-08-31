@@ -55,21 +55,50 @@ async function fetchTipos() {
   }
 }
 
+/* De que generacion es una forma que la Pokedex no sigue. Se usa la de su
+   especie: Rotom Calor es de cuarta como Rotom, y Toxtricity Grave de
+   octava como Toxtricity. Las regionales no pasan por aqui, que esas si
+   estan en el catalogo y llevan la generacion que las estreno. */
+function generacionDeFormaSuelta(id) {
+  if (!VARIANTES_MEM || !ESPECIES_MEM) return null;
+
+  const fila = VARIANTES_MEM.find(([v]) => v === id);
+  if (!fila) return null;
+
+  const porNombre = new Map(ESPECIES_MEM.map(([n, slug]) => [slug, n]));
+  const trozos = partirSlug(fila[1], porNombre);
+  if (!trozos) return null;
+
+  const base = porNombre.get(trozos.especie);
+  if (!base) return null;
+
+  const i = CORTES_DEX.findIndex((tope) => base <= tope);
+  return i === -1 ? null : i + 1;
+}
+
 /* Los candidatos de una casilla: de ese tipo y de esa generacion.
 
-   La generacion se toma del catalogo y no del numero de Pokedex, para que
-   las formas caigan donde les toca: Ursaluna es de octava y su Luna Carmesi
-   de novena, y el Ninetales de Alola cuenta como Hielo de septima, no como
-   Fuego de primera.
+   La generacion no sale del numero de Pokedex sino de donde pertenece cada
+   cosa: Ursaluna es de octava y su Luna Carmesi de novena, y el Ninetales
+   de Alola cuenta como Hielo de septima y no como Fuego de primera.
 
-   Solo entran las formas que la Pokedex sigue —las regionales y las
-   declaradas a mano—, que son las mismas que ves en las cajas. */
+   Aqui entran mas formas que en la Pokedex. Alli solo se siguen las
+   regionales, porque los juegos cuentan a Rotom o a Toxtricity como una
+   sola entrada. Pero elegir favorito no es contar completado: que te guste
+   mas el Toxtricity Grave que el Agudo es una preferencia legitima. */
 function candidatosDe(generacion, tipo) {
-  if (!TIPOS_MEM || !TIPOS_MEM[tipo] || !CATALOGO_IDS) return [];
+  if (!TIPOS_MEM || !TIPOS_MEM[tipo]) return [];
 
   return TIPOS_MEM[tipo].filter((id) => {
-    const info = CATALOGO_IDS.get(id);
-    return info && info.generacion === generacion;
+    const info = CATALOGO_IDS && CATALOGO_IDS.get(id);
+    if (info) return info.generacion === generacion;
+
+    /* Las que no sigue la Pokedex: se ubican por su especie */
+    if (id <= 1025) return false;
+    const fila = VARIANTES_MEM && VARIANTES_MEM.find(([v]) => v === id);
+    /* Los totem son solo Pokemon mas grandes, no otra forma */
+    if (!fila || /-totem/.test(fila[1])) return false;
+    return generacionDeFormaSuelta(id) === generacion;
   });
 }
 
@@ -120,8 +149,18 @@ function nombrePorDex(dex) {
   if (!dex) return "";
   if (CATALOGO_IDS && CATALOGO_IDS.has(dex)) return CATALOGO_IDS.get(dex).nombre;
   if (!ESPECIES_MEM) return "";
+
   const fila = ESPECIES_MEM.find(([id]) => id === dex);
-  return fila ? nombreEspecie(fila[1]) : "";
+  if (fila) return nombreEspecie(fila[1]);
+
+  /* Una forma que la Pokedex no sigue: se arma como las demas */
+  const forma = VARIANTES_MEM && VARIANTES_MEM.find(([v]) => v === dex);
+  if (!forma) return "";
+  const porNombre = new Map(ESPECIES_MEM.map(([n, slug]) => [slug, n]));
+  const trozos = partirSlug(forma[1], porNombre);
+  return trozos
+    ? nombreEspecie(trozos.especie) + " (" + formLabel(trozos.forma) + ")"
+    : nombreEspecie(forma[1]);
 }
 
 function celdaDe(generacion, tipo) {
@@ -184,7 +223,14 @@ function rejillaHTML() {
 /* Las formas comparten numero con su especie: el catalogo lo guarda en base */
 function baseDe(dex) {
   const info = CATALOGO_IDS && CATALOGO_IDS.get(dex);
-  return info ? info.base : dex;
+  if (info) return info.base;
+  if (dex <= 1025 || !VARIANTES_MEM || !ESPECIES_MEM) return dex;
+
+  const forma = VARIANTES_MEM.find(([v]) => v === dex);
+  if (!forma) return dex;
+  const porNombre = new Map(ESPECIES_MEM.map(([n, slug]) => [slug, n]));
+  const trozos = partirSlug(forma[1], porNombre);
+  return trozos ? porNombre.get(trozos.especie) || dex : dex;
 }
 
 let celdaEnCurso = null;
@@ -202,7 +248,7 @@ async function abrirSelectorTipo(celda) {
   const rejilla = document.getElementById("tipoOpciones");
   rejilla.innerHTML = '<p class="dex-vacio">Cargando...</p>';
 
-  await Promise.all([fetchSpecies(), fetchTipos(), construirCatalogo()]);
+  await Promise.all([fetchSpecies(), fetchVariantes(), fetchTipos(), construirCatalogo()]);
   const puesto = FAVORITOS_TIPO.get(generacion + ":" + tipo);
   const candidatos = candidatosDe(generacion, tipo);
 
