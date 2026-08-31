@@ -848,9 +848,22 @@ body.con-sesion .dex-tile { cursor: pointer; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: .5rem;
+  /* Sin hueco por defecto: cada bloque pone el suyo, porque la ball y el
+     nombre son la misma cosa y los codigos son otra. Todo a la misma
+     distancia se leia como tres elementos sueltos. */
+  gap: 0;
   font-size: 1.15rem;
   color: var(--ink-2);
+}
+
+/* 2. El nombre es lo segundo mas visible de la columna, despues del titulo.
+   Antes se veia igual que un codigo de intercambio: misma fuente, mismo
+   color y dos pixeles de diferencia. */
+.auth-quien {
+  margin-top: .55rem;
+  font-size: 1.6rem;
+  line-height: 1.2;
+  color: var(--ink);
 }
 
 /* Va en su propio recuadro, el mismo que llevan la ball de cada lamina y la
@@ -873,6 +886,7 @@ body.con-sesion .dex-tile { cursor: pointer; }
 .auth-cara i { font-size: 1.2rem; color: var(--ink-2); }
 
 .auth-codigos {
+  margin-top: 1rem;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
