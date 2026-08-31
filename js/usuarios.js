@@ -15,15 +15,19 @@ function esMutuo(id) {
   return AMISTADES.mias.has(id) && AMISTADES.suyas.has(id);
 }
 
-/* Como esta la relacion con alguien, para pintarlo */
+/* Como esta la relacion con alguien. El color lo resume y el texto sigue
+   estando en el title: quien no distinga colores, o use lector de pantalla,
+   necesita leerlo. Los dos pendientes comparten el amarillo porque a los dos
+   les falta lo mismo; cual de los dos es lo dice el boton, que pone Agregar
+   o Quitar segun a quien le toque mover. */
 function estadoCon(id) {
   const yoLoTengo = AMISTADES.mias.has(id);
   const elMeTiene = AMISTADES.suyas.has(id);
 
   if (yoLoTengo && elMeTiene) return { clave: "mutuo", texto: "Amigos" };
-  if (yoLoTengo) return { clave: "enviada", texto: "Te falta que te agregue" };
-  if (elMeTiene) return { clave: "recibida", texto: "Te tiene agregado" };
-  return { clave: "ninguna", texto: "" };
+  if (yoLoTengo) return { clave: "pendiente", texto: "Pendiente: falta que te agregue" };
+  if (elMeTiene) return { clave: "pendiente", texto: "Pendiente: te tiene agregado, agregalo tu" };
+  return { clave: "ninguna", texto: "No amigos" };
 }
 
 function filaDeUsuario(p) {
@@ -34,7 +38,8 @@ function filaDeUsuario(p) {
   return `
     <li class="usuario ${estado.clave}">
       <span class="usuario-nombre">${avatarHTML(p)}${nombre}</span>
-      <span class="usuario-estado">${estado.texto}</span>
+      <span class="usuario-estado" role="img"
+            title="${estado.texto}" aria-label="${estado.texto}"></span>
       <button type="button" class="boton usuario-agregar" data-id="${p.id}"
               aria-pressed="${agregado}">${agregado ? "Quitar" : "Agregar"}</button>
       <button type="button" class="boton primary usuario-ver" data-id="${p.id}"

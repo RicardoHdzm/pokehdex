@@ -28,6 +28,7 @@
   /* Rojo de aviso y dorado de shiny: tambien cambian con el tema */
   --peligro: #ff8f8f;
   --brillo:  #ffd45c;
+  --exito:   #6fdc8c;
 }
 
 /* ===== Modo claro =====
@@ -51,6 +52,7 @@
 
   --peligro: #a81f1f;
   --brillo:  #7a5c00;
+  --exito:   #1c7a3c;
 }
 
 * { box-sizing: border-box; }
