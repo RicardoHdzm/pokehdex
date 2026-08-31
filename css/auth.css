@@ -574,6 +574,16 @@ body.con-sesion .dex-tile { cursor: pointer; }
 
 .usuario .boton { padding: .4rem .55rem .32rem; font-size: .45rem; }
 
+/* "Agregar" son siete caracteres y "Quitar" seis: sin fijar el ancho, cada
+   vez que se pulsa el boton cambia de tamaño y la fila entera se desplaza.
+   La fuente de pixeles es monoespaciada, asi que 7ch da la medida exacta;
+   en content-box para que el relleno y el borde se sumen aparte. */
+.usuario-agregar {
+  box-sizing: content-box;
+  min-width: 7ch;
+  text-align: center;
+}
+
 .usuario .boton:disabled { opacity: .4; cursor: not-allowed; }
 
 @media (max-width: 640px) {
