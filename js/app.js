@@ -316,7 +316,12 @@ function nombreCosmetico(slug, coleccion) {
   const bonito = (txt) => txt.split("-")
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 
-  if (coleccion.slug === "unown") return sufijo.length === 1 ? sufijo.toUpperCase() : bonito(sufijo);
+  /* Las 28 son las 26 letras y dos signos, que PokeAPI nombra con palabra */
+  if (coleccion.slug === "unown") {
+    if (sufijo === "exclamation") return "!";
+    if (sufijo === "question") return "?";
+    return sufijo.length === 1 ? sufijo.toUpperCase() : bonito(sufijo);
+  }
 
   /* Alcremie combina crema y dulce. En las 63 casillas las palabras "Cream"
      y "Sweet" se repiten identicas y no distinguen nada, asi que sobran: la
