@@ -226,11 +226,13 @@
       <p class="eyebrow" id="monTitulo">Añadir</p>
 
       <form class="mon-form" id="monForm">
-        <label class="mon-campo">
+        <label class="mon-campo mon-campo-buscador">
           <span>Especie</span>
-          <input id="monEspecie" list="monLista" required autocomplete="off"
-                 placeholder="Empieza a escribir...">
-          <datalist id="monLista"></datalist>
+          <input id="monEspecie" required autocomplete="off" role="combobox"
+                 aria-expanded="false" aria-controls="monSugerencias"
+                 aria-autocomplete="list" placeholder="Empieza a escribir...">
+          <ul class="mon-sugerencias" id="monSugerencias" role="listbox" hidden></ul>
+          <datalist id="monLista" hidden></datalist>
         </label>
 
         <label class="mon-campo">
