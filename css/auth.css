@@ -881,11 +881,12 @@ body.con-sesion .dex-tile { cursor: pointer; }
 }
 
 @media (max-width: 640px) {
-  /* En la esquina pisaria el rotulo de capturados: vuelve al flujo,
-     centrada encima de los codigos. */
+  /* En la esquina pisaria el rotulo de capturados. Vuelve al flujo y, como
+     su hueco es el primero del bloque, queda encima de la entradilla. */
   .auth-ficha {
     position: static;
     justify-content: center;
+    margin-bottom: 1.4rem;
   }
 
   /* Aqui si van una debajo de otra y necesitan separarse */

@@ -171,11 +171,13 @@ async function cargarPerfil() {
 function pintarSesion() {
   const barra = document.getElementById("authBarra");
   const nombre = document.getElementById("authNombre");
+  const ficha = document.getElementById("authFicha");
   if (!barra) return;
 
   if (!sesion) {
     barra.innerHTML = "";
     if (nombre) nombre.innerHTML = "";
+    if (ficha) ficha.innerHTML = "";
     return;
   }
 
@@ -197,13 +199,19 @@ function pintarSesion() {
                  '<i class="fa-solid fa-user"></i>';
 
     /* Ficha y nombre van juntos en una fila: asi se leen como un solo
-       objeto sin depender de las separaciones, y la cabecera es mas baja. */
+       objeto sin depender de las separaciones. Va en su propio hueco, antes
+       de la entradilla: en escritorio se ancla a la esquina y en movil se
+       queda donde esta, encima de todo. */
+    if (ficha) {
+      ficha.innerHTML =
+        '<span class="auth-ficha">' +
+          '<span class="auth-cara">' + cara + "</span>" +
+          '<span class="auth-quien">' + quien + "</span>" +
+        "</span>";
+    }
+
     nombre.innerHTML =
-      '<span class="auth-ficha">' +
-        '<span class="auth-cara">' + cara + "</span>" +
-        '<span class="auth-quien">' + quien + "</span>" +
-      "</span>" +
-      (codigos.length ? '<span class="auth-codigos">' + codigos.join("") + "</span>" : "");
+      codigos.length ? '<span class="auth-codigos">' + codigos.join("") + "</span>" : "";
   }
 
   barra.innerHTML = `
