@@ -758,6 +758,124 @@ a { color: var(--accent); text-underline-offset: .2em; }
 /* Las cajas de region se distinguen de las del PC */
 .dex-caja.region .dex-caja-titulo span:first-child { color: var(--accent); }
 
+/* ===== Rejilla de favorito por tipo ===== */
+
+.rejilla-seccion { margin-top: clamp(2.5rem, 5vw, 4rem); }
+
+/* Dieciocho columnas no caben en un movil: se desplaza en horizontal y la
+   columna de generaciones se queda fija, que si no te pierdes de que fila
+   estas mirando. */
+.rejilla-marco {
+  overflow-x: auto;
+  border: 2px solid var(--rule);
+}
+
+.rejilla {
+  border-collapse: collapse;
+  width: max-content;
+  min-width: 100%;
+}
+
+.rejilla th,
+.rejilla td { border: 1px solid var(--rule); }
+
+.rejilla-esquina,
+.rejilla-gen {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  width: 3rem;
+  background: var(--panel-2);
+  font-family: var(--pixel);
+  font-size: .55rem;
+  color: var(--ink-2);
+}
+
+.rejilla-tipo {
+  padding: .5rem .35rem .42rem;
+  background: color-mix(in srgb, var(--t) 28%, var(--panel));
+  font-family: var(--pixel);
+  font-size: .4rem;
+  line-height: 1.4;
+  font-weight: 400;
+  text-transform: uppercase;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.rejilla-celda {
+  width: 3.4rem;
+  height: 3.4rem;
+  padding: 0;
+  text-align: center;
+  vertical-align: middle;
+  background: var(--panel);
+}
+
+.rejilla-celda img {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.rejilla-celda.editable { cursor: pointer; }
+.rejilla-celda.editable:hover { background: color-mix(in srgb, var(--accent) 18%, var(--panel)); }
+
+.rejilla-vacia {
+  font-family: var(--pixel);
+  font-size: .7rem;
+  color: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+/* El selector: los candidatos de esa casilla */
+.tipo-opciones {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+  gap: .5rem;
+  margin: 0 0 1.2rem;
+  padding: 0;
+  max-height: 26rem;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.tipo-opcion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .2rem;
+  padding: .4rem .2rem;
+  background: var(--panel);
+  border: 2px solid var(--rule);
+  cursor: pointer;
+  font-size: .85rem;
+  text-align: center;
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
+}
+
+.tipo-opcion img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.tipo-opcion:hover { border-color: var(--accent); color: var(--ink); }
+
+.tipo-opcion.puesta {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 15%, var(--panel));
+  color: var(--ink);
+}
+
+@media (max-width: 640px) {
+  .rejilla-celda { width: 2.8rem; height: 2.8rem; }
+  .rejilla-celda img { width: 36px; height: 36px; }
+  .rejilla-tipo { font-size: .34rem; }
+}
+
 /* ===== Colecciones cosmeticas ===== */
 
 /* Van debajo de la Pokedex y con su propio aire, para que se lean como algo

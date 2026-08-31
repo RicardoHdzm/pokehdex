@@ -1309,7 +1309,10 @@ function renderGeneration(gen) {
   }
 
   /* La Nacional es lo contrario que Champions: Pokedex y nada de equipo */
-  const equipo = (gen.hall || gen.nacional) ? (gen.nacional ? "" : cuerpo) : `
+  /* Favoritos lleva ademas la rejilla de generacion por tipo */
+  const rejilla = gen.hall && typeof rejillaHTML === "function" ? rejillaHTML() : "";
+
+  const equipo = (gen.hall || gen.nacional) ? (gen.nacional ? "" : cuerpo + rejilla) : `
     <div class="section-head">
       <h3 class="section-label">Equipo campeon</h3>
       ${vaciar}

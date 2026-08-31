@@ -91,7 +91,14 @@ async function cargarEquipos(userId) {
 }
 
 async function cargarPerfilCompleto(userId) {
-  await Promise.all([cargarCapturas(userId), cargarJuegos(userId), cargarEquipos(userId)]);
+  await Promise.all([
+    cargarCapturas(userId),
+    cargarJuegos(userId),
+    cargarEquipos(userId),
+    /* Los favoritos por tipo son de quien se este mirando, igual que todo
+       lo demas: al visitar a alguien se ve su rejilla, no la tuya. */
+    typeof cargarFavoritosTipo === "function" ? cargarFavoritosTipo(userId) : null
+  ]);
 }
 
 /* ---------- Editar un hueco del equipo o de favoritos ---------- */

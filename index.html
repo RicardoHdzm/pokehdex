@@ -99,6 +99,18 @@
     </section>
   </main>
 
+  <!-- Elegir el favorito de una casilla de la rejilla -->
+  <div class="mon-editor" id="tipoPanel" hidden>
+    <div class="mon-caja ancha" role="dialog" aria-modal="true" aria-labelledby="tipoTitulo">
+      <p class="eyebrow" id="tipoTitulo"></p>
+      <p class="usuarios-ayuda">Elige uno. Tocar el que ya esta puesto lo quita.</p>
+      <ul class="tipo-opciones" id="tipoOpciones"></ul>
+      <div class="mon-botones">
+        <button type="button" class="boton" id="tipoCerrar">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Usuarios: el directorio y a quien tienes agregado -->
   <div class="mon-editor" id="usuariosPanel" hidden>
     <div class="mon-caja ancha" role="dialog" aria-modal="true" aria-labelledby="usuariosTitulo">
@@ -299,6 +311,7 @@
   <script src="js/app.js"></script>
   <script src="js/datos.js"></script>
   <script src="js/perfil.js"></script>
+  <script src="js/tipos.js"></script>
   <script src="js/usuarios.js"></script>
   <script src="js/comparar.js"></script>
 </body>
