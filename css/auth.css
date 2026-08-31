@@ -887,6 +887,9 @@ body.con-sesion .dex-tile { cursor: pointer; }
     position: static;
     justify-content: center;
   }
+
+  /* Aqui si van una debajo de otra y necesitan separarse */
+  .auth-codigos { margin-top: 1rem; }
 }
 
 /* El nombre es lo segundo mas visible de la columna, despues del titulo.
@@ -918,7 +921,6 @@ body.con-sesion .dex-tile { cursor: pointer; }
 .auth-cara i { font-size: 1.2rem; color: var(--ink-2); }
 
 .auth-codigos {
-  margin-top: 1rem;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -928,8 +930,6 @@ body.con-sesion .dex-tile { cursor: pointer; }
 
 .auth-nombre:not(:empty) { margin-top: 1.1rem; }
 
-/* Con la ficha fuera del flujo, el bloque lo abren los codigos */
-.auth-codigos:first-child { margin-top: 0; }
 
 /* ---------- Visitando el perfil de otro ---------- */
 
