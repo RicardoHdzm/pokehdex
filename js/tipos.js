@@ -131,11 +131,19 @@ function rejillaHTML() {
     .map((t) => `<th class="rejilla-tipo t-${t}"><span>${TYPE_ES[t] || t}</span></th>`)
     .join("");
 
-  const filas = GENERACIONES_REJILLA.map((g) => `
+  /* Cuantas lleva cada generacion: 162 casillas vacias abruman, y por filas
+     se convierte en nueve tareas pequeñas en vez de una enorme */
+  const filas = GENERACIONES_REJILLA.map((g) => {
+    const puestas = TIPOS_REJILLA.filter((t) => FAVORITOS_TIPO.has(g + ":" + t)).length;
+    return `
     <tr>
       <th class="rejilla-gen" scope="row">${roman(g)}</th>
       ${TIPOS_REJILLA.map((t) => celdaDe(g, t)).join("")}
-    </tr>`).join("");
+      <td class="rejilla-cuenta${puestas === TIPOS_REJILLA.length ? " completa" : ""}">
+        ${puestas}/${TIPOS_REJILLA.length}
+      </td>
+    </tr>`;
+  }).join("");
 
   const puestas = FAVORITOS_TIPO.size;
   const total = GENERACIONES_REJILLA.length * TIPOS_REJILLA.length;
@@ -150,7 +158,7 @@ function rejillaHTML() {
       </div>
       <div class="rejilla-marco">
         <table class="rejilla">
-          <thead><tr><th class="rejilla-esquina"></th>${cabecera}</tr></thead>
+          <thead><tr><th class="rejilla-esquina"></th>${cabecera}<th class="rejilla-esquina"></th></tr></thead>
           <tbody>${filas}</tbody>
         </table>
       </div>
@@ -184,12 +192,30 @@ async function abrirSelectorTipo(celda) {
     return;
   }
 
-  rejilla.innerHTML = candidatos.map((id) => `
-    <li class="tipo-opcion${id === puesto ? " puesta" : ""}" data-dex="${id}"
-        title="${dexNum(id)} ${nombreEspecie(nombres.get(id) || "")}">
+  /* Los que llevaste en algun equipo van primero: si Arcanine estuvo en tu
+     equipo de Kanto es el candidato obvio a favorito de Fuego. Despues los
+     que tienes capturados, y al final el resto. */
+  const enEquipos = new Set();
+  TEAMS.forEach((sec) => sec.team.forEach((m) => { if (m && m.dex) enEquipos.add(m.dex); }));
+  const capturados = (typeof CAPTURAS !== "undefined" && perfilVisto) ? CAPTURAS.normal : new Set();
+
+  const peso = (id) => (enEquipos.has(id) ? 0 : capturados.has(id) ? 1 : 2);
+  const ordenados = [...candidatos].sort((a, b) => peso(a) - peso(b) || a - b);
+
+  rejilla.innerHTML = ordenados.map((id) => {
+    const deEquipo = enEquipos.has(id);
+    const tenido = capturados.has(id);
+    const marca = deEquipo ? "De tu equipo" : tenido ? "Lo tienes" : "";
+
+    return `
+    <li class="tipo-opcion${id === puesto ? " puesta" : ""}${deEquipo ? " de-equipo" : tenido ? " tenido" : ""}"
+        data-dex="${id}"
+        title="${dexNum(id)} ${nombreEspecie(nombres.get(id) || "")}${marca ? " · " + marca : ""}">
       <img src="${SPRITES}/${id}.png" alt="" loading="lazy">
       <span>${nombreEspecie(nombres.get(id) || "")}</span>
-    </li>`).join("");
+      ${marca ? '<b class="tipo-marca">' + marca + "</b>" : ""}
+    </li>`;
+  }).join("");
 }
 
 function cerrarSelectorTipo() {

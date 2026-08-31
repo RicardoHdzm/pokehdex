@@ -822,6 +822,19 @@ a { color: var(--accent); text-underline-offset: .2em; }
 .rejilla-celda.editable { cursor: pointer; }
 .rejilla-celda.editable:hover { background: color-mix(in srgb, var(--accent) 18%, var(--panel)); }
 
+/* El recuento de cada fila, pegado a la derecha */
+.rejilla-cuenta {
+  padding: 0 .6rem;
+  background: var(--panel-2);
+  font-family: var(--pixel);
+  font-size: .42rem;
+  text-align: center;
+  white-space: nowrap;
+  color: var(--ink-2);
+}
+
+.rejilla-cuenta.completa { color: var(--exito); }
+
 .rejilla-vacia {
   font-family: var(--pixel);
   font-size: .7rem;
@@ -863,6 +876,27 @@ a { color: var(--accent); text-underline-offset: .2em; }
 }
 
 .tipo-opcion:hover { border-color: var(--accent); color: var(--ink); }
+
+/* Lo que ya es tuyo se distingue: primero los de tus equipos, luego los
+   capturados. Sin esto el selector no sabia nada del resto del sitio. */
+.tipo-opcion.tenido { border-color: color-mix(in srgb, var(--exito) 55%, var(--rule)); }
+
+.tipo-opcion.de-equipo {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--panel));
+}
+
+.tipo-marca {
+  font-family: var(--pixel);
+  font-size: .32rem;
+  font-weight: 400;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.tipo-opcion.de-equipo .tipo-marca { color: var(--accent); }
+.tipo-opcion.tenido .tipo-marca { color: var(--exito); }
 
 .tipo-opcion.puesta {
   border-color: var(--accent);
