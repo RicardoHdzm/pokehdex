@@ -1324,6 +1324,9 @@ function renderGeneration(gen) {
   /* La Nacional es lo contrario que Champions: Pokedex y nada de equipo */
   /* Favoritos lleva ademas la rejilla de generacion por tipo */
   const rejilla = gen.hall && typeof rejillaHTML === "function" ? rejillaHTML() : "";
+  if (gen.hall && typeof asegurarTiposYRepintar === "function") {
+    setTimeout(asegurarTiposYRepintar, 0);
+  }
 
   const equipo = (gen.hall || gen.nacional) ? (gen.nacional ? "" : cuerpo + rejilla) : `
     <div class="section-head">

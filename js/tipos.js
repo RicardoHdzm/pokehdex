@@ -13,7 +13,9 @@
 /* La v2 incluye las formas; la clave cambia para que el cache viejo,
    que solo tenia especies, no se quede pegado */
 const TIPOS_KEY = "pkmnteam:tipos2";
-const GENERACIONES_REJILLA = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+/* La decima va incluida aunque todavia no tenga Pokemon: sus casillas se
+   ven reservadas y se encenderan solas en cuanto PokeAPI los publique. */
+const GENERACIONES_REJILLA = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 const TIPOS_REJILLA = [
   "normal", "fire", "water", "grass", "electric", "ice",
@@ -178,18 +180,30 @@ function nombrePorDex(dex) {
     : nombreEspecie(forma[1]);
 }
 
+/* Hay cruces que no existen: en primera generacion no hay ningun Siniestro,
+   porque el tipo llego en segunda. Esas casillas no se pueden rellenar, asi
+   que tampoco deben contar en el marcador ni invitar a tocarlas. */
+function casillaPosible(generacion, tipo) {
+  return candidatosDe(generacion, tipo).length > 0;
+}
+
 function celdaDe(generacion, tipo) {
   const dex = FAVORITOS_TIPO.get(generacion + ":" + tipo);
   const mio = typeof esMiPerfil === "function" && esMiPerfil();
+  const posible = casillaPosible(generacion, tipo);
 
   const dentro = dex
     ? `<img src="${SPRITES}/${dex}.png" alt="" loading="lazy">`
-    : `<span class="rejilla-vacia">${mio ? "+" : ""}</span>`;
+    : `<span class="rejilla-vacia">${!posible ? "·" : mio ? "+" : ""}</span>`;
+
+  const motivo = !posible
+    ? "No hay ningun " + (TYPE_ES[tipo] || tipo) + " de esta generacion"
+    : (dex ? dexNum(baseDe(dex)) + " " + nombrePorDex(dex) + " · " : "") +
+      (TYPE_ES[tipo] || tipo) + " · " + (ORDINAL[generacion] || generacion) + " generacion";
 
   return `
-    <td class="rejilla-celda${dex ? " puesta" : ""}${mio ? " editable" : ""}"
-        data-gen="${generacion}" data-tipo="${tipo}"
-        title="${dex ? dexNum(baseDe(dex)) + " " + nombrePorDex(dex) + " · " : ""}${TYPE_ES[tipo] || tipo} · ${ORDINAL[generacion] || generacion} generacion">
+    <td class="rejilla-celda${dex ? " puesta" : ""}${posible && mio ? " editable" : ""}${posible ? "" : " imposible"}"
+        data-gen="${generacion}" data-tipo="${tipo}" title="${motivo}">
       ${dentro}
     </td>`;
 }
@@ -211,14 +225,16 @@ function rejillaHTML() {
 
   /* Los totales de cada generacion, ahora al pie de su columna. Sirven para
      lo mismo: convertir 162 casillas en nueve metas de 18. */
+  let total = 0;
   const totales = GENERACIONES_REJILLA.map((g) => {
-    const n = TIPOS_REJILLA.filter((t) => FAVORITOS_TIPO.has(g + ":" + t)).length;
-    return `<td class="rejilla-cuenta${n === TIPOS_REJILLA.length ? " completa" : ""}">
-      ${n}/${TIPOS_REJILLA.length}</td>`;
+    const posibles = TIPOS_REJILLA.filter((t) => casillaPosible(g, t));
+    total += posibles.length;
+    const n = posibles.filter((t) => FAVORITOS_TIPO.has(g + ":" + t)).length;
+    return `<td class="rejilla-cuenta${posibles.length && n === posibles.length ? " completa" : ""}">
+      ${n}/${posibles.length}</td>`;
   }).join("");
 
   const puestas = FAVORITOS_TIPO.size;
-  const total = GENERACIONES_REJILLA.length * TIPOS_REJILLA.length;
 
   return `
     <section class="rejilla-seccion">
@@ -343,6 +359,18 @@ function conectarRejilla() {
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && !panel.hidden) cerrarSelectorTipo();
   });
+}
+
+/* La rejilla se pinta de golpe con el resto de la pestaña, y para saber
+   que casillas existen hacen falta los listados por tipo. Si todavia no
+   estan, se piden y se repinta solo esa seccion. */
+async function asegurarTiposYRepintar() {
+  if (TIPOS_MEM && CATALOGO_IDS) return;
+
+  await Promise.all([fetchSpecies(), fetchVariantes(), fetchTipos(), construirCatalogo()]);
+
+  const seccion = panelEl.querySelector(".rejilla-seccion");
+  if (seccion) seccion.outerHTML = rejillaHTML();
 }
 
 document.addEventListener("DOMContentLoaded", conectarRejilla);

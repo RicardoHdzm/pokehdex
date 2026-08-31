@@ -841,6 +841,18 @@ a { color: var(--accent); text-underline-offset: .2em; }
 
 .rejilla-cuenta.completa { color: var(--exito); }
 
+/* Un cruce que no existe: ni invita a tocarlo ni cuenta en el marcador */
+.rejilla-celda.imposible {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--panel) 0 6px,
+    var(--panel-2) 6px 12px
+  );
+  cursor: default;
+}
+
+.rejilla-celda.imposible .rejilla-vacia { color: var(--ink-2); }
+
 .rejilla-vacia {
   font-family: var(--pixel);
   font-size: .7rem;
