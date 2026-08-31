@@ -105,9 +105,9 @@ function candidatosDe(generacion, tipo) {
     if (id <= 1025) return false;
     const fila = VARIANTES_MEM && VARIANTES_MEM.find(([v]) => v === id);
     if (!fila) return false;
-    /* Fuera las Megas y las Gigamax, que no son formas del Pokemon sino
-       estados temporales de combate. Los totem son solo mas grandes. */
-    if (/-mega|-gmax|-totem/.test(fila[1])) return false;
+    /* Fuera las Megas, las Primal y las Gigamax: no son formas del Pokemon
+       sino estados temporales de combate. Los totem son solo mas grandes. */
+    if (/-mega|-primal|-gmax|-totem/.test(fila[1])) return false;
     return generacionDeFormaSuelta(id) === generacion;
   });
 }
