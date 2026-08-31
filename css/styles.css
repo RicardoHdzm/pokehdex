@@ -956,7 +956,10 @@ a { color: var(--accent); text-underline-offset: .2em; }
 /* ===== Colofon ===== */
 
 .colophon {
-  padding: 2.5rem 0 4rem;
+  /* Algo mas abajo que arriba, que es el final de la pagina, pero no el
+     doble: los 4rem de antes se pusieron cuando el pie acababa en el texto
+     legal, y al añadir el enlace debajo el desnivel se hizo evidente. */
+  padding: 2.5rem 0 2.75rem;
   border-top: 2px solid var(--rule);
   color: var(--ink-2);
   font-size: 1.05rem;
