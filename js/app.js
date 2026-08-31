@@ -73,11 +73,6 @@ const FORM_ES = {
   bloodmoon: "Bloodmoon", amped: "Amped", "low-key": "Low Key"
 };
 
-/* En ingles la region no va detras sino delante, y como adjetivo:
-   "Alolan Marowak", no "Marowak de Alola". */
-const REGION_ADJ = {
-  alola: "Alolan", galar: "Galarian", hisui: "Hisuian", paldea: "Paldean"
-};
 
 /* Nombres de las Poke Balls, en ingles (clave = archivo del sprite) */
 const BALL_ES = {
@@ -150,11 +145,12 @@ function formLabel(form) {
   return form.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 }
 
-/* Las formas regionales se dicen "Alolan Raichu"; el resto, "Charizard (Mega X)" */
+/* Todas las formas se dicen igual: la especie y la forma entre parentesis.
+   "Wooper (Paldea)", "Charizard (Mega X)", "Tauros (Paldea, Combat Breed)" */
 function formName(mon) {
-  const region = REGIONES.find((r) => mon.form.startsWith(r));
-  if (region) return REGION_ADJ[region] + " " + mon.species;
-  return mon.species + " (" + formLabel(mon.form) + ")";
+  const raza = mon.form.match(/-((?:combat|blaze|aqua)-breed)$/);
+  const etiqueta = formLabel(mon.form) + (raza ? ", " + RAZA_ES[raza[1]] : "");
+  return mon.species + " (" + etiqueta + ")";
 }
 
 /* Cache de tipos consultados a PokeAPI (para Pokemon sin "types" en teams.js) */
@@ -482,12 +478,9 @@ function entradasDe(gen, especies, variantes) {
     const trozos = partirSlug(slug, porNombre);
     if (!trozos) return null;
 
-    const region = REGIONES.find((r) => trozos.forma.startsWith(r));
     const raza = trozos.forma.match(/-((?:combat|blaze|aqua)-breed)$/);
-    const nombre = region
-      ? REGION_ADJ[region] + " " + nombreEspecie(trozos.especie) +
-        (raza ? " (" + RAZA_ES[raza[1]] + ")" : "")
-      : nombreEspecie(trozos.especie) + " (" + formLabel(trozos.forma) + ")";
+    const etiqueta = formLabel(trozos.forma) + (raza ? ", " + RAZA_ES[raza[1]] : "");
+    const nombre = nombreEspecie(trozos.especie) + " (" + etiqueta + ")";
 
     return { id, slug, base: porNombre.get(trozos.especie), region: trozos.forma, nombre };
   };
