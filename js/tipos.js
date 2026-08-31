@@ -104,8 +104,10 @@ function candidatosDe(generacion, tipo) {
     /* Las que no sigue la Pokedex: se ubican por su especie */
     if (id <= 1025) return false;
     const fila = VARIANTES_MEM && VARIANTES_MEM.find(([v]) => v === id);
-    /* Los totem son solo Pokemon mas grandes, no otra forma */
-    if (!fila || /-totem/.test(fila[1])) return false;
+    if (!fila) return false;
+    /* Fuera las Megas y las Gigamax, que no son formas del Pokemon sino
+       estados temporales de combate. Los totem son solo mas grandes. */
+    if (/-mega|-gmax|-totem/.test(fila[1])) return false;
     return generacionDeFormaSuelta(id) === generacion;
   });
 }

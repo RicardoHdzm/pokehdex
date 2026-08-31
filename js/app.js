@@ -140,9 +140,22 @@ const REGIONES = ["alola", "galar", "hisui", "paldea"];
    si se usa para pedir el sprite, pero en pantalla basta con la region) */
 function formLabel(form) {
   if (FORM_ES[form]) return FORM_ES[form];
+
+  const bonito = (txt) => txt.split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+
   const region = REGIONES.find((r) => form.startsWith(r));
-  if (region) return FORM_ES[region];
-  return form.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+  if (region) {
+    /* Lo que va detras de la region distingue unas de otras: sin esto,
+       darmanitan-galar-standard y darmanitan-galar-zen se llamaban los dos
+       "Galar" y no habia forma de saber cual era cual. Las razas de Tauros
+       se tratan aparte, que ya se añaden por su cuenta. */
+    const resto = form.slice(region.length + 1);
+    if (!resto || /(combat|blaze|aqua)-breed/.test(resto)) return FORM_ES[region];
+    return FORM_ES[region] + " " + bonito(resto);
+  }
+
+  return bonito(form);
 }
 
 /* Todas las formas se dicen igual: la especie y la forma entre parentesis.
