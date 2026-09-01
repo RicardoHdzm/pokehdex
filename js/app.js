@@ -115,13 +115,40 @@ function artwork(mon) {
   return SPRITES + "/" + dir + "/" + mon.dex + ".png";
 }
 
-function pixelSprite(mon) {
-  return SPRITES + "/" + (mon.shiny ? "shiny/" : "") + mon.dex + ".png";
+function pixelSprite(mon, hembra) {
+  const carpeta = (mon.shiny ? "shiny/" : "") + (hembra ? "female/" : "");
+  return SPRITES + "/" + carpeta + mon.dex + ".png";
 }
 
-/* Imagen principal y su recambio si esa no existe */
-const spriteSrc = (mon) => (SPRITE_STYLE === "pixel" ? pixelSprite(mon) : artwork(mon));
-const spriteAlt = (mon) => (SPRITE_STYLE === "pixel" ? artwork(mon) : pixelSprite(mon));
+/* Hay Pokemon que se ven distintos segun el sexo —la cola de Pikachu, las
+   manchas de Hippopotas, Meowstic entero—. El repositorio solo guarda la
+   version femenina de esos, asi que se pide y, si no existe, el recambio
+   devuelve la de siempre. No hace falta llevar una lista.
+
+   Solo los sprites de pixeles la tienen; el artwork oficial, no. */
+const tieneVersionHembra = (mon) => mon && mon.gender === "f";
+
+/* Los recambios separados por barra, del mas parecido al menos */
+function cadenaDeRecambio(mon) {
+  const lista = [];
+  if (SPRITE_STYLE === "pixel" && tieneVersionHembra(mon)) lista.push(pixelSprite(mon));
+  lista.push(SPRITE_STYLE === "pixel" ? artwork(mon) : pixelSprite(mon));
+  return lista.join("|");
+}
+
+/* Imagen principal y sus recambios, en orden: la de sexo, la normal y por
+   ultimo el artwork. */
+function spriteSrc(mon) {
+  if (SPRITE_STYLE === "pixel") return pixelSprite(mon, tieneVersionHembra(mon));
+  return artwork(mon);
+}
+
+function spriteAlt(mon) {
+  if (SPRITE_STYLE !== "pixel") return pixelSprite(mon);
+  /* Si se pidio la femenina y no existe, se cae a la normal antes que al
+     artwork: es el mismo Pokemon con el mismo estilo. */
+  return tieneVersionHembra(mon) ? pixelSprite(mon) : artwork(mon);
+}
 
 /* "Raichu" + forma "alola" -> "raichu-alola", que es como lo llama PokeAPI */
 function variantSlug(mon) {
@@ -1086,7 +1113,7 @@ function plate(mon, index, section) {
              data-slot="${index}">
       <div class="plate-figure">
         <img class="plate-img" loading="lazy" alt="${mon.species}"
-             src="${spriteSrc(mon)}" data-fallback="${spriteAlt(mon)}">
+             src="${spriteSrc(mon)}" data-fallback="${cadenaDeRecambio(mon)}">
         ${ballMark(mon)}
         ${mon.form ? `<span class="form-mark" title="${formName(mon)}">${formLabel(mon.form)}</span>` : ""}
         ${asaDeArrastre(index, section)}
@@ -1397,8 +1424,12 @@ function renderGeneration(gen) {
 function wireSprites() {
   panelEl.querySelectorAll(".plate-img").forEach((img) => {
     img.addEventListener("error", function onErr() {
-      this.removeEventListener("error", onErr);
-      this.src = this.dataset.fallback;
+      /* Puede haber dos saltos: de la femenina a la normal y de esa al
+         artwork. Se van consumiendo de la lista hasta que una cargue. */
+      const quedan = (this.dataset.fallback || "").split("|").filter(Boolean);
+      if (!quedan.length) { this.removeEventListener("error", onErr); return; }
+      this.dataset.fallback = quedan.slice(1).join("|");
+      this.src = quedan[0];
     });
   });
 }
