@@ -1083,6 +1083,10 @@ a { color: var(--accent); text-underline-offset: .2em; }
   font-family: "Font Awesome 6 Free";
   font-weight: 900;
   font-size: .9em;
+  /* Los dos apoyan en la misma linea base, pero Press Start 2P no tiene
+     descendentes y Font Awesome si: su tinta cae dos pixeles mas abajo. Se
+     sube en em para que el ajuste aguante a cualquier tamaño. */
+  vertical-align: .22em;
   color: var(--brillo);
 }
 
