@@ -787,7 +787,7 @@ function cajasHTML(entradas, capturados, filtrando, salto) {
                  style="--filas:${Math.ceil(tanda.length / 6)}">
           <h4 class="dex-caja-titulo">
             <span>${etiqueta}</span>
-            <span class="dex-caja-cuenta">${tengoEnCaja}/${tanda.length}</span>
+            <span class="dex-caja-cuenta${tengoEnCaja === tanda.length ? " completa" : ""}">${tengoEnCaja}/${tanda.length}</span>
           </h4>
           <ul class="dex-grid">${tanda.map((e) => dexTile(e, capturados)).join("")}</ul>
         </section>`;
@@ -882,7 +882,7 @@ function coleccionesHTML(cols, capturados) {
       <section class="dex-caja coleccion" style="--filas:${Math.ceil(col.entradas.length / 6)}">
         <h4 class="dex-caja-titulo">
           <span>${col.titulo} <b class="coleccion-nota">${col.nota}</b></span>
-          <span class="dex-caja-cuenta">${tengo}/${col.entradas.length}</span>
+          <span class="dex-caja-cuenta${tengo === col.entradas.length ? " completa" : ""}">${tengo}/${col.entradas.length}</span>
         </h4>
         <ul class="dex-grid">${col.entradas.map((e) => dexTile(e, capturados)).join("")}</ul>
       </section>`;
@@ -2296,6 +2296,7 @@ function actualizarCuentasDeCaja() {
     const casillas = caja.querySelectorAll(".dex-tile");
     const marcadas = caja.querySelectorAll(".dex-tile.caught");
     marcador.textContent = marcadas.length + "/" + casillas.length;
+    marcador.classList.toggle("completa", casillas.length > 0 && marcadas.length === casillas.length);
   });
 }
 

@@ -1074,6 +1074,18 @@ a { color: var(--accent); text-underline-offset: .2em; }
 
 .dex-caja-cuenta { color: var(--accent); }
 
+/* Una caja llena se corona con una estrella. Va como pseudo-elemento para
+   que al marcar la ultima casilla baste con encender la clase, sin tener
+   que repintar la cabecera. */
+.dex-caja-cuenta.completa::before {
+  content: "\f005";
+  margin-right: .45rem;
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  font-size: .9em;
+  color: var(--brillo);
+}
+
 .dex-grid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
