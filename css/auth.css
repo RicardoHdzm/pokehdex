@@ -442,6 +442,13 @@ body.con-sesion .dex-tile { cursor: pointer; }
 .mon-genero[data-genero="m"][aria-pressed="true"] { color: var(--male); border-color: var(--male); }
 .mon-genero[data-genero="f"][aria-pressed="true"] { color: var(--female); border-color: var(--female); }
 
+/* Un genero que ese Pokemon no puede tener: se ve apagado y no responde */
+.mon-genero:disabled {
+  opacity: .3;
+  cursor: not-allowed;
+  border-style: dashed;
+}
+
 .mon-check { display: flex; align-items: center; gap: .5rem; color: var(--ink-2); font-size: 1.05rem; }
 .mon-check input { width: 1.1rem; height: 1.1rem; accent-color: var(--accent); }
 

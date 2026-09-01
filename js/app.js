@@ -397,6 +397,59 @@ function coleccionesDe(generacion) {
   })).filter((c) => c.entradas.length);
 }
 
+/* ---------- Que generos admite cada especie ----------
+   Hay Pokemon de un solo sexo —Chansey siempre hembra, Tauros siempre
+   macho— y otros sin ninguno, como Magnemite. PokeAPI lo publica en tres
+   listados; se piden una vez y se guardan solo los casos cerrados, que son
+   los unicos que hacen falta: lo que no aparece admite los dos. */
+
+const GENEROS_KEY = "pkmnteam:generos";
+let GENEROS_MEM = null;
+
+async function fetchGeneros() {
+  if (GENEROS_MEM) return GENEROS_MEM;
+
+  const guardado = leerLista(GENEROS_KEY);
+  if (guardado && guardado.length === 3) {
+    GENEROS_MEM = { hembra: new Set(guardado[0]), macho: new Set(guardado[1]), sin: new Set(guardado[2]) };
+    return GENEROS_MEM;
+  }
+
+  try {
+    const [h, m, s] = await Promise.all([1, 2, 3].map((n) =>
+      fetch("https://pokeapi.co/api/v2/gender/" + n).then((r) => r.json())));
+
+    const idDe = (u) => Number(u.split("/").filter(Boolean).pop());
+    /* rate es la probabilidad de hembra en octavos: 8 es siempre hembra y
+       0 siempre macho */
+    const soloHembra = h.pokemon_species_details.filter((x) => x.rate === 8).map((x) => idDe(x.pokemon_species.url));
+    const soloMacho = m.pokemon_species_details.filter((x) => x.rate === 0).map((x) => idDe(x.pokemon_species.url));
+    const sinGenero = s.pokemon_species_details.map((x) => idDe(x.pokemon_species.url));
+
+    guardarLista(GENEROS_KEY, [soloHembra, soloMacho, sinGenero]);
+    GENEROS_MEM = { hembra: new Set(soloHembra), macho: new Set(soloMacho), sin: new Set(sinGenero) };
+    return GENEROS_MEM;
+  } catch {
+    return null;
+  }
+}
+
+/* Que botones de genero tienen sentido para un Pokemon. Devuelve la lista
+   de los admitidos; si no se sabe nada, los tres. */
+function generosDe(dex, forma) {
+  /* Algunas formas son el sexo en si: Meowstic hembra, Basculegion macho */
+  if (forma) {
+    if (/female/.test(forma)) return ["f"];
+    if (/(^|-)male($|-)/.test(forma)) return ["m"];
+  }
+
+  if (!GENEROS_MEM || !dex) return ["m", "f", "n"];
+  if (GENEROS_MEM.sin.has(dex)) return ["n"];
+  if (GENEROS_MEM.hembra.has(dex)) return ["f"];
+  if (GENEROS_MEM.macho.has(dex)) return ["m"];
+  return ["m", "f"];
+}
+
 /* ---------- Formas regionales ---------- */
 
 /* Que regiones estreno cada generacion. Hisui es de la octava (Leyendas Arceus). */
@@ -1652,6 +1705,8 @@ async function abrirEditor(seccion, indice) {
 
   /* Y ya con la ventana abierta, lo que puede tardar */
   await montarListaEspecies();
+  await fetchGeneros();
+  ajustarGeneros();
 
   /* Se puede haber cerrado o cambiado de hueco mientras tanto */
   if (!editando || editando.seccion !== seccion || editando.indice !== indice) return;
@@ -1766,6 +1821,37 @@ function elegirSugerencia(li) {
 
   const op = opcionDeEspecie();
   pintarFormas(op ? op.dataset.slug : null, null);
+  ajustarGeneros();
+}
+
+/* Enciende y apaga los botones de genero segun lo que admita el Pokemon
+   elegido. Si solo cabe uno, se marca solo: no tiene sentido dejar el
+   editor con un genero imposible a medio guardar. */
+function ajustarGeneros() {
+  const botones = [...document.querySelectorAll(".mon-genero")];
+  if (!botones.length) return;
+
+  const op = opcionDeEspecie();
+  const dex = op ? Number(op.dataset.dex) : null;
+  const forma = document.getElementById("monForma").value || null;
+  const admitidos = generosDe(dex, forma);
+
+  botones.forEach((b) => {
+    const vale = admitidos.includes(b.dataset.genero);
+    b.disabled = !vale;
+    b.title = vale
+      ? GENDER[b.dataset.genero].label
+      : GENDER[b.dataset.genero].label + " · este Pokemon no puede serlo";
+    if (!vale && b.getAttribute("aria-pressed") === "true") b.setAttribute("aria-pressed", "false");
+  });
+
+  /* Si el que estaba puesto ya no vale, o no queda ninguno, se pone el
+     primero que se admita */
+  const hayUno = botones.some((b) => !b.disabled && b.getAttribute("aria-pressed") === "true");
+  if (!hayUno) {
+    const primero = botones.find((b) => !b.disabled);
+    if (primero) primero.setAttribute("aria-pressed", "true");
+  }
 }
 
 /* Del nombre escrito a su entrada del buscador */
@@ -1989,6 +2075,7 @@ function conectarEditor() {
     pintarSugerencias();
     const op = opcionDeEspecie();
     pintarFormas(op ? op.dataset.slug : null, null);
+    ajustarGeneros();
   });
 
   /* Al volver al campo con algo escrito se vuelven a ofrecer */
@@ -2024,10 +2111,14 @@ function conectarEditor() {
 
   document.querySelectorAll(".mon-genero").forEach((b) => {
     b.addEventListener("click", () => {
+      if (b.disabled) return;
       document.querySelectorAll(".mon-genero").forEach((o) =>
         o.setAttribute("aria-pressed", String(o === b)));
     });
   });
+
+  /* Cambiar de forma puede cerrar el genero: Meowstic hembra solo es hembra */
+  document.getElementById("monForma").addEventListener("change", ajustarGeneros);
 
   document.getElementById("monEditor").addEventListener("click", (e) => {
     if (e.target.id === "monEditor") cerrarEditor();
