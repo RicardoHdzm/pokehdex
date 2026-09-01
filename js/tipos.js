@@ -121,6 +121,10 @@ function candidatosDe(generacion, tipo) {
        Power Construct de Zygarde son su 10% y su 50% con otra habilidad:
        el mismo aspecto repetido. */
     if (/^pikachu-|-starter$|-power-construct/.test(fila[1])) return false;
+
+    /* Los modos de Koraidon y Miraidon son posturas para desplazarse por el
+       mapa —correr, nadar, planear—, no formas del Pokemon. */
+    if (/^(koraidon|miraidon)-/.test(fila[1])) return false;
     return generacionDeFormaSuelta(id) === generacion;
   });
 }
