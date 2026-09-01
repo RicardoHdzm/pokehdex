@@ -12,6 +12,11 @@
 
 /* La v2 incluye las formas; la clave cambia para que el cache viejo,
    que solo tenia especies, no se quede pegado */
+/* Interruptor para enseñar u ocultar la rejilla. Todo lo demas sigue en su
+   sitio —los datos, el selector, la tabla de Supabase—, asi que volver a
+   encenderla es cambiar esta linea a true. */
+const REJILLA_VISIBLE = false;
+
 const TIPOS_KEY = "pkmnteam:tipos2";
 /* La decima va incluida aunque todavia no tenga Pokemon: sus casillas se
    ven reservadas y se encenderan solas en cuanto PokeAPI los publique. */
@@ -223,6 +228,8 @@ function celdaDe(generacion, tipo) {
    ancho hasta en escritorio y las casillas quedan en 54px. Asi son 9
    columnas, el doble de sitio para cada sprite y sin desplazar. */
 function rejillaHTML() {
+  if (!REJILLA_VISIBLE) return "";
+
   const cabecera = GENERACIONES_REJILLA
     .map((g) => `<th class="rejilla-gen" scope="col">${roman(g)}</th>`)
     .join("");
@@ -373,6 +380,7 @@ function conectarRejilla() {
    que casillas existen hacen falta los listados por tipo. Si todavia no
    estan, se piden y se repinta solo esa seccion. */
 async function asegurarTiposYRepintar() {
+  if (!REJILLA_VISIBLE) return;
   if (TIPOS_MEM && CATALOGO_IDS) return;
 
   await Promise.all([fetchSpecies(), fetchVariantes(), fetchTipos(), construirCatalogo()]);
