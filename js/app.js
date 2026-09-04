@@ -450,6 +450,45 @@ function generosDe(dex, forma) {
   return ["m", "f"];
 }
 
+/* ---------- Cadena evolutiva ----------
+   PokeAPI no publica un listado con todas las evoluciones de golpe: hay que
+   pedir la especie para saber a que cadena pertenece y luego la cadena.
+   Son dos peticiones, pero de la cadena salen los vecinos de TODA la
+   familia, asi que se apuntan todos: abrir Charmander deja resueltos
+   Charmeleon y Charizard sin volver a pedir nada. */
+
+const EVOLUCIONES_KEY = "pkmnteam:evoluciones";
+const ESPECIE_URL = "https://pokeapi.co/api/v2/pokemon-species/";
+let EVOLUCIONES_MEM = null;
+
+async function fetchEvoluciones(dex) {
+  if (!EVOLUCIONES_MEM) EVOLUCIONES_MEM = new Map(leerLista(EVOLUCIONES_KEY) || []);
+  if (EVOLUCIONES_MEM.has(dex)) return EVOLUCIONES_MEM.get(dex);
+
+  try {
+    const especie = await (await fetch(ESPECIE_URL + dex)).json();
+    const cadena = await (await fetch(especie.evolution_chain.url)).json();
+
+    const idDe = (u) => Number(u.split("/").filter(Boolean).pop());
+    const recorrer = (nodo, padre) => {
+      const yo = idDe(nodo.species.url);
+      const hijos = nodo.evolves_to.map((h) => idDe(h.species.url));
+      EVOLUCIONES_MEM.set(yo, { antes: padre ? [padre] : [], despues: hijos });
+      nodo.evolves_to.forEach((h) => recorrer(h, yo));
+    };
+    recorrer(cadena.chain, null);
+
+    /* Por si la especie no aparece en su propia cadena: no deberia pasar,
+       pero mejor apuntarlo que volver a pedirlo en cada tecla */
+    if (!EVOLUCIONES_MEM.has(dex)) EVOLUCIONES_MEM.set(dex, { antes: [], despues: [] });
+
+    guardarLista(EVOLUCIONES_KEY, [...EVOLUCIONES_MEM]);
+    return EVOLUCIONES_MEM.get(dex);
+  } catch {
+    return null;
+  }
+}
+
 /* ---------- Formas regionales ---------- */
 
 /* Que regiones estreno cada generacion. Hisui es de la octava (Leyendas Arceus). */
@@ -1694,6 +1733,7 @@ async function abrirEditor(seccion, indice) {
 
   document.getElementById("monForma").innerHTML = "";
   document.getElementById("monFormaCampo").hidden = true;
+  limpiarEvoluciones();
   cerrarSugerencias();
   document.getElementById("monBorrar").hidden = !mon;
   document.getElementById("monTitulo").textContent =
@@ -1707,6 +1747,7 @@ async function abrirEditor(seccion, indice) {
   await montarListaEspecies();
   await fetchGeneros();
   ajustarGeneros();
+  pintarEvoluciones();
 
   /* Se puede haber cerrado o cambiado de hueco mientras tanto */
   if (!editando || editando.seccion !== seccion || editando.indice !== indice) return;
@@ -1815,13 +1856,7 @@ function marcarSugerencia(indice) {
 
 /* Elegir una sugerencia deja el campo listo y repinta las formas */
 function elegirSugerencia(li) {
-  const campo = document.getElementById("monEspecie");
-  campo.value = li.dataset.nombre;
-  cerrarSugerencias();
-
-  const op = opcionDeEspecie();
-  pintarFormas(op ? op.dataset.slug : null, null);
-  ajustarGeneros();
+  elegirEspecie(li.dataset.nombre);
 }
 
 /* Enciende y apaga los botones de genero segun lo que admita el Pokemon
@@ -1852,6 +1887,75 @@ function ajustarGeneros() {
     const primero = botones.find((b) => !b.disabled);
     if (primero) primero.setAttribute("aria-pressed", "true");
   }
+}
+
+/* ---------- La familia, en el editor ----------
+   Debajo de la especie salen la preevolucion y las evoluciones, con la
+   elegida en medio y resaltada. Al pulsar una se cambia la especie: es la
+   forma rapida de pasar de Charmander a Charizard sin volver a escribir. */
+
+/* Cada repintado lleva numero: si se teclea mientras se pide la cadena, la
+   respuesta que llega tarde ya no pinta nada */
+let evoTurno = 0;
+
+function limpiarEvoluciones() {
+  const campo = document.getElementById("monEvoCampo");
+  if (!campo) return;
+  campo.hidden = true;
+  document.getElementById("monEvos").innerHTML = "";
+}
+
+async function pintarEvoluciones() {
+  const campo = document.getElementById("monEvoCampo");
+  if (!campo) return;
+
+  const turno = ++evoTurno;
+  const op = opcionDeEspecie();
+  const dex = op ? Number(op.dataset.dex) : null;
+  if (!dex) return limpiarEvoluciones();
+
+  const [datos, especies] = await Promise.all([fetchEvoluciones(dex), fetchSpecies()]);
+  if (turno !== evoTurno) return;
+  if (!datos || (!datos.antes.length && !datos.despues.length)) return limpiarEvoluciones();
+
+  const nombreDe = (id) => {
+    const fila = especies.find(([i]) => i === id);
+    return fila ? nombreEspecie(fila[1]) : null;
+  };
+
+  const ficha = (id, papel) => {
+    const nombre = nombreDe(id);
+    if (!nombre) return "";
+    const actual = papel === "actual";
+    const rotulo = actual ? nombre
+      : (papel === "antes" ? "Viene de " : "Evoluciona a ") + nombre;
+    return `
+      <button type="button" class="mon-evo${actual ? " actual" : ""}"
+              data-nombre="${nombre}" title="${rotulo}"
+              ${actual ? 'aria-current="true" disabled' : ""}>
+        <img src="${SPRITES + "/" + id + ".png"}" alt="" aria-hidden="true" loading="lazy">
+        <span>${nombre}</span>
+      </button>`;
+  };
+
+  const piezas = datos.antes.map((id) => ficha(id, "antes"))
+    .concat(ficha(dex, "actual"))
+    .concat(datos.despues.map((id) => ficha(id, "despues")));
+
+  document.getElementById("monEvos").innerHTML = piezas.join("");
+  campo.hidden = false;
+}
+
+/* Poner una especie en el campo y dejar el resto del editor al dia. Lo usan
+   por igual el buscador y las fichas de evolucion. */
+function elegirEspecie(nombre) {
+  document.getElementById("monEspecie").value = nombre;
+  cerrarSugerencias();
+
+  const op = opcionDeEspecie();
+  pintarFormas(op ? op.dataset.slug : null, null);
+  ajustarGeneros();
+  pintarEvoluciones();
 }
 
 /* Del nombre escrito a su entrada del buscador */
@@ -2076,6 +2180,7 @@ function conectarEditor() {
     const op = opcionDeEspecie();
     pintarFormas(op ? op.dataset.slug : null, null);
     ajustarGeneros();
+    pintarEvoluciones();
   });
 
   /* Al volver al campo con algo escrito se vuelven a ofrecer */
@@ -2102,6 +2207,12 @@ function conectarEditor() {
     if (!li) return;
     e.preventDefault();
     elegirSugerencia(li);
+  });
+
+  document.getElementById("monEvos").addEventListener("click", (e) => {
+    const ficha = e.target.closest(".mon-evo");
+    if (!ficha || ficha.disabled) return;
+    elegirEspecie(ficha.dataset.nombre);
   });
 
   campoEspecie.addEventListener("blur", () => setTimeout(cerrarSugerencias, 120));
