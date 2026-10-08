@@ -1285,3 +1285,20 @@ a { color: var(--accent); text-underline-offset: .2em; }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+/* ===== Compartir el equipo ===== */
+
+/* En las generaciones va dentro de la cabecera de seccion, al lado de
+   Vaciar equipo; en Champions y Favoritos, en su propia linea debajo. */
+.acciones-equipo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+div.acciones-equipo {
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+}
+
+#compartirEquipo[disabled] { opacity: .6; cursor: progress; }

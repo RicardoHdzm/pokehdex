@@ -1432,8 +1432,15 @@ function renderGeneration(gen) {
     ? '<button type="button" class="boton" id="vaciarEquipo">Vaciar equipo</button>'
     : "";
 
+  /* Compartir no depende de que sea tu perfil: la estampa es de lo que hay
+     en pantalla, y nada impide guardarse el equipo de otro. */
+  const compartir = gen.team.length
+    ? '<button type="button" class="boton" id="compartirEquipo">Compartir</button>'
+    : "";
+  const barra = compartir ? '<div class="acciones-equipo">' + compartir + "</div>" : "";
+
   if (gen.soloEquipo) {
-    panelEl.innerHTML = champHead(gen) + cuerpo;
+    panelEl.innerHTML = champHead(gen) + cuerpo + barra;
     genEnPantalla = gen;
     wireSprites();
     fillMissingTypes(gen, token);
@@ -1447,10 +1454,10 @@ function renderGeneration(gen) {
     setTimeout(asegurarTiposYRepintar, 0);
   }
 
-  const equipo = (gen.hall || gen.nacional) ? (gen.nacional ? "" : cuerpo + rejilla) : `
+  const equipo = (gen.hall || gen.nacional) ? (gen.nacional ? "" : cuerpo + barra + rejilla) : `
     <div class="section-head">
       <h3 class="section-label">Equipo campeon</h3>
-      ${vaciar}
+      <span class="acciones-equipo">${compartir}${vaciar}</span>
     </div>
     ${cuerpo}`;
 
