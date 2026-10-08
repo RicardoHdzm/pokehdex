@@ -367,18 +367,16 @@ function nombreDeArchivo(sec) {
     .replace(/[̀-ͯ]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
-  return "pokehdex-" + (limpio || "equipo") + ".jpg";
+  return "pokehdex-" + (limpio || "equipo") + ".png";
 }
 
-/* JPEG y no PNG: desde que la estampa lleva artwork en vez de sprites, el
-   PNG se iba a 3 MB —son ilustraciones con degradados, que no comprime— y
-   en JPEG al 92% baja a 400 KB. Medido sobre el texto de pixeles y los
-   bordes duros de la ball, la diferencia media es de 0.6 a 1.5 sobre 255:
-   no se ve. El fondo esta pintado entero, asi que no se pierde nada por
-   no tener transparencia. */
-const CALIDAD = 0.92;
-const aBlob = (lienzo) =>
-  new Promise((listo) => lienzo.toBlob(listo, "image/jpeg", CALIDAD));
+/* PNG y no JPEG, aunque pese seis veces mas (1.9 MB contra 282 KB).
+   Toda la gracia de la estampa son los pixeles con el borde limpio, y el
+   JPEG al 92% ensucia justo ahi: midiendo un sprite entero, el 0.55% de
+   sus pixeles se desvia mas de 24 sobre 255, todos pegados al contorno.
+   Son los que se verian como una aureola. 1.9 MB entra de sobra en lo que
+   aceptan WhatsApp (16 MB) y Telegram (10 MB). */
+const aBlob = (lienzo) => new Promise((listo) => lienzo.toBlob(listo, "image/png"));
 
 async function compartirEquipo(sec, boton) {
   const original = boton ? boton.textContent : "";
@@ -394,7 +392,7 @@ async function compartirEquipo(sec, boton) {
     const blob = await aBlob(lienzo);
     if (!blob) { decir("No se pudo"); return; }
 
-    const archivo = new File([blob], nombreDeArchivo(sec), { type: "image/jpeg" });
+    const archivo = new File([blob], nombreDeArchivo(sec), { type: "image/png" });
 
     /* En movil, el menu de compartir del sistema. canShare con files hay que
        preguntarlo: hay navegadores con share pero sin envio de archivos. */
