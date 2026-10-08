@@ -1256,7 +1256,11 @@ a { color: var(--accent); text-underline-offset: .2em; }
      reparto de escritorio deja de valer y la tinta sube. Estos dos valores
      estan medidos para que quede centrada; suman lo mismo que antes, o sea
      que la altura del badge no cambia. */
-  .type-chip { font-size: .42rem; padding: .38rem .4rem .2rem; }
+  /* El relleno de los lados baja de .4 a .3: con los nombres en español
+     el badge mide 9 caracteres y no 8, y dos de ellos en una lamina de
+     telefono se quedaban a 3 px de partirse en dos renglones. Los otros
+     dos valores no se tocan, que son los que centran la tinta. */
+  .type-chip { font-size: .42rem; padding: .38rem .3rem .2rem; }
   .ball-mark { width: 24px; height: 24px; padding: 3px; }
   .index-row { justify-content: flex-start; }
 
