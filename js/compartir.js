@@ -30,6 +30,7 @@ const LIENZO = {
 };
 
 const CARTA = { ancho: 300, alto: 376, hueco: 18, figura: 176 };
+const ANCHO_TIPO = 104;
 const MARGEN = 40;
 const CABECERA = 152;
 const PIE = 56;
@@ -146,7 +147,7 @@ function pintarCarta(ctx, mon, index, sec, x, y, acento, sprite, bola) {
   if (sprite) {
     /* Sin suavizado: son sprites de pixeles, interpolarlos los emborrona */
     ctx.imageSmoothingEnabled = false;
-    const lado = 148;
+    const lado = 162;
     ctx.drawImage(sprite, x + (ancho - lado) / 2, y + (figura - lado) / 2, lado, lado);
     ctx.imageSmoothingEnabled = true;
   }
@@ -217,7 +218,9 @@ function pintarCarta(ctx, mon, index, sec, x, y, acento, sprite, bola) {
     const tinte = tinteDeTipo(t);
     const etiqueta = (TYPE_ES[t] || t).toUpperCase();
     ctx.font = pixel(10);
-    const w = Math.max(ctx.measureText(etiqueta).width + 20, 96);
+    /* Todos del mismo ancho, como en las laminas: lo marca el nombre mas
+       largo, ELECTRIC y FIGHTING, de ocho letras */
+    const w = Math.max(ctx.measureText(etiqueta).width + 20, ANCHO_TIPO);
     recuadro(ctx, tx, ty, w, 30, tinte + "33", tinte + "a6");
     ctx.fillStyle = tinte;
     ctx.textAlign = "center";
