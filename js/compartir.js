@@ -43,7 +43,10 @@ const LIENZO = {
 /* La ball va al doble exacto de su tamaño original (son de 30x30): en
    multiplos enteros el escalado por vecino mas cercano sale limpio, y en
    cualquier otro quedan filas de pixeles de distinto grosor. */
-const FICHA = { ancho: 332, alto: 382, arte: 236, bola: 60 };
+/* El sprite va al doble exacto de su tamaño original —son de 96x96, la ball
+   de 30x30—: en multiplos enteros el escalado por vecino mas cercano sale
+   limpio, y en cualquier otro quedan filas de pixeles de distinto grosor. */
+const FICHA = { ancho: 332, alto: 354, arte: 208, sprite: 192, bola: 60 };
 const MARGEN = 36;
 const HUECO = 24;
 const PIE = 76;
@@ -110,10 +113,11 @@ function cargarImagen(cadena) {
   });
 }
 
-/* El artwork existe para todo —especies, variocolor y formas regionales—,
-   pero si algun dia falta uno se cae al sprite de siempre. */
+/* Los sprites de pixeles, que son los del sitio. La cadena ya trae sus
+   propios recambios —la version femenina, la normal— y de ultimo el
+   artwork, por si algun dia falta el sprite de una forma. */
 const cadenaDeArte = (mon) =>
-  [artwork(mon), spriteSrc(mon), cadenaDeRecambio(mon)].join("|");
+  [spriteSrc(mon), cadenaDeRecambio(mon), artwork(mon)].join("|");
 
 /* Un resplandor redondo que se apaga hacia afuera */
 function resplandor(ctx, x, y, radio, color, fuerza) {
@@ -221,13 +225,13 @@ function pintarFicha(ctx, mon, index, sec, x, y, acento, arte, bola) {
   /* 1. Resplandor del tipo, detras de todo */
   resplandor(ctx, x + ancho / 2, y + FICHA.arte / 2, FICHA.arte * 0.66, principal, "33");
 
-  /* 2. El artwork. Es una ilustracion de 475 px que se reduce, asi que
-     aqui si se interpola: apagar el suavizado la dejaria dentada. */
+  /* 2. El sprite, sin suavizado y al doble exacto: son pixeles, e
+     interpolarlos los emborrona. */
   if (arte) {
+    ctx.imageSmoothingEnabled = false;
+    const lado = FICHA.sprite;
+    ctx.drawImage(arte, x + (ancho - lado) / 2, y + (FICHA.arte - lado) / 2, lado, lado);
     ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
-    const lado = FICHA.arte;
-    ctx.drawImage(arte, x + (ancho - lado) / 2, y, lado, lado);
   }
 
   /* 3. El pie de la ficha.
@@ -236,7 +240,7 @@ function pintarFicha(ctx, mon, index, sec, x, y, acento, arte, bola) {
      de arriba, como Exploud. */
   if (bola) {
     ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(bola, x + ancho - FICHA.bola, y + 276, FICHA.bola, FICHA.bola);
+    ctx.drawImage(bola, x + ancho - FICHA.bola, y + 248, FICHA.bola, FICHA.bola);
     ctx.imageSmoothingEnabled = true;
   }
 
@@ -246,13 +250,13 @@ function pintarFicha(ctx, mon, index, sec, x, y, acento, arte, bola) {
   /* Hueco y numero. En Favoritos el rotulo dice la generacion. */
   ctx.font = pixel(10);
   ctx.fillStyle = acento;
-  ctx.fillText(plateLabel(mon, index, sec), x, y + 266);
+  ctx.fillText(plateLabel(mon, index, sec), x, y + 238);
   ctx.fillStyle = LIENZO.tinta2;
-  ctx.fillText(dexNum(mon.dex), x + 100, y + 266);
+  ctx.fillText(dexNum(mon.dex), x + 100, y + 238);
 
   ctx.font = term(38);
   ctx.fillStyle = LIENZO.tinta;
-  ctx.fillText(textoCabe(ctx, apodo || mon.species, tope), x, y + 312);
+  ctx.fillText(textoCabe(ctx, apodo || mon.species, tope), x, y + 284);
 
   /* El segundo renglon dice lo que el primero no alcanzo a decir: con
      apodo, la especie; sin apodo, la forma si la tiene, y si tampoco, la
@@ -267,16 +271,16 @@ function pintarFicha(ctx, mon, index, sec, x, y, acento, arte, bola) {
 
   if (bajo) {
     const puesto = textoCabe(ctx, bajo, tope - 60);
-    ctx.fillText(puesto, cursor, y + 338);
+    ctx.fillText(puesto, cursor, y + 310);
     cursor += ctx.measureText(puesto).width + 12;
   }
 
   ctx.font = '900 16px "Font Awesome 6 Free"';
-  ctx.fillText(ICONO_GENERO[mon.gender || "n"], cursor, y + 338);
+  ctx.fillText(ICONO_GENERO[mon.gender || "n"], cursor, y + 310);
   cursor += 24;
   if (mon.shiny) {
     ctx.fillStyle = acento;
-    ctx.fillText(ICONO_SHINY, cursor, y + 338);
+    ctx.fillText(ICONO_SHINY, cursor, y + 310);
   }
 
   /* Los tipos, dichos con color y no con recuadros */
@@ -285,12 +289,12 @@ function pintarFicha(ctx, mon, index, sec, x, y, acento, arte, bola) {
   tipos.forEach((t, i) => {
     if (i) {
       ctx.fillStyle = LIENZO.marco;
-      ctx.fillText("/", tx, y + 364);
+      ctx.fillText("/", tx, y + 336);
       tx += 18;
     }
     ctx.fillStyle = tinteDeTipo(t);
     const etiqueta = (TYPE_ES[t] || t).toUpperCase();
-    ctx.fillText(etiqueta, tx, y + 364);
+    ctx.fillText(etiqueta, tx, y + 336);
     tx += ctx.measureText(etiqueta).width + 10;
   });
 
@@ -299,7 +303,7 @@ function pintarFicha(ctx, mon, index, sec, x, y, acento, arte, bola) {
     const trozo = ancho / tipos.length;
     tipos.forEach((t, i) => {
       ctx.fillStyle = tinteDeTipo(t);
-      ctx.fillRect(x + i * trozo, y + 376, trozo, 5);
+      ctx.fillRect(x + i * trozo, y + 348, trozo, 5);
     });
   }
 }
