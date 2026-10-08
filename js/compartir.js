@@ -5,8 +5,21 @@
    sale el menu de compartir del sistema (WhatsApp, Telegram, lo que
    haya); en escritorio, que no lo tiene, se descarga el archivo.
 
-   La estampa va siempre en oscuro aunque el sitio este en claro: es
-   la misma imagen para todos y asi se ve igual en cualquier chat.
+   La estampa no copia las laminas del sitio a proposito. Dentro de
+   la pagina los sprites de pixeles son la identidad; en una imagen
+   suelta, que se ve grande y sin contexto, pierden. Asi que aqui:
+
+   - manda el artwork oficial, de 475 px, no el sprite de 96
+   - no hay recuadros: lo que separa una ficha de otra es el aire y
+     un resplandor del color del tipo detras de cada uno
+   - el tipo se dice con color —un rotulo chico y una barra abajo—
+     en vez de con badges, que a este tamaño se peleaban entre ellos
+   - detras de cada Pokemon va su numero de hueco en grande y casi
+     apagado, el mismo recurso del numero romano de las cabeceras
+
+   Sale en 9:16, la medida de un estado o una historia, y va siempre
+   en oscuro aunque el sitio este en claro: es la misma imagen para
+   todos y asi se ve igual en cualquier chat.
 
    Los sprites se piden con crossOrigin porque si no el navegador
    marca el lienzo como "sucio" y toBlob() deja de funcionar. El
@@ -22,18 +35,21 @@ const ESCALA = 2;
 
 const LIENZO = {
   fondo:  "#0d0d0d",
-  panel:  "#151515",
-  hueco:  "#101010",
-  marco:  "#333333",
   tinta:  "#f2f2f2",
-  tinta2: "#9a9a9a"
+  tinta2: "#9a9a9a",
+  marco:  "#333333"
 };
 
-const CARTA = { ancho: 300, alto: 376, hueco: 18, figura: 176 };
-const ANCHO_TIPO = 104;
-const MARGEN = 40;
-const CABECERA = 152;
-const PIE = 56;
+/* La ball va al doble exacto de su tamaño original (son de 30x30): en
+   multiplos enteros el escalado por vecino mas cercano sale limpio, y en
+   cualquier otro quedan filas de pixeles de distinto grosor. */
+const FICHA = { ancho: 332, alto: 382, arte: 236, bola: 60 };
+const MARGEN = 36;
+const HUECO = 24;
+const PIE = 76;
+
+const ICONO_GENERO = { m: "", f: "", n: "" };
+const ICONO_SHINY = "";
 
 /* ---------- Colores de tipo ----------
    Viven en el CSS como --t de cada .t-loquesea. Se leen de ahi en vez de
@@ -58,6 +74,9 @@ function tinteDeTipo(tipo) {
 
 /* ---------- Utilidades de dibujo ---------- */
 
+const pixel = (px) => '400 ' + px + 'px "Press Start 2P", monospace';
+const term = (px) => '400 ' + px + 'px "VT323", monospace';
+
 /* Las fuentes del sitio no estan listas hasta que el navegador las baja, y
    un canvas no espera: pide la fuente, no la tiene y pinta con otra. */
 async function fuentesListas() {
@@ -72,8 +91,7 @@ async function fuentesListas() {
   } catch { /* se pinta con lo que haya */ }
 }
 
-/* Carga una imagen probando la cadena de recambios, igual que las laminas:
-   si no existe la version femenina se cae a la normal, y de ahi al artwork. */
+/* Carga una imagen probando la cadena de recambios, separados por barra */
 function cargarImagen(cadena) {
   return new Promise((listo) => {
     const urls = String(cadena || "").split("|").filter(Boolean);
@@ -92,13 +110,18 @@ function cargarImagen(cadena) {
   });
 }
 
-function recuadro(ctx, x, y, w, h, relleno, borde) {
-  if (relleno) { ctx.fillStyle = relleno; ctx.fillRect(x, y, w, h); }
-  if (borde) {
-    ctx.strokeStyle = borde;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
-  }
+/* El artwork existe para todo —especies, variocolor y formas regionales—,
+   pero si algun dia falta uno se cae al sprite de siempre. */
+const cadenaDeArte = (mon) =>
+  [artwork(mon), spriteSrc(mon), cadenaDeRecambio(mon)].join("|");
+
+/* Un resplandor redondo que se apaga hacia afuera */
+function resplandor(ctx, x, y, radio, color, fuerza) {
+  const g = ctx.createRadialGradient(x, y, 0, x, y, radio);
+  g.addColorStop(0, color + fuerza);
+  g.addColorStop(1, color + "00");
+  ctx.fillStyle = g;
+  ctx.fillRect(x - radio, y - radio, radio * 2, radio * 2);
 }
 
 /* Recorta con puntos suspensivos lo que no quepa */
@@ -111,124 +134,173 @@ function textoCabe(ctx, texto, tope) {
   return corto + "...";
 }
 
-const pixel = (px) => '400 ' + px + 'px "Press Start 2P", monospace';
-const term = (px) => '400 ' + px + 'px "VT323", monospace';
-
-/* ---------- Los rotulos de arriba ---------- */
+/* ---------- Los rotulos de arriba ----------
+   Encima va de quien es el equipo; debajo del titulo, la region y la
+   edicion en dos renglones, como se nombran los juegos. */
 
 function rotulosDe(sec) {
   const quien = typeof nombreDelPerfil === "function" ? nombreDelPerfil() : "";
 
   if (sec.hall) {
-    return { arriba: "Salon de la Fama", titulo: "Favoritos", abajo: quien };
+    return { encima: quien, titulo: "Favoritos", lineas: ["Salon de la Fama"] };
   }
   if (sec.soloEquipo) {
-    return { arriba: "Team Actual", titulo: sec.title || sec.region, abajo: quien };
+    return { encima: quien, titulo: sec.title || sec.region, lineas: ["Team Actual"] };
   }
 
   const juego = typeof nombreJuegoDe === "function" ? nombreJuegoDe(sec) : "";
+  const lineas = [];
+  if (sec.region) lineas.push(sec.region + " Region");
+  if (juego) lineas.push(juego + " Version");
+
   return {
-    arriba: "Team " + plateNum(sec.generation),
+    encima: quien,
     titulo: (ORDINAL[sec.generation] || sec.generation) + " generacion",
-    abajo: [sec.region, juego, quien].filter(Boolean).join("   ·   ")
+    lineas
   };
 }
 
-/* ---------- Una carta ---------- */
+/* La cabecera crece con lo que tenga: sin nombre de entrenador el titulo
+   sube, y Champions no lleva region ni edicion. */
+const altoDeCabecera = (rot) =>
+  (rot.encima ? 100 : 74) + rot.lineas.length * 28 + 40;
 
-function pintarCarta(ctx, mon, index, sec, x, y, acento, sprite, bola) {
-  const { ancho, alto, figura } = CARTA;
+function pintarCabecera(ctx, rot, ancho, acento) {
+  /* Lavado del color de la region, que se disuelve hacia abajo */
+  resplandor(ctx, ancho / 2, -40, ancho * 0.9, acento, "1f");
 
-  recuadro(ctx, x, y, ancho, alto, LIENZO.panel, LIENZO.marco);
-
-  /* Figura */
-  recuadro(ctx, x, y, ancho, figura, LIENZO.hueco, null);
-
-  if (sprite) {
-    /* Sin suavizado: son sprites de pixeles, interpolarlos los emborrona */
-    ctx.imageSmoothingEnabled = false;
-    const lado = 162;
-    ctx.drawImage(sprite, x + (ancho - lado) / 2, y + (figura - lado) / 2, lado, lado);
-    ctx.imageSmoothingEnabled = true;
-  }
-
-  if (bola) {
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(bola, x + ancho - 46, y + 12, 34, 34);
-    ctx.imageSmoothingEnabled = true;
-  }
-
-  /* Etiqueta de forma, abajo a la izquierda de la figura */
-  if (mon.form) {
-    const texto = formLabel(mon.form).toUpperCase();
-    ctx.font = pixel(9);
-    const w = ctx.measureText(texto).width + 14;
-    recuadro(ctx, x + 10, y + figura - 32, w, 22, "rgba(0,0,0,.65)", acento);
-    ctx.fillStyle = acento;
-    ctx.textBaseline = "middle";
-    ctx.fillText(texto, x + 17, y + figura - 20);
-    ctx.textBaseline = "alphabetic";
-  }
-
-  /* Hueco y numero */
-  const dentro = x + 16;
-  const tope = ancho - 32;
-  ctx.font = pixel(10);
   ctx.fillStyle = acento;
-  ctx.fillText(plateLabel(mon, index, sec), dentro, y + figura + 28);
+  ctx.fillRect(0, 0, ancho, 8);
+
+  const tope = ancho - MARGEN * 2;
+
+  if (rot.encima) {
+    ctx.font = pixel(12);
+    ctx.fillStyle = acento;
+    ctx.fillText(textoCabe(ctx, rot.encima.toUpperCase(), tope), MARGEN, 58);
+  }
+
+  const y = rot.encima ? 100 : 74;
+  ctx.font = pixel(24);
+  ctx.fillStyle = LIENZO.tinta;
+  ctx.fillText(textoCabe(ctx, rot.titulo.toUpperCase(), tope), MARGEN, y);
+
+  ctx.font = term(26);
+  ctx.fillStyle = LIENZO.tinta2;
+  rot.lineas.forEach((linea, i) => {
+    ctx.fillText(textoCabe(ctx, linea, tope), MARGEN, y + 33 + i * 28);
+  });
+}
+
+function pintarPie(ctx, ancho, alto) {
+  const base = alto - 30;
+  ctx.strokeStyle = LIENZO.marco;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(MARGEN, base - 28);
+  ctx.lineTo(ancho - MARGEN, base - 28);
+  ctx.stroke();
+
+  ctx.font = pixel(11);
+  ctx.fillStyle = LIENZO.tinta;
+  ctx.fillText("POKEHDEX", MARGEN, base);
+  ctx.font = term(22);
   ctx.fillStyle = LIENZO.tinta2;
   ctx.textAlign = "right";
-  ctx.fillText(dexNum(mon.dex), x + ancho - 16, y + figura + 28);
+  ctx.fillText(COMPARTIR_SITIO, ancho - MARGEN, base);
   ctx.textAlign = "left";
+}
 
-  /* Nombre: el apodo si lo lleva */
+/* ---------- Una ficha ---------- */
+
+function pintarFicha(ctx, mon, index, sec, x, y, acento, arte, bola) {
+  const { ancho, alto } = FICHA;
+  const tipos = (mon.types || []).slice(0, 2);
+  const principal = tipos[0] ? tinteDeTipo(tipos[0]) : acento;
+
+  /* 1. Resplandor del tipo, detras de todo */
+  resplandor(ctx, x + ancho / 2, y + FICHA.arte / 2, FICHA.arte * 0.66, principal, "33");
+
+  /* 2. El artwork. Es una ilustracion de 475 px que se reduce, asi que
+     aqui si se interpola: apagar el suavizado la dejaria dentada. */
+  if (arte) {
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    const lado = FICHA.arte;
+    ctx.drawImage(arte, x + (ancho - lado) / 2, y, lado, lado);
+  }
+
+  /* 3. El pie de la ficha.
+     La ball va aqui abajo y no encima del artwork: las ilustraciones no
+     tienen todas el mismo margen y se le montaba a los que son anchos
+     de arriba, como Exploud. */
+  if (bola) {
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(bola, x + ancho - FICHA.bola, y + 276, FICHA.bola, FICHA.bola);
+    ctx.imageSmoothingEnabled = true;
+  }
+
+  const tope = ancho - FICHA.bola - 12;
   const apodo = mon.nickname && mon.nickname.trim() ? mon.nickname.trim() : "";
+
+  /* Hueco y numero. En Favoritos el rotulo dice la generacion. */
+  ctx.font = pixel(10);
+  ctx.fillStyle = acento;
+  ctx.fillText(plateLabel(mon, index, sec), x, y + 266);
+  ctx.fillStyle = LIENZO.tinta2;
+  ctx.fillText(dexNum(mon.dex), x + 100, y + 266);
+
   ctx.font = term(38);
   ctx.fillStyle = LIENZO.tinta;
-  ctx.fillText(textoCabe(ctx, apodo || mon.species, tope), dentro, y + figura + 68);
+  ctx.fillText(textoCabe(ctx, apodo || mon.species, tope), x, y + 312);
 
-  /* Especie (si hay apodo), genero y variocolor */
-  let cursor = dentro;
-  const linea = y + figura + 96;
+  /* El segundo renglon dice lo que el primero no alcanzo a decir: con
+     apodo, la especie; sin apodo, la forma si la tiene, y si tampoco, la
+     ball. Sin esto el renglon se quedaba con el icono de genero solo. */
+  let cursor = x;
+  ctx.font = term(23);
+  ctx.fillStyle = LIENZO.tinta2;
 
-  if (apodo) {
-    ctx.font = term(24);
-    ctx.fillStyle = LIENZO.tinta2;
-    const nombre = textoCabe(ctx, mon.form ? formName(mon) : mon.species, tope - 74);
-    ctx.fillText(nombre, cursor, linea);
-    cursor += ctx.measureText(nombre).width + 12;
+  const bajo = apodo
+    ? (mon.form ? formName(mon) : mon.species)
+    : (mon.form ? formLabel(mon.form) : (BALL_ES[mon.ball] || mon.ball || ""));
+
+  if (bajo) {
+    const puesto = textoCabe(ctx, bajo, tope - 60);
+    ctx.fillText(puesto, cursor, y + 338);
+    cursor += ctx.measureText(puesto).width + 12;
   }
 
-  ctx.font = '900 18px "Font Awesome 6 Free"';
-  ctx.fillStyle = LIENZO.tinta2;
-  const iconoGenero = { m: "", f: "", n: "" }[mon.gender || "n"];
-  ctx.fillText(iconoGenero, cursor, linea);
-  cursor += 28;
-
+  ctx.font = '900 16px "Font Awesome 6 Free"';
+  ctx.fillText(ICONO_GENERO[mon.gender || "n"], cursor, y + 338);
+  cursor += 24;
   if (mon.shiny) {
     ctx.fillStyle = acento;
-    ctx.fillText("", cursor, linea);
+    ctx.fillText(ICONO_SHINY, cursor, y + 338);
   }
 
-  /* Tipos */
-  const tipos = (mon.types || []).slice(0, 2);
-  let tx = dentro;
-  const ty = y + alto - 46;
-  for (const t of tipos) {
-    const tinte = tinteDeTipo(t);
+  /* Los tipos, dichos con color y no con recuadros */
+  ctx.font = pixel(10);
+  let tx = x;
+  tipos.forEach((t, i) => {
+    if (i) {
+      ctx.fillStyle = LIENZO.marco;
+      ctx.fillText("/", tx, y + 364);
+      tx += 18;
+    }
+    ctx.fillStyle = tinteDeTipo(t);
     const etiqueta = (TYPE_ES[t] || t).toUpperCase();
-    ctx.font = pixel(10);
-    /* Todos del mismo ancho, como en las laminas: lo marca el nombre mas
-       largo, ELECTRIC y FIGHTING, de ocho letras */
-    const w = Math.max(ctx.measureText(etiqueta).width + 20, ANCHO_TIPO);
-    recuadro(ctx, tx, ty, w, 30, tinte + "33", tinte + "a6");
-    ctx.fillStyle = tinte;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(etiqueta, tx + w / 2, ty + 16);
-    ctx.textAlign = "left";
-    ctx.textBaseline = "alphabetic";
-    tx += w + 8;
+    ctx.fillText(etiqueta, tx, y + 364);
+    tx += ctx.measureText(etiqueta).width + 10;
+  });
+
+  /* Y repetidos como una barra, que se lee de reojo */
+  if (tipos.length) {
+    const trozo = ancho / tipos.length;
+    tipos.forEach((t, i) => {
+      ctx.fillStyle = tinteDeTipo(t);
+      ctx.fillRect(x + i * trozo, y + 376, trozo, 5);
+    });
   }
 }
 
@@ -240,12 +312,16 @@ async function lienzoDelEquipo(sec) {
   const mons = sec.team.slice(0, sec.hall ? TOPE_FAVORITOS : 6);
   if (!mons.length) return null;
 
-  const columnas = mons.length > 6 ? 4 : 3;
+  /* Dos columnas para un equipo; con los doce de Favoritos, tres */
+  const columnas = mons.length > 6 ? 3 : 2;
   const filas = Math.ceil(mons.length / columnas);
-  const { ancho: cw, alto: ch, hueco } = CARTA;
+  const { ancho: fw, alto: fh } = FICHA;
 
-  const ancho = MARGEN * 2 + columnas * cw + (columnas - 1) * hueco;
-  const alto = CABECERA + filas * ch + (filas - 1) * hueco + PIE + MARGEN;
+  const rot = rotulosDe(sec);
+  const cabecera = altoDeCabecera(rot);
+
+  const ancho = MARGEN * 2 + columnas * fw + (columnas - 1) * HUECO;
+  const alto = cabecera + filas * fh + (filas - 1) * HUECO + PIE;
 
   const lienzo = document.createElement("canvas");
   lienzo.width = ancho * ESCALA;
@@ -256,76 +332,49 @@ async function lienzoDelEquipo(sec) {
 
   const acento = typeof colorDe === "function" ? colorDe(sec) : "#ff5a4d";
 
-  /* Fondo y franja de la region */
   ctx.fillStyle = LIENZO.fondo;
   ctx.fillRect(0, 0, ancho, alto);
-  ctx.fillStyle = acento;
-  ctx.fillRect(0, 0, ancho, 8);
 
-  /* Cabecera */
-  const rot = rotulosDe(sec);
-  ctx.font = pixel(12);
-  ctx.fillStyle = acento;
-  ctx.fillText(rot.arriba.toUpperCase(), MARGEN, 56);
+  pintarCabecera(ctx, rot, ancho, acento);
 
-  ctx.font = pixel(26);
-  ctx.fillStyle = LIENZO.tinta;
-  ctx.fillText(textoCabe(ctx, rot.titulo.toUpperCase(), ancho - MARGEN * 2), MARGEN, 100);
-
-  if (rot.abajo) {
-    ctx.font = term(26);
-    ctx.fillStyle = LIENZO.tinta2;
-    ctx.fillText(textoCabe(ctx, rot.abajo, ancho - MARGEN * 2), MARGEN, 130);
-  }
-
-  /* Las cartas: primero se bajan todas las imagenes y luego se pinta, que
-     si no el orden de dibujado depende de cual llegue antes */
+  /* Primero se bajan todas las imagenes y luego se pinta, que si no el
+     orden de dibujado depende de cual llegue antes */
   const piezas = await Promise.all(mons.map((mon) => Promise.all([
-    cargarImagen(spriteSrc(mon) + "|" + cadenaDeRecambio(mon)),
+    cargarImagen(cadenaDeArte(mon)),
     mon.ball ? cargarImagen(ITEMS + "/" + mon.ball + ".png") : null
   ])));
 
   mons.forEach((mon, i) => {
-    const x = MARGEN + (i % columnas) * (cw + hueco);
-    const y = CABECERA + Math.floor(i / columnas) * (ch + hueco);
-    pintarCarta(ctx, mon, i, sec, x, y, acento, piezas[i][0], piezas[i][1]);
+    const x = MARGEN + (i % columnas) * (fw + HUECO);
+    const y = cabecera + Math.floor(i / columnas) * (fh + HUECO);
+    pintarFicha(ctx, mon, i, sec, x, y, acento, piezas[i][0], piezas[i][1]);
   });
 
-  /* Pie */
-  const base = alto - MARGEN - 8;
-  ctx.strokeStyle = LIENZO.marco;
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(MARGEN, base - 30);
-  ctx.lineTo(ancho - MARGEN, base - 30);
-  ctx.stroke();
-
-  ctx.font = pixel(12);
-  ctx.fillStyle = LIENZO.tinta;
-  ctx.fillText("POKEHDEX", MARGEN, base);
-  ctx.font = term(24);
-  ctx.fillStyle = LIENZO.tinta2;
-  ctx.textAlign = "right";
-  ctx.fillText(COMPARTIR_SITIO, ancho - MARGEN, base);
-  ctx.textAlign = "left";
-
+  pintarPie(ctx, ancho, alto);
   return lienzo;
 }
 
 /* ---------- Entregarla ---------- */
 
 function nombreDeArchivo(sec) {
-  const rot = rotulosDe(sec);
-  const limpio = rot.titulo
+  const limpio = rotulosDe(sec).titulo
     .toLowerCase()
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
-  return "pokehdex-" + (limpio || "equipo") + ".png";
+  return "pokehdex-" + (limpio || "equipo") + ".jpg";
 }
 
-const aBlob = (lienzo) => new Promise((listo) => lienzo.toBlob(listo, "image/png"));
+/* JPEG y no PNG: desde que la estampa lleva artwork en vez de sprites, el
+   PNG se iba a 3 MB —son ilustraciones con degradados, que no comprime— y
+   en JPEG al 92% baja a 400 KB. Medido sobre el texto de pixeles y los
+   bordes duros de la ball, la diferencia media es de 0.6 a 1.5 sobre 255:
+   no se ve. El fondo esta pintado entero, asi que no se pierde nada por
+   no tener transparencia. */
+const CALIDAD = 0.92;
+const aBlob = (lienzo) =>
+  new Promise((listo) => lienzo.toBlob(listo, "image/jpeg", CALIDAD));
 
 async function compartirEquipo(sec, boton) {
   const original = boton ? boton.textContent : "";
@@ -341,7 +390,7 @@ async function compartirEquipo(sec, boton) {
     const blob = await aBlob(lienzo);
     if (!blob) { decir("No se pudo"); return; }
 
-    const archivo = new File([blob], nombreDeArchivo(sec), { type: "image/png" });
+    const archivo = new File([blob], nombreDeArchivo(sec), { type: "image/jpeg" });
 
     /* En movil, el menu de compartir del sistema. canShare con files hay que
        preguntarlo: hay navegadores con share pero sin envio de archivos. */
