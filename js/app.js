@@ -2567,12 +2567,52 @@ function init() {
   conectarEditor();
   conectarArrastre();
 
+  /* Sin Supabase configurado no hay a quien esperar y manda el archivo */
+  if (typeof sb === "undefined" || !sb) return primeraPintada();
+
+  /* Con Supabase de por medio no se pinta nada todavia. Hasta que la sesion
+     responde, TEAMS sigue teniendo los equipos de data/teams.js —que son de
+     cuando el archivo era la fuente de datos— y se veria un equipo que no
+     es el tuyo. */
+  if (!datosResueltos) panelEl.innerHTML = "<p class='gen-meta'>Cargando...</p>";
+  paginaMontada = true;
+  pintarSiTodoListo();
+}
+
+/* ---------- El arranque, en dos mitades ----------
+   init() monta la pagina y initAuth() averigua de quien son los datos, y
+   cada una va por su lado desde DOMContentLoaded. El orden entre las dos no
+   esta garantizado: initAuth se queda esperando a Supabase, y sus
+   microtareas se vacian entre un oyente y el siguiente, asi que unas veces
+   termina antes que init() y otras despues. Cuando terminaba antes, init()
+   le pisaba la pintada y la pagina se quedaba colgada; antes de esto, lo
+   que pisaba eran los equipos del archivo encima de los tuyos.
+
+   Asi que no se pinta por orden sino por banderas: pinta la que llegue
+   segunda, sea cual sea. */
+
+let paginaMontada = false;
+let datosResueltos = false;
+
+function pintarSiTodoListo() {
+  if (paginaMontada && datosResueltos) primeraPintada();
+}
+
+/* La llama auth cuando ya sabe si hay sesion y de quien son los equipos */
+function marcarDatosResueltos() {
+  datosResueltos = true;
+  pintarSiTodoListo();
+}
+
+/* Que seccion abrir al entrar: la de la direccion si la trae, y si no los
+   favoritos, o la primera generacion de verdad —ni Champions ni la Nacional,
+   que van antes y despues de ellas en el indice—. */
+function primeraPintada() {
+  if (!navEl || !panelEl) return;
+
   const fromHash = location.hash.slice(1);
   if (TEAMS.some((g) => g.id === fromHash)) return selectGeneration(fromHash, false);
 
-  /* Sin favoritos todavia, no tiene sentido abrir la pagina en una seccion
-     vacia: se cae a la primera generacion de verdad, no a Champions ni a la
-     Nacional, que ahora van antes y despues de ellas en el indice. */
   const inicio = TEAMS.find((g) => g.hall && g.team.length)
     || generacionesReales()[0] || TEAMS[0];
   selectGeneration(inicio.id, false);
